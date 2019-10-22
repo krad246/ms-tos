@@ -1,5 +1,8 @@
 ;-------------------------------------------------------------------------------
 ; Author: gta
+;    
+;  Original code borrowed from krad246
+;  https://github.com/krad246/scheduler
 ;-------------------------------------------------------------------------------
             .cdecls C,LIST,"msp430.h"       ; Include device header file
             .text                           ; Assemble into program memory.
