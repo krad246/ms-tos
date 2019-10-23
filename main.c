@@ -19,32 +19,37 @@
 #include <msp430.h>
 #include "os.h"
 
+volatile uint16_t num_mains = 0;
+
 
 void thread1(void) {
-  uint32_t i;
+  uint16_t i;
   for (;;) {
     P1OUT ^= BIT0;                      // Toggle P1.0 using exclusive-OR
+    __delay_cycles(100000);
 //    os_yield();
-    i = 0x00000FFF;
-    while (i != 0)
-      i--;
+//    i = 0xFFFF;
+//    while (i != 0)
+//      i--;
   }
 }
 
 void thread2(void) {
-  uint32_t i;
+  uint16_t i;
   for (;;) {
     P1OUT ^= BIT1;                      // Toggle P1.0 using exclusive-OR
 
-    i = 0x00000FFF;
-    while (i != 0)
-      i--;
+    __delay_cycles(100000);
+//    i = 0xFFFF;
+//    while (i != 0)
+//      i--;
 //    os_yield();
   }
 }
 
 void main(void)
 {
+  num_mains++;
   WDTCTL = WDTPW | WDTHOLD;               // Stop watchdog timer
 
   // Disable the GPIO power-on default high-impedance mode to activate
