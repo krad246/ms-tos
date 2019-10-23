@@ -11,7 +11,8 @@ struct tcb;
 
 inline void preempt_trigger(void);
 inline void preempt_init(void);
-inline void preempt_reset(void);
+void preempt_reset(void);
+extern void preempt_firstrun(void);
 
 /* asm functions */
 extern void context_save(struct context *);
@@ -21,17 +22,19 @@ void schedule(void);
 int link(void);
 void panic(int) __attribute__ ((noreturn));
 
+uint16_t num_ctx_switches = 0;
+
 struct context {
   word_t r4, r5, r6, r7, r8, r9, r10, sp, pc;
 };
 
 struct tcb {
-  struct tcb *next;
-  bool available;
   union {
     struct context ctx;
     word_t regs[9];
   };
+  struct tcb *next;
+  bool available;
 };
 
 struct tcb *run_ptr;
@@ -59,6 +62,7 @@ preempt_reset(void)
   SFRIFG1 &= ~WDTIFG; // no interrupt pending
 //  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
   WDTCTL = WDT_ADLY_1_9;
+  SFRIE1 |= WDTIE;
 }
 
 //void zero_stack(word_t *stack) {
@@ -129,7 +133,7 @@ os_run(void)
 //    for (;;);
 //  }
   preempt_init();
-  context_load(&run_ptr->ctx);
+  preempt_firstrun();
   panic(0);
 }
 
@@ -172,22 +176,22 @@ panic(c)
 }
 
 // Watchdog Timer interrupt service routine
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=WDT_VECTOR
-__interrupt
-#elif defined(__GNUC__)
-
-__attribute__ ((interrupt(WDT_VECTOR)))
-#else
-#error Compiler not supported!
-#endif
-void
-WDT_ISR(void)
-{
-  context_save(&run_ptr->ctx);
-  schedule();
-  preempt_reset();
-  context_load(&run_ptr->ctx);
-}
+//#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+//#pragma vector=WDT_VECTOR
+//__interrupt
+//#elif defined(__GNUC__)
+//
+//__attribute__ ((interrupt(WDT_VECTOR)))
+//#else
+//#error Compiler not supported!
+//#endif
+//void
+//WDT_ISR(void)
+//{
+//  context_save(&run_ptr->ctx);
+//  schedule();
+//  preempt_reset();
+//  context_load(&run_ptr->ctx);
+//}
 
 
