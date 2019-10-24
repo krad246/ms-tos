@@ -18,6 +18,7 @@
 
 #include <msp430.h>
 #include "os.h"
+#include "timer.h"
 
 volatile uint16_t num_mains = 0;
 
@@ -63,6 +64,8 @@ void main(void)
   CSCTL2 = SELA__VLOCLK | SELS__DCOCLK | SELM__DCOCLK;
 
   P1DIR = BIT0 | BIT1;                          // Set P1.0 to output direction
+
+  timerA0_init();
 
   os_init();
 //  os_thread_create(&thread1);

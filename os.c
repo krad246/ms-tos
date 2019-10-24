@@ -24,6 +24,10 @@ void panic(int) __attribute__ ((noreturn));
 
 uint16_t num_ctx_switches = 0;
 
+struct {
+  int a;
+} const scheduler = { .a = 1 };
+
 struct context {
   word_t r4, r5, r6, r7, r8, r9, r10, sp, pc;
 };
@@ -45,8 +49,8 @@ unsigned run_ct;
 void
 preempt_init(void)
 {
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
-  WDTCTL = WDT_ADLY_1_9;
+  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__8192;
+//  WDTCTL = WDT_ADLY_1_9;
   SFRIE1 |= WDTIE;
 }
 
@@ -60,7 +64,7 @@ void
 preempt_reset(void)
 {
   SFRIFG1 &= ~WDTIFG; // no interrupt pending
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
+  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__8192;
   WDTCTL = WDT_ADLY_1_9;
   SFRIE1 |= WDTIE;
 }
