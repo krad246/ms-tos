@@ -5,18 +5,29 @@
  *      Author: gta
  */
 
-#include <msp430.h>
-#include <types.h>
-#include "intrinsics.h"
-//#include <stdlib.h>
-
 #ifndef OS_H_
 #define OS_H_
 
-#define NUMTHREADS 2
-#define STACKSIZE 100
+#include <msp430.h>
+
+#include "types.h"
+#include "scheduler.h"
+#include "config.h"
 
 typedef int8_t thread_t; // index in tcbs array
+
+uint16_t num_ctx_switches;
+
+word_t stacks[NUMTHREADS][STACKSIZE];
+struct thread threads[NUMTHREADS];
+unsigned run_ct;
+
+inline void preempt_trigger(void);
+inline void preempt_init(void);
+void preempt_reset(void);
+extern void preempt_firstrun(void);
+
+void panic(int) __attribute__ ((noreturn));
 
 void os_init(void);
 void os_run(void) __attribute__ ((noreturn));
@@ -25,8 +36,6 @@ void os_yield(void);
 
 // test func
 void os_thread_set(void (*routine1)(void), void (*routine2)(void));
-
-//const word_t WDTCTL_DEFAULT = WDT_ADLY_1_9;
 
 
 #endif /* OS_H_ */
