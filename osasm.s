@@ -24,7 +24,11 @@
             .global context_save
             .global preempt_firstrun
 
+            .global isr_time_start
+            .global isr_time_stop
+
 WDT_ISR:                                    ; Stack: (Top) SR, PC
+            call    #isr_time_start
             nop
             dint                            ; Disable interrupts
             nop
@@ -57,6 +61,7 @@ WDT_ISR:                                    ; Stack: (Top) SR, PC
             nop
             eint                            ; Enable interrupts
             nop
+            call    #isr_time_stop
             reti                            ; RETI for CPUX (GIE bit set needs pipeline NOP here-- fix)
 
 

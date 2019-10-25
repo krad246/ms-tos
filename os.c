@@ -6,47 +6,11 @@
  */
 #include "os.h"
 
-struct context;
-struct tcb;
-
-inline void preempt_trigger(void);
-inline void preempt_init(void);
-void preempt_reset(void);
-extern void preempt_firstrun(void);
-
-/* asm functions */
-extern void context_save(struct context *);
-extern void context_load(struct context *);
-
-void schedule(void);
-int link(void);
-void panic(int) __attribute__ ((noreturn));
-
-uint16_t num_ctx_switches = 0;
-
-struct context {
-  word_t r4, r5, r6, r7, r8, r9, r10, sp, pc;
-};
-
-struct tcb {
-  union {
-    struct context ctx;
-    word_t regs[9];
-  };
-  struct tcb *next;
-  bool available;
-};
-
-struct tcb *run_ptr;
-word_t stacks[NUMTHREADS][STACKSIZE];
-struct tcb tcbs[NUMTHREADS];
-unsigned run_ct;
-
 void
 preempt_init(void)
 {
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
-  WDTCTL = WDT_ADLY_1_9;
+  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__8192;
+//  WDTCTL = WDT_ADLY_1_9;
   SFRIE1 |= WDTIE;
 }
 
@@ -60,7 +24,7 @@ void
 preempt_reset(void)
 {
   SFRIFG1 &= ~WDTIFG; // no interrupt pending
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
+  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__8192;
   WDTCTL = WDT_ADLY_1_9;
   SFRIE1 |= WDTIE;
 }
@@ -71,28 +35,7 @@ preempt_reset(void)
 //    stack[i] = 0;
 //}
 
-int
-link(void)
-{
-  int i;
-  int ct = 0;
-  struct tcb *prev = 0, *first = 0;
-  if (NUMTHREADS == 0)
-    return ct;
-  for (i = 0; i < NUMTHREADS; i++) {
-    if (!tcbs[i].available) {
-      ct++;
-      if (!first)              // get reference to first to wrap around at the end
-        first = &tcbs[i];
-      if (prev)                // only set previous's next if previous has been set
-        prev->next = &tcbs[i]; // (accounts for first iteration of the loop)
-      prev = &tcbs[i];
-    }
-  }
-  prev->next = first;
-  run_ptr = first;
-  return ct;
-}
+
 
 thread_t
 os_thread_create(void (* routine)(void))
@@ -100,10 +43,10 @@ os_thread_create(void (* routine)(void))
   int i;
   __disable_interrupt();
   for (i = 0; i < NUMTHREADS; ++i) {
-    if (tcbs[i].available) {
-      tcbs[i].available = false;
-      tcbs[i].ctx.sp = (word_t) &stacks[i][STACKSIZE - 1];
-      tcbs[i].ctx.pc = (word_t) routine;
+    if (threads[i].available) {
+      threads[i].available = false;
+      threads[i].ctx.sp = (word_t) &stacks[i][STACKSIZE - 1];
+      threads[i].ctx.pc = (word_t) routine;
       (void) link();
       __enable_interrupt();
       return i;
@@ -120,7 +63,7 @@ os_init(void)
   preempt_reset();
   int i;
   for (i = 0; i < NUMTHREADS; ++i)
-    tcbs[i].available = 0;
+    threads[i].available = 0;
 }
 
 void
@@ -147,24 +90,19 @@ void
 os_thread_set(void (*routine1)(void),
               void (*routine2)(void))
 {
-  tcbs[0].available = false;
-  tcbs[0].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  tcbs[0].ctx.pc = (word_t) routine1;
+  threads[0].available = false;
+  threads[0].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
+  threads[0].ctx.pc = (word_t) routine1;
 
-  tcbs[1].available = false;
-  tcbs[1].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  tcbs[1].ctx.pc = (word_t) routine2;
+  threads[1].available = false;
+  threads[1].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
+  threads[1].ctx.pc = (word_t) routine2;
 
-  tcbs[0].next = &tcbs[1];
-  tcbs[1].next = &tcbs[0];
-  run_ptr = &tcbs[0];
+  threads[0].next = &threads[1];
+  threads[1].next = &threads[0];
+  run_ptr = &threads[0];
 }
 
-void
-schedule(void)
-{
-  run_ptr = run_ptr->next;
-}
 
 void
 panic(c)

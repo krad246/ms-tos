@@ -16,10 +16,12 @@
 //  July 2013
 //***************************************************************************************
 
+#ifndef RTOS_MAIN_
+#define RTOS_MAIN_
+
 #include <msp430.h>
 #include "os.h"
-
-volatile uint16_t num_mains = 0;
+#include "timer.h"
 
 
 void thread1(void) {
@@ -49,7 +51,6 @@ void thread2(void) {
 
 void main(void)
 {
-  num_mains++;
   WDTCTL = WDTPW | WDTHOLD;               // Stop watchdog timer
 
   // Disable the GPIO power-on default high-impedance mode to activate
@@ -64,6 +65,8 @@ void main(void)
 
   P1DIR = BIT0 | BIT1;                          // Set P1.0 to output direction
 
+  timerA0_init();
+
   os_init();
 //  os_thread_create(&thread1);
 //  os_thread_create(&thread2);
@@ -72,3 +75,6 @@ void main(void)
 
   for (;;);
 }
+
+
+#endif
