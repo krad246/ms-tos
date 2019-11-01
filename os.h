@@ -10,7 +10,7 @@
 
 #include <msp430.h>
 
-#include "types.h"
+#include "defines.h"
 #include "scheduler.h"
 #include "config.h"
 

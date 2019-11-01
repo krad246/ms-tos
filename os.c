@@ -6,6 +6,7 @@
  */
 #include "os.h"
 
+
 void
 preempt_init(void)
 {
@@ -24,21 +25,9 @@ preempt_trigger(void)
 void
 preempt_reset(void)
 {
-  SFRIFG1 &= ~WDTIFG; // no interrupt pending
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__8192;
-  WDTCTL = WDT_ADLY_1_9;
-  SFRIE1 |= WDTIE;
-
-//	IFG1 &= ~WDTIFG;
-//	WDTCTL = WDT_ADLY_1_9;
-//	IE1 |= WDTIFG;
+	SFRIFG1 &= ~WDTIFG;
+	 WDTCTL = WDT_ADLY_1_9;
 }
-
-//void zero_stack(word_t *stack) {
-//  int i;
-//  for (i = 0; i < STACKSIZE; i++)
-//    stack[i] = 0;
-//}
 
 
 
@@ -51,8 +40,7 @@ os_thread_create(void (* routine)(void))
     if (threads[i].available) {
       threads[i].available = false;
       threads[i].ctx.sp = (word_t) &stacks[i][STACKSIZE - 1];
-      threads[i].ctx.sr = GIE;
-      threads[i].ctx.pc = (word_t) routine;
+      threads[i].ctx.tf = trapframe((word_t) routine, GIE);
       (void) link();
       __enable_interrupt();
       return i;
@@ -96,15 +84,21 @@ void
 os_thread_set(void (*routine1)(void),
               void (*routine2)(void))
 {
+	int i;
+	for (i = 0; i < STACKSIZE; i++) {
+		stacks[0][i] = 0;
+		stacks[1][i] = 0;
+		threads[0].regs[i] = 0;
+		threads[1].regs[i] = 0;
+	}
+
   threads[0].available = false;
   threads[0].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  threads[0].ctx.sr = GIE;
-  threads[0].ctx.pc = (word_t) routine1;
+  threads[0].ctx.tf.value = (word_t) routine1;
 
   threads[1].available = false;
-  threads[1].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  threads[1].ctx.sr = GIE;
-  threads[1].ctx.pc = (word_t) routine2;
+  threads[1].ctx.sp = (word_t) &stacks[1][STACKSIZE - 1];
+  threads[1].ctx.tf = trapframe((word_t) routine2, GIE);
 
   threads[0].next = &threads[1];
   threads[1].next = &threads[0];
