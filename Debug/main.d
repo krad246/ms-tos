@@ -17,8 +17,11 @@ main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_t
 main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h
 main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h
 main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h
+main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h
+main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h
+main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h
+main.obj: C:/Users/krad2/workspace_v8/ms-tos/config.h
 main.obj: ../scheduler.h
-main.obj: ../config.h
 main.obj: ../thread.h
 main.obj: ../rr.h
 main.obj: ../scheduler.h
@@ -42,8 +45,11 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_types.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h: 
+C:/Users/krad2/workspace_v8/ms-tos/config.h: 
 ../scheduler.h: 
-../config.h: 
 ../thread.h: 
 ../rr.h: 
 ../scheduler.h: 

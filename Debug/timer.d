@@ -17,6 +17,10 @@ timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_
 timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h
 timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h
 timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h
+timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h
+timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h
+timer.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h
+timer.obj: C:/Users/krad2/workspace_v8/ms-tos/config.h
 
 ../timer.c: 
 ../timer.h: 
@@ -35,3 +39,7 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_types.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h: 
+C:/Users/krad2/workspace_v8/ms-tos/config.h: 

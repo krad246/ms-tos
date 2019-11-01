@@ -144,7 +144,7 @@ context_switcher:
 				pop.w R15
             .endif
 
-            reti
+            reti																				; Branch to task
 
 
 preempt_firstrun: .asmfunc
@@ -154,23 +154,17 @@ preempt_firstrun: .asmfunc
 
 				calla #preempt_reset															; Reset scheduler timer
 
-				nop
-	            eint                            												; Enable interrupts for scheduler operation
-	            nop
-
-	            bra 48(R15) 																	; Branch to first task
+				popx.a R15																		; Dummy variable used in subsequent calls, needs to be popped
 			.else
            	 	mov.w   &run_ptr, R15
            	 	context_load R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, SP, R15
 
            	 	call #preempt_reset
 
-           	 	nop
-            	eint
-            	nop
-
-           	 	br 24(R15)
+				pop.w R15
             .endif
+
+				reti																			; Branch to first task
 
             .endasmfunc
 

@@ -20,6 +20,9 @@ rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_typ
 rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h
 rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h
 rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h
+rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h
+rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h
+rr.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h
 rr.obj: ../rr.h
 rr.obj: ../os.h
 
@@ -43,5 +46,8 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_types.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h: 
 ../rr.h: 
 ../os.h: 

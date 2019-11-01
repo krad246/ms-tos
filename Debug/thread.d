@@ -17,6 +17,10 @@ thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/
 thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h
 thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h
 thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h
+thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h
+thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h
+thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos/config.h
 
 ../thread.c: 
 C:/Users/krad2/workspace_v8/ms-tos/thread.h: 
@@ -35,3 +39,7 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_types.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/machine/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/sys/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h: 
+C:/Users/krad2/workspace_v8/ms-tos/config.h: 

@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v19.6.0                     
 ******************************************************************************
->> Linked Thu Oct 31 21:47:24 2019
+>> Linked Fri Nov  1 00:38:35 2019
 
 OUTPUT FILE NAME:   <ms-tos.out>
-ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 000044d0
+ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 000044ca
 
 
 MEMORY CONFIGURATION
@@ -19,8 +19,8 @@ MEMORY CONFIGURATION
   INFOB                 00001900   00000080  00000000  00000080  RWIX
   INFOA                 00001980   00000080  00000000  00000080  RWIX
   USBRAM                00001c00   00000800  00000000  00000800  RWIX
-  RAM                   00002400   00002000  000001bc  00001e44  RWIX
-  FLASH                 00004400   0000bb80  000000ec  0000ba94  RWIX
+  RAM                   00002400   00002000  0000016c  00001e94  RWIX
+  FLASH                 00004400   0000bb80  000000e6  0000ba9a  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
   INT02                 0000ff84   00000002  00000000  00000002  RWIX
@@ -85,7 +85,7 @@ MEMORY CONFIGURATION
   INT61                 0000fffa   00000002  00000002  00000000  RWIX
   INT62                 0000fffc   00000002  00000002  00000000  RWIX
   RESET                 0000fffe   00000002  00000002  00000000  RWIX
-  FLASH2                00010000   00014400  0000020e  000141f2  RWIX
+  FLASH2                00010000   00014400  00000246  000141ba  RWIX
 
 
 SECTION ALLOCATION MAP
@@ -93,20 +93,19 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.bss       0    00002400    0000011c     UNINITIALIZED
-                  00002400    000000a0     (.common:stacks)
-                  000024a0    00000078     (.common:threads)
-                  00002518    00000004     (.common:run_ptr)
+.bss       0    00002400    000000cc     UNINITIALIZED
+                  00002400    000000c8     (.common:threads)
+                  000024c8    00000004     (.common:run_ptr)
 
 .stack     0    00004360    000000a0     UNINITIALIZED
                   00004360    00000004     rts430x_lc_ld_eabi.lib : boot.c.obj (.stack)
                   00004364    0000009c     --HOLE--
 
 .text:_isr 
-*          0    00004400    000000ec     
-                  00004400    000000d0     osasm.obj (.text:_isr)
-                  000044d0    00000014     rts430x_lc_ld_eabi.lib : boot.c.obj (.text:_isr:_c_int00_noinit_noargs)
-                  000044e4    00000008                            : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
+*          0    00004400    000000e6     
+                  00004400    000000ca     osasm.obj (.text:_isr)
+                  000044ca    00000014     rts430x_lc_ld_eabi.lib : boot.c.obj (.text:_isr:_c_int00_noinit_noargs)
+                  000044de    00000008                            : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
 
 .cinit     0    00004400    00000000     UNINITIALIZED
 
@@ -192,39 +191,43 @@ SYSNMI     0    0000fffc    00000002
 .reset     0    0000fffe    00000002     
                   0000fffe    00000002     rts430x_lc_ld_eabi.lib : boot.c.obj (.reset)
 
-.text      0    00010000    0000020e     
-                  00010000    000000ae     os.obj (.text:os_thread_set)
-                  000100ae    0000004a     thread.obj (.text:trapframe)
-                  000100f8    0000003c     rts430x_lc_ld_eabi.lib : memcpy.c.obj (.text:memcpy)
-                  00010134    0000002e     main.obj (.text:main)
-                  00010162    00000024     os.obj (.text:os_init)
-                  00010186    00000018     rts430x_lc_ld_eabi.lib : mult16_f5hw.asm.obj (.text)
-                  0001019e    00000016     os.obj (.text:os_run)
-                  000101b4    00000016     main.obj (.text:thread2)
-                  000101ca    00000014     main.obj (.text:thread1)
-                  000101de    0000000e     rr.obj (.text:schedule)
-                  000101ec    0000000c     os.obj (.text:preempt_reset)
-                  000101f8    0000000a     os.obj (.text:panic)
-                  00010202    00000006     rts430x_lc_ld_eabi.lib : exit.c.obj (.text:abort)
-                  00010208    00000004                            : pre_init.c.obj (.text:_system_pre_init)
-                  0001020c    00000002     timer.obj (.text:timerA0_init)
+.text      0    00010000    00000246     
+                  00010000    00000088     thread.obj (.text:thread_init)
+                  00010088    0000004a     thread.obj (.text:trapframe_init)
+                  000100d2    0000003c     rts430x_lc_ld_eabi.lib : memcpy.c.obj (.text:memcpy)
+                  0001010e    00000034     os.obj (.text:os_thread_set)
+                  00010142    0000002e     main.obj (.text:main)
+                  00010170    00000024     os.obj (.text:os_init)
+                  00010194    00000020     rts430x_lc_ld_eabi.lib : memset.c.obj (.text:memset)
+                  000101b4    00000018                            : mult16_f5hw.asm.obj (.text)
+                  000101cc    00000016     os.obj (.text:os_run)
+                  000101e2    00000016     main.obj (.text:thread2)
+                  000101f8    00000014     main.obj (.text:thread1)
+                  0001020c    0000000e     rr.obj (.text:schedule)
+                  0001021a    0000000c     os.obj (.text:preempt_reset)
+                  00010226    0000000a     os.obj (.text:panic)
+                  00010230    0000000a     thread.obj (.text:stack_base)
+                  0001023a    00000006     rts430x_lc_ld_eabi.lib : exit.c.obj (.text:abort)
+                  00010240    00000004                            : pre_init.c.obj (.text:_system_pre_init)
+                  00010244    00000002     timer.obj (.text:timerA0_init)
 
 MODULE SUMMARY
 
        Module                code   ro data   rw data
        ------                ----   -------   -------
     .\
-       main.obj              88     0         284    
-       os.obj                254    0         0      
-       osasm.obj             208    2         0      
-       thread.obj            74     0         0      
+       main.obj              88     0         204    
+       thread.obj            220    0         0      
+       osasm.obj             202    2         0      
+       os.obj                132    0         0      
        rr.obj                14     0         0      
        timer.obj             2      0         0      
     +--+---------------------+------+---------+---------+
-       Total:                640    2         284    
+       Total:                658    2         204    
                                                      
     C:\ti\ccsv8\tools\compiler\ti-cgt-msp430_19.6.0.STS\lib\rts430x_lc_ld_eabi.lib
        memcpy.c.obj          60     0         0      
+       memset.c.obj          32     0         0      
        mult16_f5hw.asm.obj   24     0         0      
        boot.c.obj            20     2         0      
        isr_trap.asm.obj      8      0         0      
@@ -252,11 +255,11 @@ MODULE SUMMARY
        int61.asm.obj         0      2         0      
        int62.asm.obj         0      2         0      
     +--+---------------------+------+---------+---------+
-       Total:                122    44        0      
+       Total:                154    44        0      
                                                      
        Stack:                0      0         160    
     +--+---------------------+------+---------+---------+
-       Grand Total:          762    46        444    
+       Grand Total:          812    46        364    
 
 
 GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
@@ -345,7 +348,7 @@ address   name
 00000732  ADC12MEM9             
 00000733  ADC12MEM9_H           
 00000732  ADC12MEM9_L           
-00010202  C$$EXIT               
+0001023a  C$$EXIT               
 000008c0  CBCTL0                
 000008c1  CBCTL0_H              
 000008c0  CBCTL0_L              
@@ -996,7 +999,7 @@ address   name
 0000015c  WDTCTL_L              
 00004400  __STACK_END           
 000000a0  __STACK_SIZE          
-000044e4  __TI_ISR_TRAP         
+000044de  __TI_ISR_TRAP         
 0000ffd2  __TI_int41            
 0000ffd4  __TI_int42            
 0000ffd6  __TI_int43            
@@ -1023,29 +1026,30 @@ ffffffff  __TI_pprof_out_hndl
 ffffffff  __TI_prof_data_size   
 ffffffff  __TI_prof_data_start  
 ffffffff  __c_args__            
-00010186  __mspabi_mpyi_f5hw    
-000044d0  _c_int00_noinit_noargs
+000101b4  __mspabi_mpyi_f5hw    
+000044ca  _c_int00_noinit_noargs
 0000fffe  _reset_vector         
 00004360  _stack                
-00010208  _system_pre_init      
-00010202  abort                 
+00010240  _system_pre_init      
+0001023a  abort                 
 00004400  context_switcher      
-00010134  main                  
-000100f8  memcpy                
-00010162  os_init               
-0001019e  os_run                
-00010000  os_thread_set         
-000101f8  panic                 
+00010142  main                  
+000100d2  memcpy                
+00010194  memset                
+00010170  os_init               
+000101cc  os_run                
+0001010e  os_thread_set         
+00010226  panic                 
 0000448e  preempt_firstrun      
-000101ec  preempt_reset         
-00002518  run_ptr               
-000101de  schedule              
-00002400  stacks                
-000101ca  thread1               
-000101b4  thread2               
-000024a0  threads               
-0001020c  timerA0_init          
-000100ae  trapframe             
+0001021a  preempt_reset         
+000024c8  run_ptr               
+0001020c  schedule              
+000101f8  thread1               
+000101e2  thread2               
+00010000  thread_init           
+00002400  threads               
+00010244  timerA0_init          
+00010088  trapframe_init        
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -1783,15 +1787,14 @@ address   name
 000023fd  USBIEPBBAY_7          
 000023fe  USBIEPBCTY_7          
 000023ff  USBIEPSIZXY_7         
-00002400  stacks                
-000024a0  threads               
-00002518  run_ptr               
+00002400  threads               
+000024c8  run_ptr               
 00004360  _stack                
 00004400  __STACK_END           
 00004400  context_switcher      
 0000448e  preempt_firstrun      
-000044d0  _c_int00_noinit_noargs
-000044e4  __TI_ISR_TRAP         
+000044ca  _c_int00_noinit_noargs
+000044de  __TI_ISR_TRAP         
 0000ffd2  __TI_int41            
 0000ffd4  __TI_int42            
 0000ffd6  __TI_int43            
@@ -1815,25 +1818,27 @@ address   name
 0000fffa  __TI_int61            
 0000fffc  __TI_int62            
 0000fffe  _reset_vector         
-00010000  os_thread_set         
-000100ae  trapframe             
-000100f8  memcpy                
-00010134  main                  
-00010162  os_init               
-00010186  __mspabi_mpyi_f5hw    
-0001019e  os_run                
-000101b4  thread2               
-000101ca  thread1               
-000101de  schedule              
-000101ec  preempt_reset         
-000101f8  panic                 
-00010202  C$$EXIT               
-00010202  abort                 
-00010208  _system_pre_init      
-0001020c  timerA0_init          
+00010000  thread_init           
+00010088  trapframe_init        
+000100d2  memcpy                
+0001010e  os_thread_set         
+00010142  main                  
+00010170  os_init               
+00010194  memset                
+000101b4  __mspabi_mpyi_f5hw    
+000101cc  os_run                
+000101e2  thread2               
+000101f8  thread1               
+0001020c  schedule              
+0001021a  preempt_reset         
+00010226  panic                 
+0001023a  C$$EXIT               
+0001023a  abort                 
+00010240  _system_pre_init      
+00010244  timerA0_init          
 ffffffff  __TI_pprof_out_hndl   
 ffffffff  __TI_prof_data_size   
 ffffffff  __TI_prof_data_start  
 ffffffff  __c_args__            
 
-[783 symbols]
+[784 symbols]

@@ -32,15 +32,14 @@ preempt_reset(void)
 
 
 thread_t
-os_thread_create(void (* routine)(void))
+os_thread_create(void (*routine)(void))
 {
   int i;
   __disable_interrupt();
   for (i = 0; i < NUMTHREADS; ++i) {
     if (threads[i].available) {
       threads[i].available = false;
-      threads[i].ctx.sp = (word_t) &stacks[i][STACKSIZE - 1];
-      threads[i].ctx.tf = trapframe((word_t) routine, GIE);
+      thread_init(threads + i, routine);
       (void) link();
       __enable_interrupt();
       return i;
@@ -84,25 +83,14 @@ void
 os_thread_set(void (*routine1)(void),
               void (*routine2)(void))
 {
-	int i;
-	for (i = 0; i < STACKSIZE; i++) {
-		stacks[0][i] = 0;
-		stacks[1][i] = 0;
-		threads[0].regs[i] = 0;
-		threads[1].regs[i] = 0;
-	}
 
-  threads[0].available = false;
-  threads[0].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  threads[0].ctx.tf.value = (word_t) routine1;
+	thread_init(threads + 0, routine1);
+	thread_init(threads + 1, routine2);
 
-  threads[1].available = false;
-  threads[1].ctx.sp = (word_t) &stacks[1][STACKSIZE - 1];
-  threads[1].ctx.tf = trapframe((word_t) routine2, GIE);
+	threads[0].next = &threads[1];
+	threads[1].next = &threads[0];
 
-  threads[0].next = &threads[1];
-  threads[1].next = &threads[0];
-  run_ptr = &threads[0];
+	run_ptr = &threads[0];
 }
 
 
