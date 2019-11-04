@@ -8,6 +8,7 @@ void
 preempt_init(void)
 {
 //  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__8192;
+	UCSCTL5 = DIVA_1;
   WDTCTL = WDT_ADLY_1_9;
   SFRIE1 |= WDTIE;
 }

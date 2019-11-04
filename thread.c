@@ -27,7 +27,7 @@ trapframe trapframe_init(word_t pc, word_t sr) {
 
 // Returns the 'bottom' of the stack of a process
 static uint16_t *stack_base(thread *this) {
-	return this->stack + STACKSIZE;
+	return this->stack + sizeof(this->stack) / sizeof(uint16_t);
 }
 extern void thread_exit(int res);
 

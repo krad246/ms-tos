@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v19.6.0                     
 ******************************************************************************
->> Linked Sun Nov  3 21:16:41 2019
+>> Linked Mon Nov  4 01:33:10 2019
 
 OUTPUT FILE NAME:   <ms-tos.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 000044ce
+ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 000044e2
 
 
 MEMORY CONFIGURATION
@@ -19,8 +19,8 @@ MEMORY CONFIGURATION
   INFOB                 00001900   00000080  00000000  00000080  RWIX
   INFOA                 00001980   00000080  00000000  00000080  RWIX
   USBRAM                00001c00   00000800  00000000  00000800  RWIX
-  RAM                   00002400   00002000  0000017e  00001e82  RWIX
-  FLASH                 00004400   0000bb80  00000108  0000ba78  RWIX
+  RAM                   00002400   00002000  0000019e  00001e62  RWIX
+  FLASH                 00004400   0000bb80  0000011c  0000ba64  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
   INT02                 0000ff84   00000002  00000000  00000002  RWIX
@@ -85,7 +85,7 @@ MEMORY CONFIGURATION
   INT61                 0000fffa   00000002  00000002  00000000  RWIX
   INT62                 0000fffc   00000002  00000002  00000000  RWIX
   RESET                 0000fffe   00000002  00000002  00000000  RWIX
-  FLASH2                00010000   00014400  000003e8  00014018  RWIX
+  FLASH2                00010000   00014400  000003f4  0001400c  RWIX
 
 
 SECTION ALLOCATION MAP
@@ -93,27 +93,27 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.bss       0    00002400    000000dc     UNINITIALIZED
-                  00002400    000000d8     (.common:threads)
-                  000024d8    00000004     (.common:run_ptr)
+.bss       0    00002400    000000fc     UNINITIALIZED
+                  00002400    000000f8     (.common:threads)
+                  000024f8    00000004     (.common:run_ptr)
 
-.data      0    000024dc    00000002     UNINITIALIZED
-                  000024dc    00000002     os.obj (.data)
+.data      0    000024fc    00000002     UNINITIALIZED
+                  000024fc    00000002     os.obj (.data)
 
 .stack     0    00004360    000000a0     UNINITIALIZED
                   00004360    00000004     rts430x_lc_ld_eabi.lib : boot.c.obj (.stack)
                   00004364    0000009c     --HOLE--
 
 .text:_isr 
-*          0    00004400    000000f2     
-                  00004400    000000ce     osasm.obj (.text:_isr)
-                  000044ce    0000001c     rts430x_lc_ld_eabi.lib : boot.c.obj (.text:_isr:_c_int00_noargs)
-                  000044ea    00000008                            : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
+*          0    00004400    00000106     
+                  00004400    000000e2     osasm.obj (.text:_isr)
+                  000044e2    0000001c     rts430x_lc_ld_eabi.lib : boot.c.obj (.text:_isr:_c_int00_noargs)
+                  000044fe    00000008                            : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
 
-.cinit     0    000044f2    00000016     
-                  000044f2    00000008     (__TI_handler_table)
-                  000044fa    00000006     (.cinit..data.load) [load image, compression = lzss]
-                  00004500    00000008     (__TI_cinit_table)
+.cinit     0    00004506    00000016     
+                  00004506    00000008     (__TI_handler_table)
+                  0000450e    00000006     (.cinit..data.load) [load image, compression = lzss]
+                  00004514    00000008     (__TI_cinit_table)
 
 .binit     0    00004400    00000000     
 
@@ -197,7 +197,7 @@ SYSNMI     0    0000fffc    00000002
 .reset     0    0000fffe    00000002     
                   0000fffe    00000002     rts430x_lc_ld_eabi.lib : boot.c.obj (.reset)
 
-.text      0    00010000    000003e8     
+.text      0    00010000    000003f4     
                   00010000    000000d4     thread.obj (.text:thread_init)
                   000100d4    00000078     rts430x_lc_ld_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
                   0001014c    00000076                            : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
@@ -212,31 +212,31 @@ SYSNMI     0    0000fffc    00000002
                   00010346    00000018     rts430x_lc_ld_eabi.lib : mult16_f5hw.asm.obj (.text)
                   0001035e    00000018     main.obj (.text:thread1)
                   00010376    00000016     rts430x_lc_ld_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
-                  0001038c    00000010     os.obj (.text:os_run)
-                  0001039c    0000000e     os.obj (.text:panic)
-                  000103aa    0000000e     rr.obj (.text:schedule)
-                  000103b8    0000000c     preempt.obj (.text:preempt_init)
-                  000103c4    0000000c     preempt.obj (.text:preempt_reset)
-                  000103d0    0000000a     thread.obj (.text:stack_base)
-                  000103da    00000006     rts430x_lc_ld_eabi.lib : exit.c.obj (.text:abort)
-                  000103e0    00000004                            : pre_init.c.obj (.text:_system_pre_init)
-                  000103e4    00000002                            : startup.c.obj (.text:_system_post_cinit)
-                  000103e6    00000002     timer.obj (.text:timerA0_init)
+                  0001038c    00000012     preempt.obj (.text:preempt_init)
+                  0001039e    0000000e     os.obj (.text:panic)
+                  000103ac    0000000e     rr.obj (.text:schedule)
+                  000103ba    0000000c     os.obj (.text:os_run)
+                  000103c6    0000000c     preempt.obj (.text:preempt_reset)
+                  000103d2    0000000c     timer.obj (.text:timerA0_init)
+                  000103de    0000000a     thread.obj (.text:stack_base)
+                  000103e8    00000006     rts430x_lc_ld_eabi.lib : exit.c.obj (.text:abort)
+                  000103ee    00000004                            : pre_init.c.obj (.text:_system_pre_init)
+                  000103f2    00000002                            : startup.c.obj (.text:_system_post_cinit)
 
 MODULE SUMMARY
 
        Module                       code   ro data   rw data
        ------                       ----   -------   -------
     .\
-       main.obj                     96     0         220    
+       main.obj                     96     0         252    
        thread.obj                   296    0         0      
-       osasm.obj                    206    2         0      
-       os.obj                       118    0         2      
-       preempt.obj                  24     0         0      
+       osasm.obj                    226    2         0      
+       os.obj                       114    0         2      
+       preempt.obj                  30     0         0      
        rr.obj                       14     0         0      
-       timer.obj                    2      0         0      
+       timer.obj                    12     0         0      
     +--+----------------------------+------+---------+---------+
-       Total:                       756    2         222    
+       Total:                       788    2         254    
                                                             
     C:\ti\ccsv8\tools\compiler\ti-cgt-msp430_19.6.0.STS\lib\rts430x_lc_ld_eabi.lib
        autoinit.c.obj               120    0         0      
@@ -278,18 +278,18 @@ MODULE SUMMARY
        Stack:                       0      0         160    
        Linker Generated:            0      22        0      
     +--+----------------------------+------+---------+---------+
-       Grand Total:                 1242   68        382    
+       Grand Total:                 1274   68        414    
 
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 00004500 records: 1, size/record: 8, table size: 8
-	.data: load addr=000044fa, load size=00000006 bytes, run addr=000024dc, run size=00000002 bytes, compression=lzss
+__TI_cinit_table @ 00004514 records: 1, size/record: 8, table size: 8
+	.data: load addr=0000450e, load size=00000006 bytes, run addr=000024fc, run size=00000002 bytes, compression=lzss
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 000044f2 records: 2, size/record: 4, table size: 8
+__TI_handler_table @ 00004506 records: 2, size/record: 4, table size: 8
 	index: 0, handler: __TI_decompress_lzss
 	index: 1, handler: __TI_decompress_none
 
@@ -380,7 +380,7 @@ address   name
 00000732  ADC12MEM9                              
 00000733  ADC12MEM9_H                            
 00000732  ADC12MEM9_L                            
-000103da  C$$EXIT                                
+000103e8  C$$EXIT                                
 000008c0  CBCTL0                                 
 000008c1  CBCTL0_H                               
 000008c0  CBCTL0_L                               
@@ -1031,11 +1031,11 @@ address   name
 0000015c  WDTCTL_L                               
 00004400  __STACK_END                            
 000000a0  __STACK_SIZE                           
-00004500  __TI_CINIT_Base                        
-00004508  __TI_CINIT_Limit                       
-000044f2  __TI_Handler_Table_Base                
-000044fa  __TI_Handler_Table_Limit               
-000044ea  __TI_ISR_TRAP                          
+00004514  __TI_CINIT_Base                        
+0000451c  __TI_CINIT_Limit                       
+00004506  __TI_Handler_Table_Base                
+0000450e  __TI_Handler_Table_Limit               
+000044fe  __TI_ISR_TRAP                          
 000100d4  __TI_auto_init_nobinit_nopinit_hold_wdt
 0001014c  __TI_decompress_lzss                   
 00010376  __TI_decompress_none                   
@@ -1081,32 +1081,32 @@ ffffffff  __c_args__
 0001022c  __mspabi_sral_7                        
 00010228  __mspabi_sral_8                        
 00010224  __mspabi_sral_9                        
-000044ce  _c_int00_noargs                        
+000044e2  _c_int00_noargs                        
 0000fffe  _reset_vector                          
 00004360  _stack                                 
-000103e4  _system_post_cinit                     
-000103e0  _system_pre_init                       
-000103da  abort                                  
+000103f2  _system_post_cinit                     
+000103ee  _system_pre_init                       
+000103e8  abort                                  
 00004400  context_switcher                       
 000102c2  main                                   
 0001024a  memcpy                                 
 000102f0  memset                                 
 00010310  os_init                                
-0001038c  os_run                                 
+000103ba  os_run                                 
 00010286  os_thread_set                          
-0001039c  panic                                  
-0000448e  preempt_firstrun                       
-000103b8  preempt_init                           
-000103c4  preempt_reset                          
-000024dc  q                                      
-000024d8  run_ptr                                
-000103aa  schedule                               
+0001039e  panic                                  
+000044a2  preempt_firstrun                       
+0001038c  preempt_init                           
+000103c6  preempt_reset                          
+000024fc  q                                      
+000024f8  run_ptr                                
+000103ac  schedule                               
 0001035e  thread1                                
 0001032c  thread2                                
-0001039c  thread_exit                            
+0001039e  thread_exit                            
 00010000  thread_init                            
 00002400  threads                                
-000103e6  timerA0_init                           
+000103d2  timerA0_init                           
 000101c2  trapframe_init                         
 
 
@@ -1846,18 +1846,18 @@ address   name
 000023fe  USBIEPBCTY_7                           
 000023ff  USBIEPSIZXY_7                          
 00002400  threads                                
-000024d8  run_ptr                                
-000024dc  q                                      
+000024f8  run_ptr                                
+000024fc  q                                      
 00004360  _stack                                 
 00004400  __STACK_END                            
 00004400  context_switcher                       
-0000448e  preempt_firstrun                       
-000044ce  _c_int00_noargs                        
-000044ea  __TI_ISR_TRAP                          
-000044f2  __TI_Handler_Table_Base                
-000044fa  __TI_Handler_Table_Limit               
-00004500  __TI_CINIT_Base                        
-00004508  __TI_CINIT_Limit                       
+000044a2  preempt_firstrun                       
+000044e2  _c_int00_noargs                        
+000044fe  __TI_ISR_TRAP                          
+00004506  __TI_Handler_Table_Base                
+0000450e  __TI_Handler_Table_Limit               
+00004514  __TI_CINIT_Base                        
+0000451c  __TI_CINIT_Limit                       
 0000ffd2  __TI_int41                             
 0000ffd4  __TI_int42                             
 0000ffd6  __TI_int43                             
@@ -1909,17 +1909,17 @@ address   name
 00010346  __mspabi_mpyi_f5hw                     
 0001035e  thread1                                
 00010376  __TI_decompress_none                   
-0001038c  os_run                                 
-0001039c  panic                                  
-0001039c  thread_exit                            
-000103aa  schedule                               
-000103b8  preempt_init                           
-000103c4  preempt_reset                          
-000103da  C$$EXIT                                
-000103da  abort                                  
-000103e0  _system_pre_init                       
-000103e4  _system_post_cinit                     
-000103e6  timerA0_init                           
+0001038c  preempt_init                           
+0001039e  panic                                  
+0001039e  thread_exit                            
+000103ac  schedule                               
+000103ba  os_run                                 
+000103c6  preempt_reset                          
+000103d2  timerA0_init                           
+000103e8  C$$EXIT                                
+000103e8  abort                                  
+000103ee  _system_pre_init                       
+000103f2  _system_post_cinit                     
 ffffffff  __TI_pprof_out_hndl                    
 ffffffff  __TI_prof_data_size                    
 ffffffff  __TI_prof_data_start                   

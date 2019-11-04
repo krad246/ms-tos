@@ -35,13 +35,6 @@ os_init(void)
 void
 os_run(void)
 {
-//  if (run_ct) {
-//    preempt_init();
-//    context_load(&run_ptr->ctx);
-//  } else {
-//    for (;;);
-//  }
-  preempt_init();
   preempt_firstrun();
   panic(0);
 }
