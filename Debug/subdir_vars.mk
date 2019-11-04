@@ -14,6 +14,7 @@ S_SRCS += \
 C_SRCS += \
 ../main.c \
 ../os.c \
+../preempt.c \
 ../rr.c \
 ../thread.c \
 ../timer.c 
@@ -24,6 +25,7 @@ S_DEPS += \
 C_DEPS += \
 ./main.d \
 ./os.d \
+./preempt.d \
 ./rr.d \
 ./thread.d \
 ./timer.d 
@@ -32,6 +34,7 @@ OBJS += \
 ./main.obj \
 ./os.obj \
 ./osasm.obj \
+./preempt.obj \
 ./rr.obj \
 ./thread.obj \
 ./timer.obj 
@@ -40,6 +43,7 @@ OBJS__QUOTED += \
 "main.obj" \
 "os.obj" \
 "osasm.obj" \
+"preempt.obj" \
 "rr.obj" \
 "thread.obj" \
 "timer.obj" 
@@ -47,6 +51,7 @@ OBJS__QUOTED += \
 C_DEPS__QUOTED += \
 "main.d" \
 "os.d" \
+"preempt.d" \
 "rr.d" \
 "thread.d" \
 "timer.d" 
@@ -57,6 +62,7 @@ S_DEPS__QUOTED += \
 C_SRCS__QUOTED += \
 "../main.c" \
 "../os.c" \
+"../preempt.c" \
 "../rr.c" \
 "../thread.c" \
 "../timer.c" 

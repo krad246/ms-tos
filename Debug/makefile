@@ -13,6 +13,7 @@ ORDERED_OBJS += \
 "./main.obj" \
 "./os.obj" \
 "./osasm.obj" \
+"./preempt.obj" \
 "./rr.obj" \
 "./thread.obj" \
 "./timer.obj" \
@@ -160,8 +161,8 @@ ms-tos.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "os.obj" "osasm.obj" "rr.obj" "thread.obj" "timer.obj" 
-	-$(RM) "main.d" "os.d" "rr.d" "thread.d" "timer.d" 
+	-$(RM) "main.obj" "os.obj" "osasm.obj" "preempt.obj" "rr.obj" "thread.obj" "timer.obj" 
+	-$(RM) "main.d" "os.d" "preempt.d" "rr.d" "thread.d" "timer.d" 
 	-$(RM) "osasm.d" 
 	-@echo 'Finished clean'
 	-@echo ' '

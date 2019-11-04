@@ -16,7 +16,9 @@
             .sect ".text:_isr"
             .align 2
 
+			.global preempt_init
             .global preempt_reset
+
             .global schedule
             .global run_ptr
             .global num_ctx_switches
@@ -152,6 +154,7 @@ preempt_firstrun: .asmfunc
 				mova	&run_ptr, R15
 				context_load R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, SP, R15			; Load context
 
+				calla #preempt_init
 				calla #preempt_reset															; Reset scheduler timer
 
 				popx.a R15																		; Dummy variable used in subsequent calls, needs to be popped
@@ -159,6 +162,7 @@ preempt_firstrun: .asmfunc
            	 	mov.w   &run_ptr, R15
            	 	context_load R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, SP, R15
 
+				call #preempt_init
            	 	call #preempt_reset
 
 				pop.w R15
