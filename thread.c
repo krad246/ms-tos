@@ -27,7 +27,7 @@ trapframe trapframe_init(word_t pc, word_t sr) {
 
 // Returns the 'bottom' of the stack of a process
 static uint16_t *stack_base(thread *this) {
-	return this->stack + sizeof(this->stack) / sizeof(uint16_t);
+	return (uint16_t *) &this->mem.ret_addr;
 }
 extern void thread_exit(int res);
 
@@ -37,37 +37,43 @@ void thread_init(thread *this, int (*routine)(void *), void *arg) {
 	// Clears out all memory in the process
 	memset(this, 0, sizeof(thread));
 
-	// Trapframe + variable structure used in every scheduler invocation past the 1st
-	// Need location to pop these values off and enter process with clean stack
-
-	const word_t stack_base_ = (word_t) stack_base(this);
-
-	const word_t ret_offset = sizeof(word_t);
-	const word_t tf_offset = ret_offset + sizeof(trapframe);
-	const word_t tf_top_offset = tf_offset + sizeof(word_t);
-
-	const word_t starting_sp = stack_base_ - tf_top_offset;
-
-	// Location of trapframe in the 'dummy' frame loaded on
-	const word_t tf_loc = stack_base_ - tf_offset;
-
-	// Location of return address in the stack
-	const word_t ret_loc = stack_base_ - ret_offset;
-
-	// Initialize the trapframe
+	this->mem.ret_addr = (word_t) thread_exit;
 	this->ctx.tf = trapframe_init((word_t) routine, GIE);
-
-	// Copy the trapframe over to the stack (will be popped off on boot / every invocation)
-	memcpy((void *) tf_loc, &this->ctx.tf, sizeof(trapframe));
-
-	// Copy the thread exit routine to the stack
-	*((word_t *) ret_loc) = (word_t) thread_exit;
-
-	// Initialize the process with the stack preloaded with a trapframe & R15
-	this->ctx.registers.sp = starting_sp;
-
-	// Set up argument pointer
+	this->mem.stack_preloaded.tf = trapframe_init((word_t) routine, GIE);
+	this->ctx.registers.sp = (word_t) &this->mem.stack_preloaded.r15;
 	this->ctx.registers.r12 = (word_t) arg;
+//
+//	// Trapframe + variable structure used in every scheduler invocation past the 1st
+//	// Need location to pop these values off and enter process with clean stack
+//
+//	const word_t stack_base_ = (word_t) stack_base(this);
+//
+//	const word_t ret_offset = sizeof(word_t);
+//	const word_t tf_offset = ret_offset + sizeof(trapframe);
+//	const word_t tf_top_offset = tf_offset + sizeof(word_t);
+//
+//	const word_t starting_sp = stack_base_ - tf_top_offset;
+//
+//	// Location of trapframe in the 'dummy' frame loaded on
+//	const word_t tf_loc = stack_base_ - tf_offset;
+//
+//	// Location of return address in the stack
+//	const word_t ret_loc = stack_base_ - ret_offset;
+//
+//	// Initialize the trapframe
+//	this->ctx.tf = trapframe_init((word_t) routine, GIE);
+//
+//	// Copy the trapframe over to the stack (will be popped off on boot / every invocation)
+//	memcpy((void *) tf_loc, &this->ctx.tf, sizeof(trapframe));
+//
+//	// Copy the thread exit routine to the stack
+//	*((word_t *) ret_loc) = (word_t) thread_exit;
+//
+//	// Initialize the process with the stack preloaded with a trapframe & R15
+//	this->ctx.registers.sp = starting_sp;
+//
+//	// Set up argument pointer
+//	this->ctx.registers.r12 = (word_t) arg;
 }
 extern void panic(int res);
 void thread_exit(int res) {

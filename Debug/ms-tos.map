@@ -1,7 +1,7 @@
 ******************************************************************************
                   MSP430 Linker PC v19.6.0                     
 ******************************************************************************
->> Linked Mon Nov  4 02:30:13 2019
+>> Linked Fri Nov 15 02:17:15 2019
 
 OUTPUT FILE NAME:   <ms-tos.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 000044e2
@@ -19,7 +19,7 @@ MEMORY CONFIGURATION
   INFOB                 00001900   00000080  00000000  00000080  RWIX
   INFOA                 00001980   00000080  00000000  00000080  RWIX
   USBRAM                00001c00   00000800  00000000  00000800  RWIX
-  RAM                   00002400   00002000  00000186  00001e7a  RWIX
+  RAM                   00002400   00002000  0000018e  00001e72  RWIX
   FLASH                 00004400   0000bb80  0000011c  0000ba64  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
@@ -85,7 +85,7 @@ MEMORY CONFIGURATION
   INT61                 0000fffa   00000002  00000002  00000000  RWIX
   INT62                 0000fffc   00000002  00000002  00000000  RWIX
   RESET                 0000fffe   00000002  00000002  00000000  RWIX
-  FLASH2                00010000   00014400  00000416  00013fea  RWIX
+  FLASH2                00010000   00014400  000003f8  00014008  RWIX
 
 
 SECTION ALLOCATION MAP
@@ -93,12 +93,12 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.bss       0    00002400    000000e4     UNINITIALIZED
-                  00002400    000000e0     (.common:threads)
-                  000024e0    00000004     (.common:run_ptr)
+.bss       0    00002400    000000ec     UNINITIALIZED
+                  00002400    000000e8     (.common:threads)
+                  000024e8    00000004     (.common:run_ptr)
 
-.data      0    000024e4    00000002     UNINITIALIZED
-                  000024e4    00000002     os.obj (.data)
+.data      0    000024ec    00000002     UNINITIALIZED
+                  000024ec    00000002     os.obj (.data)
 
 .stack     0    00004360    000000a0     UNINITIALIZED
                   00004360    00000004     rts430x_lc_ld_eabi.lib : boot.c.obj (.stack)
@@ -197,46 +197,45 @@ SYSNMI     0    0000fffc    00000002
 .reset     0    0000fffe    00000002     
                   0000fffe    00000002     rts430x_lc_ld_eabi.lib : boot.c.obj (.reset)
 
-.text      0    00010000    00000416     
-                  00010000    000000d4     thread.obj (.text:thread_init)
-                  000100d4    00000078     rts430x_lc_ld_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
-                  0001014c    00000076                            : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
-                  000101c2    0000004a     thread.obj (.text:trapframe_init)
-                  0001020c    0000003e     rts430x_lc_ld_eabi.lib : asr32.asm.obj (.text:l_asr_const)
-                  0001024a    0000003c                            : memcpy.c.obj (.text:memcpy)
-                  00010286    0000003c     os.obj (.text:os_thread_set)
-                  000102c2    0000003a     main.obj (.text:thread1)
-                  000102fc    0000002e     main.obj (.text:main)
-                  0001032a    00000020     rts430x_lc_ld_eabi.lib : memset.c.obj (.text:memset)
-                  0001034a    0000001c     os.obj (.text:os_init)
-                  00010366    0000001a     main.obj (.text:thread2)
-                  00010380    00000018     rts430x_lc_ld_eabi.lib : mult16_f5hw.asm.obj (.text)
-                  00010398    00000016                            : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
-                  000103ae    00000012     preempt.obj (.text:preempt_init)
-                  000103c0    0000000e     os.obj (.text:panic)
-                  000103ce    0000000e     rr.obj (.text:schedule)
-                  000103dc    0000000c     os.obj (.text:os_run)
-                  000103e8    0000000c     preempt.obj (.text:preempt_reset)
-                  000103f4    0000000c     timer.obj (.text:timerA0_init)
-                  00010400    0000000a     thread.obj (.text:stack_base)
-                  0001040a    00000006     rts430x_lc_ld_eabi.lib : exit.c.obj (.text:abort)
-                  00010410    00000004                            : pre_init.c.obj (.text:_system_pre_init)
-                  00010414    00000002                            : startup.c.obj (.text:_system_post_cinit)
+.text      0    00010000    000003f8     
+                  00010000    000000bc     thread.obj (.text:thread_init)
+                  000100bc    00000078     rts430x_lc_ld_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
+                  00010134    00000076                            : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
+                  000101aa    0000004a     thread.obj (.text:trapframe_init)
+                  000101f4    0000003e     rts430x_lc_ld_eabi.lib : asr32.asm.obj (.text:l_asr_const)
+                  00010232    0000003e     main.obj (.text:thread1)
+                  00010270    0000003c     rts430x_lc_ld_eabi.lib : memcpy.c.obj (.text:memcpy)
+                  000102ac    0000003c     os.obj (.text:os_thread_set)
+                  000102e8    0000002e     main.obj (.text:main)
+                  00010316    00000020     rts430x_lc_ld_eabi.lib : memset.c.obj (.text:memset)
+                  00010336    0000001c     os.obj (.text:os_init)
+                  00010352    0000001a     main.obj (.text:thread2)
+                  0001036c    00000018     rts430x_lc_ld_eabi.lib : mult16_f5hw.asm.obj (.text)
+                  00010384    00000016                            : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
+                  0001039a    00000012     preempt.obj (.text:preempt_init)
+                  000103ac    0000000e     os.obj (.text:panic)
+                  000103ba    0000000e     rr.obj (.text:schedule)
+                  000103c8    0000000c     os.obj (.text:os_run)
+                  000103d4    0000000c     preempt.obj (.text:preempt_reset)
+                  000103e0    0000000c     timer.obj (.text:timerA0_init)
+                  000103ec    00000006     rts430x_lc_ld_eabi.lib : exit.c.obj (.text:abort)
+                  000103f2    00000004                            : pre_init.c.obj (.text:_system_pre_init)
+                  000103f6    00000002                            : startup.c.obj (.text:_system_post_cinit)
 
 MODULE SUMMARY
 
        Module                       code   ro data   rw data
        ------                       ----   -------   -------
     .\
-       main.obj                     130    0         228    
-       thread.obj                   296    0         0      
+       main.obj                     134    0         236    
+       thread.obj                   262    0         0      
        osasm.obj                    226    2         0      
        os.obj                       114    0         2      
        preempt.obj                  30     0         0      
        rr.obj                       14     0         0      
        timer.obj                    12     0         0      
     +--+----------------------------+------+---------+---------+
-       Total:                       822    2         230    
+       Total:                       792    2         238    
                                                             
     C:\ti\ccsv8\tools\compiler\ti-cgt-msp430_19.6.0.STS\lib\rts430x_lc_ld_eabi.lib
        autoinit.c.obj               120    0         0      
@@ -278,13 +277,13 @@ MODULE SUMMARY
        Stack:                       0      0         160    
        Linker Generated:            0      22        0      
     +--+----------------------------+------+---------+---------+
-       Grand Total:                 1308   68        390    
+       Grand Total:                 1278   68        398    
 
 
 LINKER GENERATED COPY TABLES
 
 __TI_cinit_table @ 00004514 records: 1, size/record: 8, table size: 8
-	.data: load addr=0000450e, load size=00000006 bytes, run addr=000024e4, run size=00000002 bytes, compression=lzss
+	.data: load addr=0000450e, load size=00000006 bytes, run addr=000024ec, run size=00000002 bytes, compression=lzss
 
 
 LINKER GENERATED HANDLER TABLE
@@ -380,7 +379,7 @@ address   name
 00000732  ADC12MEM9                              
 00000733  ADC12MEM9_H                            
 00000732  ADC12MEM9_L                            
-0001040a  C$$EXIT                                
+000103ec  C$$EXIT                                
 000008c0  CBCTL0                                 
 000008c1  CBCTL0_H                               
 000008c0  CBCTL0_L                               
@@ -1036,9 +1035,9 @@ address   name
 00004506  __TI_Handler_Table_Base                
 0000450e  __TI_Handler_Table_Limit               
 000044fe  __TI_ISR_TRAP                          
-000100d4  __TI_auto_init_nobinit_nopinit_hold_wdt
-0001014c  __TI_decompress_lzss                   
-00010398  __TI_decompress_none                   
+000100bc  __TI_auto_init_nobinit_nopinit_hold_wdt
+00010134  __TI_decompress_lzss                   
+00010384  __TI_decompress_none                   
 0000ffd2  __TI_int41                             
 0000ffd4  __TI_int42                             
 0000ffd6  __TI_int43                             
@@ -1065,49 +1064,49 @@ ffffffff  __TI_pprof_out_hndl
 ffffffff  __TI_prof_data_size                    
 ffffffff  __TI_prof_data_start                   
 ffffffff  __c_args__                             
-00010380  __mspabi_mpyi_f5hw                     
-00010244  __mspabi_sral_1                        
-00010220  __mspabi_sral_10                       
-0001021c  __mspabi_sral_11                       
-00010218  __mspabi_sral_12                       
-00010214  __mspabi_sral_13                       
-00010210  __mspabi_sral_14                       
-0001020c  __mspabi_sral_15                       
-00010240  __mspabi_sral_2                        
-0001023c  __mspabi_sral_3                        
-00010238  __mspabi_sral_4                        
-00010234  __mspabi_sral_5                        
-00010230  __mspabi_sral_6                        
-0001022c  __mspabi_sral_7                        
-00010228  __mspabi_sral_8                        
-00010224  __mspabi_sral_9                        
+0001036c  __mspabi_mpyi_f5hw                     
+0001022c  __mspabi_sral_1                        
+00010208  __mspabi_sral_10                       
+00010204  __mspabi_sral_11                       
+00010200  __mspabi_sral_12                       
+000101fc  __mspabi_sral_13                       
+000101f8  __mspabi_sral_14                       
+000101f4  __mspabi_sral_15                       
+00010228  __mspabi_sral_2                        
+00010224  __mspabi_sral_3                        
+00010220  __mspabi_sral_4                        
+0001021c  __mspabi_sral_5                        
+00010218  __mspabi_sral_6                        
+00010214  __mspabi_sral_7                        
+00010210  __mspabi_sral_8                        
+0001020c  __mspabi_sral_9                        
 000044e2  _c_int00_noargs                        
 0000fffe  _reset_vector                          
 00004360  _stack                                 
-00010414  _system_post_cinit                     
-00010410  _system_pre_init                       
-0001040a  abort                                  
+000103f6  _system_post_cinit                     
+000103f2  _system_pre_init                       
+000103ec  abort                                  
 00004400  context_switcher                       
-000102fc  main                                   
-0001024a  memcpy                                 
-0001032a  memset                                 
-0001034a  os_init                                
-000103dc  os_run                                 
-00010286  os_thread_set                          
-000103c0  panic                                  
+000102e8  main                                   
+00010270  memcpy                                 
+00010316  memset                                 
+00010336  os_init                                
+000103c8  os_run                                 
+000102ac  os_thread_set                          
+000103ac  panic                                  
 000044a2  preempt_firstrun                       
-000103ae  preempt_init                           
-000103e8  preempt_reset                          
-000024e4  q                                      
-000024e0  run_ptr                                
-000103ce  schedule                               
-000102c2  thread1                                
-00010366  thread2                                
-000103c0  thread_exit                            
+0001039a  preempt_init                           
+000103d4  preempt_reset                          
+000024ec  q                                      
+000024e8  run_ptr                                
+000103ba  schedule                               
+00010232  thread1                                
+00010352  thread2                                
+000103ac  thread_exit                            
 00010000  thread_init                            
 00002400  threads                                
-000103f4  timerA0_init                           
-000101c2  trapframe_init                         
+000103e0  timerA0_init                           
+000101aa  trapframe_init                         
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -1846,8 +1845,8 @@ address   name
 000023fe  USBIEPBCTY_7                           
 000023ff  USBIEPSIZXY_7                          
 00002400  threads                                
-000024e0  run_ptr                                
-000024e4  q                                      
+000024e8  run_ptr                                
+000024ec  q                                      
 00004360  _stack                                 
 00004400  __STACK_END                            
 00004400  context_switcher                       
@@ -1882,44 +1881,44 @@ address   name
 0000fffc  __TI_int62                             
 0000fffe  _reset_vector                          
 00010000  thread_init                            
-000100d4  __TI_auto_init_nobinit_nopinit_hold_wdt
-0001014c  __TI_decompress_lzss                   
-000101c2  trapframe_init                         
-0001020c  __mspabi_sral_15                       
-00010210  __mspabi_sral_14                       
-00010214  __mspabi_sral_13                       
-00010218  __mspabi_sral_12                       
-0001021c  __mspabi_sral_11                       
-00010220  __mspabi_sral_10                       
-00010224  __mspabi_sral_9                        
-00010228  __mspabi_sral_8                        
-0001022c  __mspabi_sral_7                        
-00010230  __mspabi_sral_6                        
-00010234  __mspabi_sral_5                        
-00010238  __mspabi_sral_4                        
-0001023c  __mspabi_sral_3                        
-00010240  __mspabi_sral_2                        
-00010244  __mspabi_sral_1                        
-0001024a  memcpy                                 
-00010286  os_thread_set                          
-000102c2  thread1                                
-000102fc  main                                   
-0001032a  memset                                 
-0001034a  os_init                                
-00010366  thread2                                
-00010380  __mspabi_mpyi_f5hw                     
-00010398  __TI_decompress_none                   
-000103ae  preempt_init                           
-000103c0  panic                                  
-000103c0  thread_exit                            
-000103ce  schedule                               
-000103dc  os_run                                 
-000103e8  preempt_reset                          
-000103f4  timerA0_init                           
-0001040a  C$$EXIT                                
-0001040a  abort                                  
-00010410  _system_pre_init                       
-00010414  _system_post_cinit                     
+000100bc  __TI_auto_init_nobinit_nopinit_hold_wdt
+00010134  __TI_decompress_lzss                   
+000101aa  trapframe_init                         
+000101f4  __mspabi_sral_15                       
+000101f8  __mspabi_sral_14                       
+000101fc  __mspabi_sral_13                       
+00010200  __mspabi_sral_12                       
+00010204  __mspabi_sral_11                       
+00010208  __mspabi_sral_10                       
+0001020c  __mspabi_sral_9                        
+00010210  __mspabi_sral_8                        
+00010214  __mspabi_sral_7                        
+00010218  __mspabi_sral_6                        
+0001021c  __mspabi_sral_5                        
+00010220  __mspabi_sral_4                        
+00010224  __mspabi_sral_3                        
+00010228  __mspabi_sral_2                        
+0001022c  __mspabi_sral_1                        
+00010232  thread1                                
+00010270  memcpy                                 
+000102ac  os_thread_set                          
+000102e8  main                                   
+00010316  memset                                 
+00010336  os_init                                
+00010352  thread2                                
+0001036c  __mspabi_mpyi_f5hw                     
+00010384  __TI_decompress_none                   
+0001039a  preempt_init                           
+000103ac  panic                                  
+000103ac  thread_exit                            
+000103ba  schedule                               
+000103c8  os_run                                 
+000103d4  preempt_reset                          
+000103e0  timerA0_init                           
+000103ec  C$$EXIT                                
+000103ec  abort                                  
+000103f2  _system_pre_init                       
+000103f6  _system_post_cinit                     
 ffffffff  __TI_pprof_out_hndl                    
 ffffffff  __TI_prof_data_size                    
 ffffffff  __TI_prof_data_start                   

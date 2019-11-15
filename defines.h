@@ -37,11 +37,24 @@
 #endif
 
 /* Define structure sizes */
-
+struct thread;
+struct context;
+struct trapframe;
 #if defined(RTOS_20BIT__)
 	typedef uint32_t word_t;
 #elif defined(RTOS_16BIT__)
 	typedef uint16_t word_t;
+#endif
+
+#define RTOS_ADDR_SIZE__ sizeof(word_t) / sizeof(uint16_t)
+#define RTOS_REG_SIZE__ sizeof(word_t) / sizeof(uint16_t)
+#define RTOS_TRAPFRAME_SIZE__ sizeof(trapframe) / sizeof(uint16_t)
+#define RTOS_STACKFRAME_SIZE__ RTOS_REG_SIZE__ + RTOS_TRAPFRAME_SIZE__
+
+#if defined(RTOS_20BIT__)
+	#define THREAD_MEM_SZ RTOS_ADDR_SIZE__ + STACKSIZE + RTOS_STACKFRAME_SIZE__ - 4
+#else
+	#define THREAD_MEM_SZ RTOS_ADDR_SIZE__ + STACKSIZE + RTOS_STACKFRAME_SIZE__ - 6
 #endif
 
 #define RTOS_STACK_CHECK__

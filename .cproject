@@ -261,6 +261,16 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.ti.ccstudio.buildDefinitions.MSP430.Debug.258552431.1263382183" name="osasm.s" rcbsApplicability="disable" resourcePath="osasm.s" toolsToInvoke="com.ti.ccstudio.buildDefinitions.MSP430_19.6.exe.compilerDebug.193370872.2080084461">
+						<tool id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.exe.compilerDebug.193370872.2080084461" name="MSP430 Compiler" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.exe.compilerDebug.193370872">
+							<option id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compilerID.CODE_MODEL.2137579144" name="Specify the code memory model. (--code_model)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compilerID.CODE_MODEL" value="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compilerID.CODE_MODEL.large" valueType="enumerated"/>
+							<option id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compilerID.DATA_MODEL.580662624" name="Specify the data memory model. (--data_model)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compilerID.DATA_MODEL" value="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compilerID.DATA_MODEL.large" valueType="enumerated"/>
+							<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__C_SRCS.1282625081" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__C_SRCS"/>
+							<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__CPP_SRCS.179347120" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__CPP_SRCS"/>
+							<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__ASM_SRCS.622145463" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__ASM_SRCS"/>
+							<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__ASM2_SRCS.1627399843" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_19.6.compiler.inputType__ASM2_SRCS"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="lnk_msp430g2553.cmd|msp430f5529.ld" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>

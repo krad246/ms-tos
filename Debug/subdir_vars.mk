@@ -67,7 +67,4 @@ C_SRCS__QUOTED += \
 "../thread.c" \
 "../timer.c" 
 
-S_SRCS__QUOTED += \
-"../osasm.s" 
-
 

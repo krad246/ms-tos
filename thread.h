@@ -64,6 +64,19 @@ typedef struct __attribute__((packed)) {
 	trapframe tf;
 } context;
 
+typedef struct __attribute__((packed)) {
+	union {
+		uint16_t stack[THREAD_MEM_SZ];
+		struct {
+			uint16_t stack[THREAD_MEM_SZ - RTOS_STACKFRAME_SIZE__];
+			word_t r15;
+			trapframe tf;
+		} stack_preloaded;
+	};
+
+	word_t ret_addr;
+} thread_mem;
+
 /**
  * Thread object
  * - Contains thread context
@@ -78,7 +91,7 @@ typedef struct thread {
 	context ctx;
 
 	// Process memory
-	uint16_t stack[sizeof(word_t) / sizeof(uint16_t) + sizeof(trapframe) / sizeof(uint16_t) + STACKSIZE + sizeof(word_t) / sizeof(uint16_t)];
+	thread_mem mem;
 
 	// Thread ID
 	tid_t tid;

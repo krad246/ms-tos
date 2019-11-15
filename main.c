@@ -33,11 +33,12 @@ int fib(int x, int y, int z, int w) {
 
 int thread1(void *arg) {
 	volatile int*k = ((volatile int*)arg);
-	volatile unsigned int bob[4] = { 0 };
+	volatile unsigned int bob[56] = { 0 };
 	memset(bob, 0xB0, sizeof(bob));
   for (;;) {
     P1OUT ^= BIT0;                      // Toggle P1.0 using exclusive-OR
     *k = *k + 1;
+
 
     __delay_cycles(100000);
 

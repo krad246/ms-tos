@@ -12,7 +12,6 @@
 ;-------------------------------------------------------------------------------
             .cdecls "defines.h"
 
-
             .sect ".text:_isr"
             .align 2
 
@@ -117,6 +116,22 @@ context_load_epilogue: .macro SP, R15
 			.endif
             .endm
 
+stack_check: .macro SP, R15
+			.if $DEFINED(RTOS_STACK_CHECK__)
+			.if $DEFINED(RTOS_20BIT__)
+				addx.a #56, R15
+				cmpa R15, SP
+				jn kernel_panic
+				subx.a #56, R15
+			.else
+				add.w #28, R15
+				cmp R15, SP
+				jl kernel_panic
+				sub.w #28, R15
+			.endif
+			.endif
+			.endm
+
 context_switcher:
 			.if $DEFINED(RTOS_20BIT__)
 				pushx.a R15																		; Save scratch register R15
@@ -124,12 +139,7 @@ context_switcher:
 				mova	&run_ptr, R15															; Fetch current task (overwrites R15)
 				context_save R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, SP, R15			; Save context to current TCB
 
-			.if $DEFINED(RTOS_STACK_CHECK__)
-				addx.a #52, R15
-				cmpa SP, R15
-				jge kernel_panic
-				subx.a #52, R15
-			.endif
+				stack_check SP, R15
 
 				calla #schedule																	; Find next TCB to run
 				calla #preempt_reset															; Reset scheduler timer
@@ -145,12 +155,7 @@ context_switcher:
            	 	mov.w   &run_ptr, R15
             	context_save R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, SP, R15
 
-			.if $DEFINED(RTOS_STACK_CHECK__)
-				add.w #28, R15
-				cmp R15, SP
-				jl kernel_panic
-				sub.w #28, R15
-			.endif
+            	stack_check SP, R15
 
             	call    #schedule
             	call    #preempt_reset
@@ -166,10 +171,10 @@ context_switcher:
 
 kernel_panic: .asmfunc
 			.if $DEFINED(RTOS_20BIT__)
-				mova #69, R12
+				mova #-1, R12
 				calla #panic
 			.else
-				mov.w #69, R12
+				mov.w #-1, R12
 				call #panic
 			.endif
 
