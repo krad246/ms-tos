@@ -126,8 +126,8 @@ context_switcher:
 
 			.if $DEFINED(RTOS_STACK_CHECK__)
 				addx.a #52, R15
-				cmpa R15, SP
-				jl kernel_panic
+				cmpa SP, R15
+				jge kernel_panic
 				subx.a #52, R15
 			.endif
 

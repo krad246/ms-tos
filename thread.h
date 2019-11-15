@@ -78,7 +78,7 @@ typedef struct thread {
 	context ctx;
 
 	// Process memory
-	uint16_t stack[sizeof(word_t) + sizeof(trapframe) + STACKSIZE + sizeof(word_t)];
+	uint16_t stack[sizeof(word_t) / sizeof(uint16_t) + sizeof(trapframe) / sizeof(uint16_t) + STACKSIZE + sizeof(word_t) / sizeof(uint16_t)];
 
 	// Thread ID
 	tid_t tid;
