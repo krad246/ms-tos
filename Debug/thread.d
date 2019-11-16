@@ -1,8 +1,8 @@
 # FIXED
 
 thread.obj: ../thread.c
-thread.obj: C:/Users/krad2/workspace_v8/ms-tos/thread.h
-thread.obj: C:/Users/krad2/workspace_v8/ms-tos/defines.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/definitions.h
 thread.obj: C:/ti/ccsv8/ccs_base/msp430/include/msp430.h
 thread.obj: C:/ti/ccsv8/ccs_base/msp430/include/msp430f5529.h
 thread.obj: C:/ti/ccsv8/ccs_base/msp430/include/in430.h
@@ -20,11 +20,17 @@ thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.
 thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h
 thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h
 thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h
-thread.obj: C:/Users/krad2/workspace_v8/ms-tos/config.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/config.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/task_table.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/list.h
+thread.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stddef.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/pool.h
+thread.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/slist.h
 
 ../thread.c: 
-C:/Users/krad2/workspace_v8/ms-tos/thread.h: 
-C:/Users/krad2/workspace_v8/ms-tos/defines.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/definitions.h: 
 C:/ti/ccsv8/ccs_base/msp430/include/msp430.h: 
 C:/ti/ccsv8/ccs_base/msp430/include/msp430f5529.h: 
 C:/ti/ccsv8/ccs_base/msp430/include/in430.h: 
@@ -42,4 +48,10 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdbool.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/string.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/_ti_config.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/linkage.h: 
-C:/Users/krad2/workspace_v8/ms-tos/config.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/config.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/task_table.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/list.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stddef.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/pool.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/slist.h: 

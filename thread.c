@@ -1,81 +1,86 @@
-/*
- * thread.c
- *
- *  Created on: Oct 31, 2019
- *      Author: krad2
- */
-
 #include <thread.h>
 
-trapframe trapframe_init(word_t pc, word_t sr) {
-	trapframe tf;
-	#if defined(RTOS_MSP430X_TRAPFRAME__)
+int hw_stackframe_init(hw_stackframe_t *frame, pc_t pc, word_t sr) {
+	if (frame == 0) return -1;	// InvalidArgument
+	if (pc == 0) return -1;	// InvalidArgument
+
+	#if defined(__LARGE_CODE_MODEL__)
 		unsigned int pc_high_ = (pc & 0xF0000) >> 16;	// PC[19:16]
 		unsigned int pc_low_ = pc & 0xFFFF;				// PC[15:0]
 		unsigned int sr_ = sr & 0xFFF;					// SR
 
-		tf.pc_high = pc_high_;
-		tf.pc_low = pc_low_;
-		tf.sr = sr_;
+		frame->pc_high = pc_high_;
+		frame->pc_low = pc_low_;
+		frame->sr = sr_;
 	#else
-		tf.pc = pc & 0xFFFF;
-		tf.sr = sr & 0xFF;
+		frame->pc = pc & 0xFFFF;
+		frame->sr = sr & 0xFF;
 	#endif
 
-	return tf;
+	return 0;
 }
 
-// Returns the 'bottom' of the stack of a process
-static uint16_t *stack_base(thread *this) {
-	return (uint16_t *) &this->mem.ret_addr;
+int sw_stackframe_init(sw_stackframe_t *frame, word_t sp, word_t arg) {
+	if (frame == 0) return -1; // InvalidArgument
+	if (sp == 0) return -1; // InvalidArgument
+
+	// Zero-initialize the stack, set the stack pointer to the location of the HW stack frame, and set the argument pointer
+	memset(frame, 0, sizeof(sw_stackframe_t));
+	frame->sp = sp;
+	frame->r12 = arg;
+
+	return 0;
 }
-extern void thread_exit(int res);
 
-// Initializes a process with a runnable
-void thread_init(thread *this, int (*routine)(void *), void *arg) {
-
-	// Clears out all memory in the process
-	memset(this, 0, sizeof(thread));
-
-	this->mem.ret_addr = (word_t) thread_exit;
-	this->ctx.tf = trapframe_init((word_t) routine, GIE);
-	this->mem.stack_preloaded.tf = trapframe_init((word_t) routine, GIE);
-	this->ctx.registers.sp = (word_t) &this->mem.stack_preloaded.r15;
-	this->ctx.registers.r12 = (word_t) arg;
-//
-//	// Trapframe + variable structure used in every scheduler invocation past the 1st
-//	// Need location to pop these values off and enter process with clean stack
-//
-//	const word_t stack_base_ = (word_t) stack_base(this);
-//
-//	const word_t ret_offset = sizeof(word_t);
-//	const word_t tf_offset = ret_offset + sizeof(trapframe);
-//	const word_t tf_top_offset = tf_offset + sizeof(word_t);
-//
-//	const word_t starting_sp = stack_base_ - tf_top_offset;
-//
-//	// Location of trapframe in the 'dummy' frame loaded on
-//	const word_t tf_loc = stack_base_ - tf_offset;
-//
-//	// Location of return address in the stack
-//	const word_t ret_loc = stack_base_ - ret_offset;
-//
-//	// Initialize the trapframe
-//	this->ctx.tf = trapframe_init((word_t) routine, GIE);
-//
-//	// Copy the trapframe over to the stack (will be popped off on boot / every invocation)
-//	memcpy((void *) tf_loc, &this->ctx.tf, sizeof(trapframe));
-//
-//	// Copy the thread exit routine to the stack
-//	*((word_t *) ret_loc) = (word_t) thread_exit;
-//
-//	// Initialize the process with the stack preloaded with a trapframe & R15
-//	this->ctx.registers.sp = starting_sp;
-//
-//	// Set up argument pointer
-//	this->ctx.registers.r12 = (word_t) arg;
+const uint8_t *thrd_stack_base(thrd_t *this) {
+	const uint16_t sz = sizeof(this->stack) / sizeof(*this->stack);
+	const uint16_t *stack_top = this->stack;
+	return (const uint8_t *) (stack_top + sz);
 }
-extern void panic(int res);
-void thread_exit(int res) {
-	panic(res);
+
+int thrd_stack_init(thrd_t *this, pc_t pc) {
+	if (this == NULL) return -1; // InvalidArgument
+	if (pc == 0) return -1; // InvalidArgument
+
+	memset(this->stack, 0, sizeof(this->stack));
+
+	const uint8_t *stack_bottom = thrd_stack_base(this);
+
+	// need to also add thrd_exit return address here
+	const uint16_t hw_stackframe_offset = sizeof(hw_stackframe_t);
+	uint8_t *hw_stackframe_loc = (uint8_t *) (stack_bottom - hw_stackframe_offset);
+
+	int status;
+	status = hw_stackframe_init((hw_stackframe_t *) hw_stackframe_loc, pc, GIE);
+
+	return status;
+}
+
+int thrd_context_init(thrd_t *this, word_t sp, word_t arg) {
+	if (this == NULL) return -1;
+	if (sp == 0) return -1;
+
+	int status;
+	status = sw_stackframe_init(&this->context, sp, arg);
+
+	return status;
+}
+
+int thrd_init(thrd_t *this, int (*routine)(void *), void *arg) {
+	int status;
+
+	status = thrd_stack_init(this, (pc_t) routine);
+	if (status < 0) return status;
+
+	const uint8_t *stack_bottom = thrd_stack_base(this);
+	const uint16_t hw_stackframe_offset = sizeof(hw_stackframe_t);
+	uint8_t *hw_stackframe_loc = (uint8_t *) (stack_bottom - hw_stackframe_offset);
+
+	status = thrd_context_init(this, (word_t) hw_stackframe_loc, (word_t) arg);
+
+	return status;
+}
+
+int thrd_create(int (*routine)(void *), void *arg) {
+	return task_create(routine, arg);
 }

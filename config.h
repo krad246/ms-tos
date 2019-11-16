@@ -1,14 +1,14 @@
-//
-// Created by gta on 10/24/19.
-//
+/*
+ * config.h
+ *
+ *  Created on: Nov 15, 2019
+ *      Author: krad2
+ */
 
-#ifndef RTOS_CONFIG_H
-#define RTOS_CONFIG_H
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
-#define NUMTHREADS 2
+#define NUM_THREADS 8
 #define STACKSIZE 20
 
-#define SCHEDULER_USE_ROUND_ROBIN 1
-#define SCHEDULER_USE_PRIORITY 0
-
-#endif //RTOS_CONFIG_H
+#endif /* CONFIG_H_ */

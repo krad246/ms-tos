@@ -8,63 +8,54 @@ SHELL = cmd.exe
 CMD_SRCS += \
 ../lnk_msp430f5529.cmd 
 
-S_SRCS += \
-../osasm.s 
+ASM_SRCS += \
+../krnl_swtch.asm 
 
 C_SRCS += \
 ../main.c \
 ../os.c \
-../preempt.c \
-../rr.c \
-../thread.c \
-../timer.c 
-
-S_DEPS += \
-./osasm.d 
+../task_table.c \
+../thread.c 
 
 C_DEPS += \
 ./main.d \
 ./os.d \
-./preempt.d \
-./rr.d \
-./thread.d \
-./timer.d 
+./task_table.d \
+./thread.d 
 
 OBJS += \
+./krnl_swtch.obj \
 ./main.obj \
 ./os.obj \
-./osasm.obj \
-./preempt.obj \
-./rr.obj \
-./thread.obj \
-./timer.obj 
+./task_table.obj \
+./thread.obj 
+
+ASM_DEPS += \
+./krnl_swtch.d 
 
 OBJS__QUOTED += \
+"krnl_swtch.obj" \
 "main.obj" \
 "os.obj" \
-"osasm.obj" \
-"preempt.obj" \
-"rr.obj" \
-"thread.obj" \
-"timer.obj" 
+"task_table.obj" \
+"thread.obj" 
 
 C_DEPS__QUOTED += \
 "main.d" \
 "os.d" \
-"preempt.d" \
-"rr.d" \
-"thread.d" \
-"timer.d" 
+"task_table.d" \
+"thread.d" 
 
-S_DEPS__QUOTED += \
-"osasm.d" 
+ASM_DEPS__QUOTED += \
+"krnl_swtch.d" 
+
+ASM_SRCS__QUOTED += \
+"../krnl_swtch.asm" 
 
 C_SRCS__QUOTED += \
 "../main.c" \
 "../os.c" \
-"../preempt.c" \
-"../rr.c" \
-"../thread.c" \
-"../timer.c" 
+"../task_table.c" \
+"../thread.c" 
 
 

@@ -10,17 +10,16 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./krnl_swtch.obj" \
 "./main.obj" \
 "./os.obj" \
-"./osasm.obj" \
-"./preempt.obj" \
-"./rr.obj" \
+"./task_table.obj" \
 "./thread.obj" \
-"./timer.obj" \
+"./utils/crc/crc16.obj" \
 "../lnk_msp430f5529.cmd" \
 $(GEN_CMDS__FLAG) \
--llibc.a \
 -llibmath.a \
+-llibc.a \
 
 -include ../makefile.init
 
@@ -30,7 +29,9 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include utils/crc/subdir_vars.mk
 -include subdir_rules.mk
+-include utils/crc/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -127,43 +128,43 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-ms-tos.out \
+ms-tos-refactor.out \
 
 EXE_OUTPUTS__QUOTED += \
-"ms-tos.out" \
+"ms-tos-refactor.out" \
 
 BIN_OUTPUTS += \
-ms-tos.hex \
+ms-tos-refactor.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"ms-tos.hex" \
+"ms-tos-refactor.hex" \
 
 
 # All Target
-all: $(OBJS) $(CMD_SRCS) $(LD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "ms-tos.out"
+all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+	@$(MAKE) --no-print-directory -Onone "ms-tos-refactor.out"
 
 # Tool invocations
-ms-tos.out: $(OBJS) $(CMD_SRCS) $(LD_SRCS) $(GEN_CMDS)
+ms-tos-refactor.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: MSP430 Linker'
-	"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/bin/cl430" -vmspx --code_model=large --data_model=large --use_hw_mpy=F5 --advice:power="all" --define=__MSP430F5529__ -g --printf_support=minimal --diag_warning=225 --diag_wrap=off --display_error_number --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU23 --silicon_errata=CPU40 -z -m"ms-tos.map" --heap_size=160 --stack_size=160 --cinit_hold_wdt=on -i"C:/ti/ccsv8/ccs_base/msp430/include" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/lib" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include" -i"C:/ti/ccsv8/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="ms-tos_linkInfo.xml" --use_hw_mpy=F5 --rom_model --strict_compatibility=on --unused_section_elimination=on --zero_init=off -o "ms-tos.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/bin/cl430" -vmspx --code_model=small --data_model=small -O3 --opt_for_speed=3 --use_hw_mpy=F5 --advice:power="all" --define=__MSP430F5529__ -g --printf_support=minimal --diag_warning=225 --diag_wrap=off --display_error_number --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU23 --silicon_errata=CPU40 -z -m"ms-tos-refactor.map" --heap_size=160 --stack_size=160 --cinit_hold_wdt=on -i"C:/ti/ccsv8/ccs_base/msp430/include" -i"C:/ti/ccsv8/ccs_base/msp430/lib/5xx_6xx_FRxx" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/lib" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="ms-tos-refactor_linkInfo.xml" --use_hw_mpy=F5 --rom_model --unused_section_elimination=on --zero_init=off -o "ms-tos-refactor.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-ms-tos.hex: $(EXE_OUTPUTS)
+ms-tos-refactor.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: MSP430 Hex Utility'
-	"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/bin/hex430" --memwidth=8 --romwidth=8 -o "ms-tos.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/bin/hex430" --memwidth=8 --romwidth=8 -o "ms-tos-refactor.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "os.obj" "osasm.obj" "preempt.obj" "rr.obj" "thread.obj" "timer.obj" 
-	-$(RM) "main.d" "os.d" "preempt.d" "rr.d" "thread.d" "timer.d" 
-	-$(RM) "osasm.d" 
+	-$(RM) "krnl_swtch.obj" "main.obj" "os.obj" "task_table.obj" "thread.obj" "utils\crc\crc16.obj" 
+	-$(RM) "main.d" "os.d" "task_table.d" "thread.d" "utils\crc\crc16.d" 
+	-$(RM) "krnl_swtch.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

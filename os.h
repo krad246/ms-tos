@@ -1,40 +1,42 @@
 /*
  * os.h
  *
- *  Created on: Oct 18, 2019
- *      Author: gta
+ *  Created on: Nov 16, 2019
+ *      Author: krad2
  */
 
 #ifndef OS_H_
 #define OS_H_
 
-#include <msp430.h>
+#include <definitions.h>
+#include <task_table.h>
 
-#include "defines.h"
-#include "scheduler.h"
-#include "config.h"
+// Enters / exits critical section (disables interrupt)
+void _start_critical(void);
+void _end_critical(void);
 
-typedef int8_t thread_t; // index in tcbs array
+// Sets up preemptive tick
+void os_tick_init(void);
 
-uint16_t num_ctx_switches;
-
-thread threads[NUMTHREADS];
-unsigned run_ct;
-
-inline void preempt_trigger(void);
-inline void preempt_init(void);
-void preempt_reset(void);
-extern void preempt_firstrun(void);
-
-void panic(int) __attribute__ ((noreturn));
-
+// Sets up os memory, state variables, etc.
 void os_init(void);
-void os_run(void) __attribute__ ((noreturn));
-thread_t os_thread_create(int (*routine)(void *));
+
+// Underlying branch to first task
+extern void _os_start(void);
+
+// Wrapper; picks first runnable and calls _os_start()
+void os_launch(void);
+
+// Creates a thread given a runnable and an argument; wrapper
+int os_thread_create(int (*routine)(void *), void *arg);
+
+// Picks a new thread to run
+void os_schedule(void);
+
+// Voluntary transfer of control to the scheduler
 void os_yield(void);
 
-// test func
-void os_thread_set(int (*routine1)(void *), int (*routine2)(void *));
-
+// Error handler for the kernel
+void os_panic(int error);
 
 #endif /* OS_H_ */
