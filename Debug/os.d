@@ -29,6 +29,10 @@ os.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stddef.h
 os.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/pool.h
 os.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/slist.h
 os.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h
+os.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/semaphore.h
+os.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/os.h
+os.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/queue.h
+os.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdlib.h
 
 ../os.c: 
 C:/Users/krad2/workspace_v8/ms-tos-refactor/os.h: 
@@ -59,3 +63,7 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stddef.h:
 C:/Users/krad2/workspace_v8/ms-tos-refactor/pool.h: 
 C:/Users/krad2/workspace_v8/ms-tos-refactor/slist.h: 
 C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/semaphore.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/os.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/queue.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdlib.h: 

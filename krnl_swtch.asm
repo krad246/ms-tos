@@ -11,6 +11,7 @@
 			.global os_schedule
 
 			.global os_tick_init
+			.global os_tick_reset
 
 
 ;-------------------------------------------------------------------------------
@@ -98,7 +99,7 @@ _os_start:
 			_mov &run_ptr, sp		; get top of new context block
 			_restore				; restore context (r4-r15 first, then sp)
 
-			nop
+			_call #os_tick_reset
 			reti
 
 _os_switch:
@@ -121,7 +122,7 @@ _os_switch:
 
 			;_profile_end			; start timer
 
-			nop
+			_call #os_tick_reset
 			reti
 
 			.sect WDT_VECTOR

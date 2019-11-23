@@ -1,1 +1,1 @@
-"./krnl_swtch.obj" "./main.obj" "./os.obj" "./task_table.obj" "./thread.obj" "./utils/crc/crc16.obj" "../lnk_msp430f5529.cmd" -llibmath.a -llibc.a 
+"./barrier.obj" "./bsem_pool.obj" "./krnl_swtch.obj" "./main.obj" "./os.obj" "./semaphore.obj" "./task_table.obj" "./thread.obj" "../lnk_msp430f5529.cmd" -llibmath.a -llibc.a 

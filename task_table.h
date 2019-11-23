@@ -35,6 +35,14 @@ POOL(task_mem, task_table_element_t, NUM_THREADS);
 struct pool_task_mem task_mem;
 
 /**
+ * Round robin scheduler variables
+ */
+
+struct list_iterator it;
+struct list_element *current;
+thrd_t *run_ptr;
+
+/**
  * Initializes the thread table
  */
 
@@ -48,15 +56,24 @@ task_table_element_t *task_element_alloc(void);
 void task_element_free(task_table_element_t *process);
 
 /**
+ * Manages task list
+ */
+
+int task_table_push(task_table_element_t *process);
+int task_table_pop(task_table_element_t *process);
+
+/**
  * Create / destroy threads
  */
 
 int task_create(int (*routine)(void *), void *arg);
 int task_kill(thrd_t *this);
 
-struct list_iterator it;
-struct list_element *current;
-task_table_element_t *run_ptr;
+/**
+ * Returns current thread
+ */
+
+const thrd_t *task_current(void);
 
 /**
  * Fetches the next task from the run queue

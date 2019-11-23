@@ -10,6 +10,7 @@
 
 #include <definitions.h>
 #include <task_table.h>
+#include <semaphore.h>
 
 // Enters / exits critical section (disables interrupt)
 void _start_critical(void);
@@ -17,6 +18,7 @@ void _end_critical(void);
 
 // Sets up preemptive tick
 void os_tick_init(void);
+void os_tick_reset(void);
 
 // Sets up os memory, state variables, etc.
 void os_init(void);
@@ -33,8 +35,19 @@ int os_thread_create(int (*routine)(void *), void *arg);
 // Picks a new thread to run
 void os_schedule(void);
 
+// Returns a handle to the current thread
+const thrd_t *os_get_current_thread(void);
+
 // Voluntary transfer of control to the scheduler
 void os_yield(void);
+void os_idle(void);
+void os_sleep(size_t ticks);
+
+// Blocks a task
+void _os_task_freeze(thrd_t *process);
+
+// Unblocks a task
+void _os_task_unfreeze(thrd_t *process);
 
 // Error handler for the kernel
 void os_panic(int error);

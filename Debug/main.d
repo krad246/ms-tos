@@ -29,6 +29,13 @@ main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stddef.h
 main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/pool.h
 main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/slist.h
 main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h
+main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/semaphore.h
+main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/os.h
+main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/queue.h
+main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdlib.h
+main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdarg.h
+main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/bsem_pool.h
+main.obj: C:/Users/krad2/workspace_v8/ms-tos-refactor/barrier.h
 
 ../main.c: 
 C:/Users/krad2/workspace_v8/ms-tos-refactor/os.h: 
@@ -59,3 +66,10 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stddef.h:
 C:/Users/krad2/workspace_v8/ms-tos-refactor/pool.h: 
 C:/Users/krad2/workspace_v8/ms-tos-refactor/slist.h: 
 C:/Users/krad2/workspace_v8/ms-tos-refactor/thread.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/semaphore.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/os.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/queue.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdlib.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-msp430_19.6.0.STS/include/stdarg.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/bsem_pool.h: 
+C:/Users/krad2/workspace_v8/ms-tos-refactor/barrier.h: 

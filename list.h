@@ -202,8 +202,9 @@ static inline int list_iterator_next(struct list_iterator *it, struct list_eleme
 \return 0 if successful
 */
 static inline int list_iterator_next_circular(struct list_iterator *it, struct list_element **element) {
-    if (it->current->next == &it->list->head) it->current->next = it->list->head.next;
+    if (it->current->next == &it->list->head) it->current = it->list->head.next;
     else it->current = it->current->next;
+
     *element = it->current;
     return 0;
 }

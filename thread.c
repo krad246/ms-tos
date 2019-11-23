@@ -78,7 +78,15 @@ int thrd_init(thrd_t *this, int (*routine)(void *), void *arg) {
 
 	status = thrd_context_init(this, (word_t) hw_stackframe_loc, (word_t) arg);
 
+	this->ret_addr = (pc_t) thrd_exit;
+	this->exec_cnt = 0;
+
 	return status;
+}
+
+int thrd_exit(int ret_code) {
+	// need to post on semaphore for thrd_join
+
 }
 
 int thrd_create(int (*routine)(void *), void *arg) {

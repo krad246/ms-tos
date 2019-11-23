@@ -91,6 +91,8 @@ int sw_stackframe_init(sw_stackframe_t *frame, word_t sp, word_t arg);
 typedef struct thrd_t {
 	sw_stackframe_t context;
 	uint16_t stack[STACKSIZE];	// Need to resize to hold thrd_exit address
+	pc_t ret_addr;
+	size_t exec_cnt;
 } thrd_t;
 
 /**
@@ -122,6 +124,12 @@ int thrd_init(thrd_t *this, int (*routine)(void *), void *arg);
  */
 
 int thrd_create(int (*routine)(void *), void *arg);
+
+/**
+ * Exit handler for threads
+ */
+
+int thrd_exit(int ret_code);
 
 #include <task_table.h>
 

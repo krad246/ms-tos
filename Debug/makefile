@@ -10,12 +10,14 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./barrier.obj" \
+"./bsem_pool.obj" \
 "./krnl_swtch.obj" \
 "./main.obj" \
 "./os.obj" \
+"./semaphore.obj" \
 "./task_table.obj" \
 "./thread.obj" \
-"./utils/crc/crc16.obj" \
 "../lnk_msp430f5529.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibmath.a \
@@ -29,9 +31,7 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
--include utils/crc/subdir_vars.mk
 -include subdir_rules.mk
--include utils/crc/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -162,8 +162,8 @@ ms-tos-refactor.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "krnl_swtch.obj" "main.obj" "os.obj" "task_table.obj" "thread.obj" "utils\crc\crc16.obj" 
-	-$(RM) "main.d" "os.d" "task_table.d" "thread.d" "utils\crc\crc16.d" 
+	-$(RM) "barrier.obj" "bsem_pool.obj" "krnl_swtch.obj" "main.obj" "os.obj" "semaphore.obj" "task_table.obj" "thread.obj" 
+	-$(RM) "barrier.d" "bsem_pool.d" "main.d" "os.d" "semaphore.d" "task_table.d" "thread.d" 
 	-$(RM) "krnl_swtch.d" 
 	-@echo 'Finished clean'
 	-@echo ' '

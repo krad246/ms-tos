@@ -60,7 +60,7 @@ int task_create(int (*routine)(void *), void *arg) {
 	if (status < 0) return status;
 
 	// Add to the run queue
-	status = list_append(&task_table, &new_process->elem);
+	status = task_table_push(new_process);
 	return status;
 }
 
@@ -76,7 +76,7 @@ int task_kill(thrd_t *this) {
 
 	// Unlink the task from the run queue
 	int status;
-	status = list_remove(&task_table, &process->elem);
+	status = task_table_pop(process);
 	if (status < 0) return status;
 
 	// Deallocate the task
@@ -85,10 +85,38 @@ int task_kill(thrd_t *this) {
 }
 
 /**
+ * Fetches current task
+ */
+
+const thrd_t *task_current(void) {
+	return (const thrd_t *) run_ptr;
+}
+
+/**
+ * Pushes task to table
+ */
+
+int task_table_push(task_table_element_t *process) {
+	int status;
+	status = list_append(&task_table, &process->elem);
+	return status;
+}
+
+/**
+ * Pops task from table
+ */
+
+int task_table_pop(task_table_element_t *process) {
+	int status;
+	status = list_remove(&task_table, &process->elem);
+	return status;
+}
+
+/**
  * Fetches next task
  */
 
 void task_next(void) {
-	list_iterator_next_circular(&it, &current);						// Move through the circular list
-	run_ptr = CONTAINER_OF(current, task_table_element_t, elem);	// Find the thread matching the node picked
+	list_iterator_next_circular(&it, &current);								// Move through the circular list
+	run_ptr = (thrd_t *) CONTAINER_OF(current, task_table_element_t, elem);	// Find the thread matching the node picked
 }
