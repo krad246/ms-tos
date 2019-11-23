@@ -1,197 +1,147 @@
 /*
  * os.c
  *
- *  Created on: Oct 18, 2019
- *      Author: gta
+ *  Created on: Nov 16, 2019
+ *      Author: krad2
  */
-#include "os.h"
 
-struct context;
-struct tcb;
+#include <os.h>
 
-inline void preempt_trigger(void);
-inline void preempt_init(void);
-void preempt_reset(void);
-extern void preempt_firstrun(void);
-
-/* asm functions */
-extern void context_save(struct context *);
-extern void context_load(struct context *);
-
-void schedule(void);
-int link(void);
-void panic(int) __attribute__ ((noreturn));
-
-uint16_t num_ctx_switches = 0;
-
-struct context {
-  word_t r4, r5, r6, r7, r8, r9, r10, sp, pc;
-};
-
-struct tcb {
-  union {
-    struct context ctx;
-    word_t regs[9];
-  };
-  struct tcb *next;
-  bool available;
-};
-
-struct tcb *run_ptr;
-word_t stacks[NUMTHREADS][STACKSIZE];
-struct tcb tcbs[NUMTHREADS];
-unsigned run_ct;
-
-void
-preempt_init(void)
-{
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
-  WDTCTL = WDT_ADLY_1_9;
-  SFRIE1 |= WDTIE;
+thrd_t _os_idle_thrd;
+size_t task_cnt = 0;
+int _os_idle_hook(void *arg) {
+	_low_power_mode_3();
+	while (1);
 }
 
-void
-preempt_trigger(void)
-{
-  SFRIFG1 |= WDTIFG; // wdt interrupt pending
+void _start_critical(void) {
+	__disable_interrupt();
 }
 
-void
-preempt_reset(void)
-{
-  SFRIFG1 &= ~WDTIFG; // no interrupt pending
-//  WDTCTL = WDTPW | WDTSSEL__SMCLK | WDTTMSEL | WDTCNTCL | WDTIS__512;
-  WDTCTL = WDT_ADLY_1_9;
-  SFRIE1 |= WDTIE;
+void _end_critical(void) {
+	__enable_interrupt();
 }
 
-//void zero_stack(word_t *stack) {
-//  int i;
-//  for (i = 0; i < STACKSIZE; i++)
-//    stack[i] = 0;
-//}
-
-int
-link(void)
-{
-  int i;
-  int ct = 0;
-  struct tcb *prev = 0, *first = 0;
-  if (NUMTHREADS == 0)
-    return ct;
-  for (i = 0; i < NUMTHREADS; i++) {
-    if (!tcbs[i].available) {
-      ct++;
-      if (!first)              // get reference to first to wrap around at the end
-        first = &tcbs[i];
-      if (prev)                // only set previous's next if previous has been set
-        prev->next = &tcbs[i]; // (accounts for first iteration of the loop)
-      prev = &tcbs[i];
-    }
-  }
-  prev->next = first;
-  run_ptr = first;
-  return ct;
+// Set up tick timer
+void os_tick_init(void) {
+	UCSCTL5 = DIVA_1;
+	WDTCTL = WDT_ADLY_1_9;
+	SFRIE1 |= WDTIE;
 }
 
-thread_t
-os_thread_create(void (* routine)(void))
-{
-  int i;
-  __disable_interrupt();
-  for (i = 0; i < NUMTHREADS; ++i) {
-    if (tcbs[i].available) {
-      tcbs[i].available = false;
-      tcbs[i].ctx.sp = (word_t) &stacks[i][STACKSIZE - 1];
-      tcbs[i].ctx.pc = (word_t) routine;
-      (void) link();
-      __enable_interrupt();
-      return i;
-    }
-  }
-  __enable_interrupt();
-  return -1;
+void os_tick_reset(void) {
+	WDTCTL = WDT_ADLY_1_9;
+	SFRIFG1 &= ~WDTIE;
 }
 
-void
-os_init(void)
-{
-  __disable_interrupt(); // disable interrupts until os_run
-  preempt_reset();
-  int i;
-  for (i = 0; i < NUMTHREADS; ++i)
-    tcbs[i].available = 0;
+// Initialize OS
+void os_init(void) {
+	int status;
+
+	_start_critical();
+
+	status = task_table_init();			// Initialize the run queue
+	if (status < 0) os_panic(status);	// If failed, panic
+
+	status = thrd_init(&_os_idle_thrd, _os_idle_hook, NULL);
+	if (status < 0) os_panic(status);
+
+	_end_critical();
 }
 
-void
-os_run(void)
-{
-//  if (run_ct) {
-//    preempt_init();
-//    context_load(&run_ptr->ctx);
-//  } else {
-//    for (;;);
-//  }
-  preempt_init();
-  preempt_firstrun();
-  panic(0);
+// Run the OS
+void os_launch(void) {
+	_start_critical();
+
+	os_schedule();						// Schedule the first task
+	_os_start();						// Branch to the task
+
+	_end_critical();
+
+	os_panic(0);
 }
 
-void
-os_yield(void)
-{
-  preempt_trigger();
+// Create a thread
+int os_thread_create(int (*routine)(void *), void *arg) {
+	int status;
+
+	_start_critical();
+	status = thrd_create(routine, arg);
+	if (status == 0) task_cnt++;
+	_end_critical();
+
+	return status;
 }
 
-void
-os_thread_set(void (*routine1)(void),
-              void (*routine2)(void))
-{
-  tcbs[0].available = false;
-  tcbs[0].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  tcbs[0].ctx.pc = (word_t) routine1;
+void os_sleep(size_t ticks) {
+	_start_critical();
+	volatile const thrd_t *calling_thread = os_get_current_thread();
+//	calling_thread->sleep_cnt = ticks;
+//	queue_wait_push(&sem->wq, &calling_thread); -- replace with sleeping priority queue
 
-  tcbs[1].available = false;
-  tcbs[1].ctx.sp = (word_t) &stacks[0][STACKSIZE - 1];
-  tcbs[1].ctx.pc = (word_t) routine2;
+	_os_task_freeze((thrd_t *) calling_thread);
 
-  tcbs[0].next = &tcbs[1];
-  tcbs[1].next = &tcbs[0];
-  run_ptr = &tcbs[0];
+	os_yield();
+	_end_critical();
 }
 
-void
-schedule(void)
-{
-  run_ptr = run_ptr->next;
+// Pick the next task
+// If no tasks available to run, then set run_ptr to the idle thread
+size_t os_tick_cnt = 0;
+void os_schedule(void) {
+	if (task_cnt == 0) os_idle();
+	else task_next();
+
+	++run_ptr->exec_cnt;
+	os_tick_cnt++;
 }
 
-void
-panic(c)
-  int c;
-{
-  volatile int code = c; // for debug
-  for (;;)
-    ;
+void os_idle(void) {
+	run_ptr = &_os_idle_thrd;
 }
 
-// Watchdog Timer interrupt service routine
-//#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-//#pragma vector=WDT_VECTOR
-//__interrupt
-//#elif defined(__GNUC__)
-//
-//__attribute__ ((interrupt(WDT_VECTOR)))
-//#else
-//#error Compiler not supported!
-//#endif
-//void
-//WDT_ISR(void)
-//{
-//  context_save(&run_ptr->ctx);
-//  schedule();
-//  preempt_reset();
-//  context_load(&run_ptr->ctx);
-//}
 
+// Returns a handle to the current thread
+const thrd_t *os_get_current_thread(void) {
+	return task_current();
+}
 
+// Transfer control to the scheduler
+void os_yield(void) {
+	SFRIFG1 |= WDTIFG;
+}
+
+// Blocks a process
+void _os_task_freeze(thrd_t *process) {
+	volatile task_table_element_t *entry = (task_table_element_t *) process;	// Fetch the calling thread entry
+	struct list_element links;
+	links.prev = entry->elem.prev;
+	links.next = entry->elem.next;
+
+	task_table_pop((task_table_element_t *) process); task_cnt--;				// Pop() removes the links but we need them
+
+	entry->elem.prev = links.prev;												// Retain the references to the list members so that we can transfer control successfully (will never be called again)
+	entry->elem.next = links.next;
+}
+
+// Unblocks a process
+void _os_task_unfreeze(thrd_t *process) {
+	volatile task_table_element_t *entry = (task_table_element_t *) process;	// Fetch the wakeup thread entry
+	struct list_element links;
+	links.prev = entry->elem.prev;
+	links.next = entry->elem.next;
+
+	links.prev->next = (struct list_element *) &entry->elem;					// Relink it into the list
+	links.next->prev = (struct list_element *) &entry->elem;
+
+	task_cnt++;
+}
+
+// Kernel panic
+void os_panic(int error) {
+	_start_critical();
+
+	// Find the faulting application here (fetch return address from stack)
+
+	while (1);
+}
