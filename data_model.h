@@ -10,6 +10,7 @@
 		.define "pop.a", _pop
 		.define "mov.a", _mov
 		.define "add.a", _add
+		.define "sub.a", _sub
 	.else
 		.define "pushm.w", _pushm
 		.define "popm.w", _popm
@@ -17,12 +18,15 @@
 		.define "pop.w", _pop
 		.define "mov.w", _mov
 		.define "add.w", _add
+		.define "sub.w", _sub
 	.endif
 
 	.if $DEFINED( __LARGE_CODE_MODEL__ ) & $DEFINED(__MSP430X__)	; 20-bit function pointers, 16-bit data
 		.define "calla", _call
 		.define "reta", _ret
+		.define "br.a", _br
 	.else
 		.define "call", _call
 		.define "ret", _ret
+		.define "br", _br
 	.endif

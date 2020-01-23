@@ -1,26 +1,32 @@
-			.cdecls "definitions.h"
+			.cdecls C
+			%{
+				#include "definitions.h"
+				#include "os.h"
+			%}
+
 			.include data_model.h
 
             .sect ".text:_isr"
             .align 2
 
 			.global run_ptr
+			.global hw_stackframe_init
 
-			.global _os_switch
-			.global _os_start
+			.global os_sp
+			.global os_start
+			.global os_tick_init
+			.global os_first_task
+
+			.global os_update
 			.global os_schedule
 
-			.global os_tick_init
-			.global os_tick_reset
-
+			.global os_cleanup
 
 ;-------------------------------------------------------------------------------
-; void _save(void)
+; void save(void)
 ; - Saves thread context
 ;-------------------------------------------------------------------------------
-_save: .macro
-		_push &_sp_backup
-
+save: .macro
 		.if $DEFINED(__MSP430X__)
 			_pushm #12, r15	; use pushm to accelerate if possible
 		.else
@@ -37,39 +43,35 @@ _save: .macro
 			_push r5
 			_push r4
 		.endif
+
+		_mov &run_ptr, r15
+		_mov sp, 0(r15)
 	.endm
 
 ;-------------------------------------------------------------------------------
-; void _restore(void)
+; void restore(void)
 ; - Restores thread context
 ;-------------------------------------------------------------------------------
-_restore: .macro
+restore: .macro
+		_mov &run_ptr, r15		; get top of new context block
+		_mov @r15, sp
+
 		.if $DEFINED(__MSP430X__)
 			_popm #12, r15	; use popm to accelerate if possible
 		.else
-			_pop r15
-			_pop r14
-			_pop r13
-			_pop r12
-			_pop r11
-			_pop r10
-			_pop r9
-			_pop r8
-			_pop r7
-			_pop r6
-			_pop r5
 			_pop r4
+			_pop r5
+			_pop r6
+			_pop r7
+			_pop r8
+			_pop r9
+			_pop r10
+			_pop r11
+			_pop r12
+			_pop r13
+			_pop r14
+			_pop r15
 		.endif
-
-		_mov @sp, sp
-	.endm
-
-_stack_unwind: .macro	; unwind stack to hit the base
-	.if $DEFINED( __LARGE_CODE_MODEL__ ) & $DEFINED(__MSP430X__)
-		_add #0x34, sp	; large code model requires larger stackframe
-	.else
-		_add #0x1a, sp
-	.endif
 	.endm
 
 ;-------------------------------------------------------------------------------
@@ -89,51 +91,104 @@ _profile_end: .macro
 		_mov #0, &TA0CTL
 	.endm
 
+os_syscall: .macro
+			_sub #4, sp				; allocate a trapframe
 
+			; prepare arguments for trapframe init - first back up
 
-_os_start:
-			_mov #__STACK_END, sp	; switch to kernel stack to prevent context corruption
+			_push r12				; will contain pointer to start of trapframe
+			_push r13				; will contain program address of caller
+			_push r14				; will contain status register value
+
+			_mov sp, r12			; after backing up original values, load in offset trapframe pointer
+
+			; bring it back to the actual location
+			.if $DEFINED(__LARGE_CODE_MODEL__) | $DEFINED(__LARGE_DATA_MODEL__)
+				_add #12, r12
+			.else
+				_add #6, r12
+			.endif
+
+			_mov 4(r12), r13		; load caller address in as program counter value to program
+			_mov sr, r14			; program in the status register
+
+			; create the trapframe
+			_call #hw_stackframe_init
+
+			; restore original register values
+			_pop r14
+			_pop r13
+			_pop r12
+	.endm
+
+os_preinit: .macro
+		os_syscall
+
+		.if $DEFINED(__MSP430X__)
+			_pushm #12, r15	; use pushm to accelerate if possible
+		.else
+			_push r15
+			_push r14
+			_push r13
+			_push r12
+			_push r11
+			_push r10
+			_push r9
+			_push r8
+			_push r7
+			_push r6
+			_push r5
+			_push r4
+		.endif
+
+		_mov sp, &os_sp
+	.endm
+
+os_start:
+			os_preinit				; back up the pre-os state
+
+			_call #os_first_task	; find the first task and then start it
+			restore					; restore context (r4-r15 first, then sp)
 
 			_call #os_tick_init
-
-			_mov &run_ptr, sp		; get top of new context block
-			_restore				; restore context (r4-r15 first, then sp)
-
-			_call #os_tick_reset
+			
+			nop
 			reti
 
-_os_switch:
-			;_profile_start			; start timer
+os_tick:
+			_profile_start			; start timer
 
-			_mov sp, &_sp_backup	; backup sp (will replace with kernel stack)
-
-			_mov &run_ptr, sp		; move sp to context block
-
-			_stack_unwind			; unwind stack for push
-
-			_save					; save context (r4 - r15 + sp)
-
-			_mov #__STACK_END, sp	; switch to kernel stack to prevent context corruption
+			save					; save context (r4 - r15 + sp)
+			_call #os_update
 			_call #os_schedule		; reschedule
+			restore					; restore context (r4-r15 first, then sp)
 
-			_mov &run_ptr, sp		; get top of new context block
+			_profile_end			; sstop timer
 
-			_restore				; restore context (r4-r15 first, then sp)
+			reti
 
-			;_profile_end			; start timer
+os_cleanup:
+			_mov &os_sp, sp
 
-			_call #os_tick_reset
+		.if $DEFINED(__MSP430X__)
+			_popm #12, r15	; use popm to accelerate if possible
+		.else
+			_pop r4
+			_pop r5
+			_pop r6
+			_pop r7
+			_pop r8
+			_pop r9
+			_pop r10
+			_pop r11
+			_pop r12
+			_pop r13
+			_pop r14
+			_pop r15
+		.endif
+
+			nop
 			reti
 
 			.sect WDT_VECTOR
-			.word _os_switch
-
-			.sect .stack
-			.global __STACK_END
-
-			.data
-_sp_backup:	.word 0
-			.end
-
-
-
+			.word os_tick

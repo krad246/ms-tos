@@ -9,18 +9,7 @@
 #define SEMAPHORE_H_
 
 #include <definitions.h>
-#include <os.h>
-#include <queue.h>
-
-/**
- * Semaphore object using a queue sized to the number of threads
- */
-
-QUEUE(wait, thrd_t *, NUM_THREADS);		// Queue holds thread handles for efficient access
-typedef struct sem_t {
-	int8_t val;
-	struct queue_wait wq;
-} sem_t;
+#include <config.h>
 
 /**
  * Initialize semaphore to value
@@ -39,6 +28,12 @@ int sem_destroy(sem_t *sem);
  */
 
 int sem_wait(sem_t *sem);
+
+/**
+ * Blocking wait() with a time limit
+ */
+
+int sem_timedwait(sem_t *sem, size_t timeout);
 
 /**
  * Non-blocking wait()

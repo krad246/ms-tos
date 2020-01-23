@@ -1,8 +1,8 @@
-#include <os.h>
+#include <thread.h>
 #include <stdarg.h>
-#include <bsem_pool.h>
+#include <os.h>
 #include <semaphore.h>
-#include <barrier.h>
+#include <mutex.h>
 
 void uart_putc(unsigned);
 void uart_puts(char *);
@@ -10,113 +10,106 @@ void uart_send_byte(unsigned char byte);
 void uart_printf(char *format, ...);
 void uart_init(void);
 
-sem_t s;
-barrier_t br;
-volatile int x;
-
 /**
  * main.c
  */
 
+volatile thrd_t *bob;
+sem_t uart_sem;
+mtx_t uart_mtx;
+
 int foo(void *arg) {
 	P1DIR |= BIT0;
-	x=0;
-
-	while (1) {
+	bob = (thrd_t *) thrd_current();
+	int i = 0;
+	while (i++ < 10) {
 		P1OUT ^= BIT0;
-		sem_wait(&s);
-		x ++;
-		sem_post(&s);
-		barrier_wait(&br);
-		_delay_cycles(50000);
+		thrd_sleep(250);
 	}
+
+	return -1;
+}
+int blinker(void *arg) {
+	int i = 0;
+	while (++i < 30) {
+		P4OUT ^= BIT7;
+		thrd_sleep(50);
+	}
+
+//	os_exit();
 }
 
 int bar(void *arg) {
 	P4DIR |= BIT7;
-	while (1) {
+	int status;
+	thrd_join((thrd_t *) bob, &status);
+	int i = 0;
+	while (i++ < 20) {
 		P4OUT ^= BIT7;
-		sem_wait(&s);
-		x--;
-		sem_post(&s);
-
-		barrier_wait(&br);
-		_delay_cycles(50000);
+		thrd_sleep(100);
 	}
+
+	thrd_create(blinker, NULL, 1);
+
+	return 0;
 }
 
 int printer1(void *arg) {
 	uart_init();
 	while (1) {
-		_start_critical();
+		sem_wait(&uart_sem);
+//		mtx_lock(&uart_mtx);
 		uart_printf("hello1\r\n");
-		_end_critical();
-		__delay_cycles(50000);
+//		thrd_sleep(20);
+//		mtx_unlock(&uart_mtx);
+		sem_post(&uart_sem);
 	}
 }
 
 int printer2(void *arg) {
 	uart_init();
+	volatile int status;
 	while (1) {
-		_start_critical();
-		uart_printf("hello2\r\n");
-		_end_critical();
-		_delay_cycles(50000);
+		status = sem_timedwait(&uart_sem, 26);
+//		status = mtx_timedlock(&uart_mtx,25);
+		if (status == 0) {
+			uart_printf("hello2\r\n");
+//			mtx_unlock(&uart_mtx);
+			sem_post(&uart_sem);
+		}
+		thrd_sleep(10);
 	}
 }
 
 int printer3(void *arg) {
 	uart_init();
 	while (1) {
-		_start_critical();
-		uart_printf("%i\r\n", x);
-		_end_critical();
-		_delay_cycles(50000);
+
 	}
 }
 
 int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
 
-	sem_init(&s, 1);
-	barrier_init(&br, 2);
-
 	os_init();
-	os_thread_create(foo, NULL);
-	os_thread_create(bar, NULL);
-	os_thread_create(printer1, NULL);
-	os_thread_create(printer2, NULL);
-	os_thread_create(printer3, NULL);
-	os_launch();
-//
-//	bsem_pool_t x;
-//	bsem_pool_init(&x);
-//
-//	volatile int a2 = bsem_pool_get_active_sem(&x);
-//	volatile int a3 = bsem_pool_alloc(&x);
-//	volatile int a6 = bsem_pool_change_active_sem(&x, 1);
-//	volatile int a4 = bsem_pool_get_active_sem(&x);
-//	volatile int a5 = bsem_pool_alloc(&x);
-//	volatile int a8 = bsem_pool_active_sem_get_val(&x);
-//	volatile int a9 = bsem_pool_active_sem_set_val(&x, 2);
-//	volatile int a10 = bsem_pool_active_sem_set_val(&x, 0);
-//	volatile int a11 = bsem_pool_alloc(&x);
-//	volatile int a12 = bsem_pool_alloc(&x);
-//	volatile int a13 = bsem_pool_alloc(&x);
-//	volatile int a15 = bsem_pool_active_sem_set_val(&x, 0);
-//	volatile int a14 = bsem_pool_free(&x, 3);
-//	volatile int a16 = bsem_pool_free(&x, 2);
-//	volatile int a17 = bsem_pool_free(&x, 1);
-//	volatile int a18 = bsem_pool_free(&x, 0);
-//
-//	bsem_pool_wait(&x);
-//	bsem_pool_wait(&x);
-//	bsem_pool_signal(&x);
-//	bsem_pool_signal(&x);
-//
-//	while(1);
-//
-//	while (1);
+	sem_init(&uart_sem, 1);
+	mtx_init(&uart_mtx);
+
+	thrd_create(foo, NULL, 2);
+	thrd_create(bar, NULL, 1);
+	thrd_create(printer1, NULL, 1);
+	thrd_create(printer2, NULL, 1);
+//	thrd_create(printer3, NULL);
+
+	for (;;) {
+	os_launch(); // -- need to fix rebooting system
+
+	P1OUT &= ~BIT0;
+	P4OUT &= ~BIT7;
+
+	__delay_cycles(30000);
+//	_low_power_mode_3();
+	}
 	return 0;
 }
 

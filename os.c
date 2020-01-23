@@ -1,147 +1,361 @@
 /*
  * os.c
  *
- *  Created on: Nov 16, 2019
+ *  Created on: Jan 17, 2020
  *      Author: krad2
  */
 
 #include <os.h>
 
-thrd_t _os_idle_thrd;
-size_t task_cnt = 0;
-int _os_idle_hook(void *arg) {
-	_low_power_mode_3();
-	while (1);
+/**
+ * OS-allocated variables
+ */
+
+static size_t crit_sec_nest_counter = 0;
+static os_task_t idle_thrd;
+static struct pqueue_sleep sleep_queue;
+void *os_sp;
+static size_t os_tick_cnt;
+
+/**
+ * Memory pool for threads
+ */
+
+static struct pool_task_mem task_mem;
+
+/**
+ * Round robin scheduler variables
+ */
+
+static struct list_iterator it;
+static struct list run_queue;
+thrd_t *run_ptr;
+static size_t task_active_cnt = 0;
+
+static int os_idle(void *arg) {
+	(void) arg;
+
+	for (;;) {
+		_low_power_mode_3();
+	}
 }
 
-void _start_critical(void) {
-	__disable_interrupt();
+static void os_panic(int error) {
+	start_critical();
+	os_idle(NULL);
 }
 
-void _end_critical(void) {
-	__enable_interrupt();
-}
-
-// Set up tick timer
 void os_tick_init(void) {
-	UCSCTL5 = DIVA_1;
 	WDTCTL = WDT_ADLY_1_9;
 	SFRIE1 |= WDTIE;
 }
 
-void os_tick_reset(void) {
-	WDTCTL = WDT_ADLY_1_9;
-	SFRIFG1 &= ~WDTIE;
+void os_tick_deinit(void) {
+	WDTCTL = WDTPW | WDTHOLD;
 }
 
-// Initialize OS
-void os_init(void) {
+/**
+ * Allocates a process from the memory pool
+ */
+
+static os_task_t *talloc(void) {
+	os_task_t *process;
+
+	start_critical();
+	process = pool_task_mem_alloc(&task_mem);
+	end_critical();
+
+	return process;
+}
+
+/**
+ * Frees a process in the memory pool
+ */
+
+static void tfree(os_task_t *process) {
+	start_critical();
+	pool_task_mem_free(&task_mem, process);
+	end_critical();
+}
+
+static int os_add_task_mmang(os_task_t *process) {
+	if (process == NULL) return -1;
+
 	int status;
 
-	_start_critical();
+	if (task_active_cnt == 0) list_iterator_init(&it, &run_queue); // no tasks - list vars have to be rebuilt
 
-	status = task_table_init();			// Initialize the run queue
-	if (status < 0) os_panic(status);	// If failed, panic
+	status = list_append(&run_queue, &process->elem);
+	if (status == -1) return status;
 
-	status = thrd_init(&_os_idle_thrd, _os_idle_hook, NULL);
-	if (status < 0) os_panic(status);
-
-	_end_critical();
+	task_active_cnt++;
+	return status;
 }
 
-// Run the OS
-void os_launch(void) {
-	_start_critical();
+static int os_del_task_mmang(os_task_t *process) {
+	if (process == NULL) return -1;
 
-	os_schedule();						// Schedule the first task
-	_os_start();						// Branch to the task
-
-	_end_critical();
-
-	os_panic(0);
-}
-
-// Create a thread
-int os_thread_create(int (*routine)(void *), void *arg) {
 	int status;
 
-	_start_critical();
-	status = thrd_create(routine, arg);
-	if (status == 0) task_cnt++;
-	_end_critical();
+	struct list_element *current;
+	list_iterator_previous_circular(&it, &current);	// move backwards to avoid iterator invalidation
+
+	status = list_remove(&run_queue, &process->elem);
+	if (status == -1) return status;
+
+	task_active_cnt--;
+	return status;
+}
+
+static int os_add_task(os_task_t *process) {
+	int status;
+
+	start_critical();
+
+	status = os_add_task_mmang(process);
+
+	end_critical();
 
 	return status;
 }
 
-void os_sleep(size_t ticks) {
-	_start_critical();
-	volatile const thrd_t *calling_thread = os_get_current_thread();
-//	calling_thread->sleep_cnt = ticks;
-//	queue_wait_push(&sem->wq, &calling_thread); -- replace with sleeping priority queue
+static int os_del_task(os_task_t *process) {
+	int status;
 
-	_os_task_freeze((thrd_t *) calling_thread);
+	start_critical();
 
-	os_yield();
-	_end_critical();
+	status = os_del_task_mmang(process);
+
+	end_critical();
+
+	return status;
 }
 
-// Pick the next task
-// If no tasks available to run, then set run_ptr to the idle thread
-size_t os_tick_cnt = 0;
-void os_schedule(void) {
-	if (task_cnt == 0) os_idle();
-	else task_next();
+static int os_mem_init(void) {
+	start_critical();
 
-	++run_ptr->exec_cnt;
-	os_tick_cnt++;
+	int status;
+	status = pool_task_mem_init(&task_mem);	// Initialize memory pool and run queue for future allocations
+	if (status < 0) return status;
+
+	status = list_init(&run_queue);
+	if (status < 0) return status;
+
+	status = list_iterator_init(&it, &run_queue);
+
+	end_critical();
+	return status;
 }
 
-void os_idle(void) {
-	run_ptr = &_os_idle_thrd;
+os_task_t *os_task_create(int (*routine)(void *), void *arg) {
+	start_critical();
+
+	// Allocate process (or at least try to)
+	os_task_t *new_process = talloc();
+	if (new_process == NULL) return NULL;	// OutOfMemory
+
+	int status;
+
+	// Initialize its other members for the run queue
+	status = list_element_init(&new_process->elem);
+	if (status < 0) return NULL;
+
+	// Add to the run queue
+	status = os_add_task(new_process);
+	if (status < 0) return NULL;
+
+	end_critical();
+
+	return new_process;
 }
 
-
-// Returns a handle to the current thread
-const thrd_t *os_get_current_thread(void) {
-	return task_current();
-}
-
-// Transfer control to the scheduler
-void os_yield(void) {
+static void os_task_yield(void) {
 	SFRIFG1 |= WDTIFG;
 }
 
-// Blocks a process
-void _os_task_freeze(thrd_t *process) {
-	volatile task_table_element_t *entry = (task_table_element_t *) process;	// Fetch the calling thread entry
-	struct list_element links;
-	links.prev = entry->elem.prev;
-	links.next = entry->elem.next;
+const thrd_t *os_task_current(void) {
+	thrd_t *curr;
 
-	task_table_pop((task_table_element_t *) process); task_cnt--;				// Pop() removes the links but we need them
+	start_critical();
+	curr = run_ptr;
+	end_critical();
 
-	entry->elem.prev = links.prev;												// Retain the references to the list members so that we can transfer control successfully (will never be called again)
-	entry->elem.next = links.next;
+	return curr;
 }
 
-// Unblocks a process
-void _os_task_unfreeze(thrd_t *process) {
-	volatile task_table_element_t *entry = (task_table_element_t *) process;	// Fetch the wakeup thread entry
-	struct list_element links;
-	links.prev = entry->elem.prev;
-	links.next = entry->elem.next;
+__attribute__((noreturn)) void os_task_kill(void) {
+	start_critical();
 
-	links.prev->next = (struct list_element *) &entry->elem;					// Relink it into the list
-	links.next->prev = (struct list_element *) &entry->elem;
+	os_task_t *process = (os_task_t *) os_task_current();
 
-	task_cnt++;
+	os_del_task(process);
+	tfree(process);
+	os_task_yield();
+
+	end_critical();
+
+	for (;;);
 }
 
-// Kernel panic
-void os_panic(int error) {
-	_start_critical();
+void os_task_pause(thrd_t *thrd) {
+	start_critical();
 
-	// Find the faulting application here (fetch return address from stack)
+	os_del_task((os_task_t *) thrd);
+	os_task_yield();
 
-	while (1);
+	end_critical();
+}
+
+void os_task_unpause(thrd_t *thrd) {
+	start_critical();
+	os_add_task((os_task_t *) thrd);
+	end_critical();
+}
+
+void os_update(void) {
+//	os_tick_cnt++;
+	const size_t cleanup_thresh = 0 ;// (sleep_queue.count * 3) / 4;
+	while (sleep_queue.count > cleanup_thresh && --sleep_queue.storage[1].priority <= 0) {
+		struct sleep_deadline deadline;
+		pqueue_sleep_pop(&sleep_queue, &deadline);
+		os_add_task_mmang((os_task_t *) deadline.data);
+
+		struct pqueue_sleep_node *next_deadline = &sleep_queue.storage[1];
+		next_deadline->priority -= deadline.ticks;
+	}
+}
+
+void os_first_task(void) {
+	#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+	struct list_element *current;
+	list_iterator_next_circular(&it, &current);
+	run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+}
+
+static void os_next(void) {
+//	if (--run_ptr->working_prio == 0) {
+//		run_ptr->working_prio = run_ptr->fixed_prio;
+//
+//		#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+//		struct list_element *current;
+//		list_iterator_next_circular(&it, &current);
+//		run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+//	}
+//
+	#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+	struct list_element *current;
+	list_iterator_next_circular(&it, &current);
+	run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+}
+
+void os_schedule(void) {
+	if (task_active_cnt > 0) os_next();
+	else run_ptr = (thrd_t *) &idle_thrd;
+}
+
+size_t os_time(void) {
+	size_t ticks;
+
+	start_critical();
+	ticks = os_tick_cnt;
+	end_critical();
+
+	return ticks;
+}
+
+void os_task_sleep(thrd_t *caller, size_t ticks) {
+	start_critical();
+
+	if (ticks == 0) {
+		os_task_yield();
+	} else {
+		struct sleep_deadline deadline = { caller, ticks };
+		pqueue_sleep_push(&sleep_queue, ticks, &deadline);
+
+		caller->working_prio = caller->fixed_prio;	// reset the caller's time slice
+		os_task_pause(caller);
+	}
+
+	end_critical();
+}
+
+void os_task_exit(int ret_code) {
+	start_critical();
+
+	thrd_t *this = (thrd_t *) os_task_current();
+
+	// signal all of the threads on the wait queue
+	while (queue_wait_count(&this->join_sem.wq) > 0) {
+		// identify the thread to wake up
+		volatile thrd_t *wakeup_thrd;
+		queue_wait_back(&this->join_sem.wq, &wakeup_thrd);
+
+		// write your return code to the private data section of the thread that we are going to wake up
+		int *thrd_join_ret_val = (int *) &wakeup_thrd->mbox;
+		*thrd_join_ret_val = ret_code;
+
+		// wake it up
+		extern int sem_post(sem_t *sem);
+		sem_post(&this->join_sem);
+	}
+
+	end_critical();
+}
+
+void os_task_join(thrd_t *other, int * const ret_code) {
+	const thrd_t *curr_thrd = os_task_current();
+	extern int sem_wait(sem_t *s);
+	sem_wait(&other->join_sem);
+	*ret_code = curr_thrd->mbox;
+}
+
+int os_task_detach(thrd_t *thrd) {
+	return 0;
+}
+
+void start_critical(void) {
+	__disable_interrupt();
+	crit_sec_nest_counter++;
+}
+
+void end_critical(void) {
+	if (crit_sec_nest_counter > 0) {
+		crit_sec_nest_counter--;
+
+		if (crit_sec_nest_counter == 0) {
+			__enable_interrupt();
+		}
+	}
+}
+
+void os_init(void) {
+	int status;
+
+	start_critical();
+
+	status = os_mem_init();
+	OS_ASSERT(status);
+
+	extern int thrd_init(thrd_t *, int (*)(void *), void *, size_t);
+	status = thrd_init((thrd_t *) &idle_thrd, os_idle, NULL, 1);
+	OS_ASSERT(status);
+
+	pqueue_sleep_init(&sleep_queue);
+
+	end_critical();
+}
+
+void os_launch(void) {
+	extern void os_start(void);
+	os_start();
+}
+
+__attribute__((noreturn)) void os_exit(void) {
+	__disable_interrupt();
+	os_tick_deinit();
+
+	extern void os_cleanup(void);
+	os_cleanup();
+
+	for (;;);
 }

@@ -6,12 +6,13 @@
  */
 
 #include <barrier.h>
+#include <os.h>
 
 int barrier_init(barrier_t *barrier, size_t value) {
 	if (!barrier) return -1;
 	if (value > NUM_THREADS) return -1;
 
-	_start_critical();
+	start_critical();
 
 	barrier->count = 0;
 	barrier->val = value;
@@ -19,12 +20,12 @@ int barrier_init(barrier_t *barrier, size_t value) {
 	sem_init(&barrier->turnstile1, 0);
 	sem_init(&barrier->turnstile2, 0);
 
-	_end_critical();
+	end_critical();
 
 	return 0;
 }
 
-void phase1_barrier(barrier_t *barrier) {
+static void phase1_barrier(barrier_t *barrier) {
 	sem_wait(&barrier->mutex);
 
 	if (++barrier->count == barrier->val) {
@@ -36,7 +37,7 @@ void phase1_barrier(barrier_t *barrier) {
 	sem_wait(&barrier->turnstile1);
 }
 
-void phase2_barrier(barrier_t *barrier) {
+static void phase2_barrier(barrier_t *barrier) {
 	sem_wait(&barrier->mutex);
 
 	if (--barrier->count == 0) {
@@ -60,7 +61,7 @@ int barrier_wait(barrier_t *barrier) {
 int barrier_destroy(barrier_t *barrier) {
 	if (!barrier) return -1;
 
-	_start_critical();
+	start_critical();
 
 	barrier->count = 0;
 	barrier->val = 0;
@@ -68,7 +69,7 @@ int barrier_destroy(barrier_t *barrier) {
 	sem_destroy(&barrier->turnstile1);
 	sem_destroy(&barrier->turnstile2);
 
-	_end_critical();
+	end_critical();
 
 	return 0;
 }

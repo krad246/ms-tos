@@ -1,9 +1,8 @@
 #include <thread.h>
+#include <semaphore.h>
+#include <os.h>
 
-int hw_stackframe_init(hw_stackframe_t *frame, pc_t pc, word_t sr) {
-	if (frame == 0) return -1;	// InvalidArgument
-	if (pc == 0) return -1;	// InvalidArgument
-
+void hw_stackframe_init(hw_stackframe_t *frame, pc_t pc, word_t sr) {
 	#if defined(__LARGE_CODE_MODEL__)
 		unsigned int pc_high_ = (pc & 0xF0000) >> 16;	// PC[19:16]
 		unsigned int pc_low_ = pc & 0xFFFF;				// PC[15:0]
@@ -16,79 +15,130 @@ int hw_stackframe_init(hw_stackframe_t *frame, pc_t pc, word_t sr) {
 		frame->pc = pc & 0xFFFF;
 		frame->sr = sr & 0xFF;
 	#endif
-
-	return 0;
 }
 
-int sw_stackframe_init(sw_stackframe_t *frame, word_t sp, word_t arg) {
-	if (frame == 0) return -1; // InvalidArgument
-	if (sp == 0) return -1; // InvalidArgument
-
+static void sw_stackframe_init(sw_stackframe_t *frame, word_t arg) {
 	// Zero-initialize the stack, set the stack pointer to the location of the HW stack frame, and set the argument pointer
 	memset(frame, 0, sizeof(sw_stackframe_t));
-	frame->sp = sp;
 	frame->r12 = arg;
-
-	return 0;
 }
 
-const uint8_t *thrd_stack_base(thrd_t *this) {
+static const uint8_t *thrd_stack_base(thrd_t *this) {
 	const uint16_t sz = sizeof(this->stack) / sizeof(*this->stack);
 	const uint16_t *stack_top = this->stack;
 	return (const uint8_t *) (stack_top + sz);
 }
 
-int thrd_stack_init(thrd_t *this, pc_t pc) {
+static int thrd_stack_init(thrd_t *this, pc_t pc, word_t arg) {
 	if (this == NULL) return -1; // InvalidArgument
 	if (pc == 0) return -1; // InvalidArgument
 
 	memset(this->stack, 0, sizeof(this->stack));
 
-	const uint8_t *stack_bottom = thrd_stack_base(this);
+	const uint8_t *stack_base = (uint8_t *) thrd_stack_base(this);
 
-	// need to also add thrd_exit return address here
-	const uint16_t hw_stackframe_offset = sizeof(hw_stackframe_t);
-	uint8_t *hw_stackframe_loc = (uint8_t *) (stack_bottom - hw_stackframe_offset);
+	const size_t hw_sf_offs = sizeof(hw_stackframe_t);
+	const size_t sw_sf_offs = sizeof(sw_stackframe_t);
 
-	int status;
-	status = hw_stackframe_init((hw_stackframe_t *) hw_stackframe_loc, pc, GIE);
+	const uint8_t *hw_sf_start = stack_base - hw_sf_offs;
+	const uint8_t *sw_sf_start = stack_base - (hw_sf_offs + sw_sf_offs);
 
-	return status;
+	hw_stackframe_init((hw_stackframe_t *) hw_sf_start, pc, GIE);
+	sw_stackframe_init((sw_stackframe_t *) sw_sf_start, arg);
+	this->sp = (word_t) sw_sf_start;
+
+	return 0;
 }
 
-int thrd_context_init(thrd_t *this, word_t sp, word_t arg) {
-	if (this == NULL) return -1;
-	if (sp == 0) return -1;
-
-	int status;
-	status = sw_stackframe_init(&this->context, sp, arg);
-
-	return status;
+static void thrd_kill(void) {
+	extern void os_task_kill(void);
+	os_task_kill();
 }
 
-int thrd_init(thrd_t *this, int (*routine)(void *), void *arg) {
+static void thrd_exit(int ret_code) {
+	extern void os_task_exit(int ret_code);
+	os_task_exit(ret_code);
+	thrd_kill();
+}
+
+int thrd_init(thrd_t *this, int (*routine)(void *), void *arg, size_t priority) {
+	
 	int status;
 
-	status = thrd_stack_init(this, (pc_t) routine);
+	/**
+	 * Set up thread stack
+	 */
+
+	status = thrd_stack_init(this, (pc_t) routine, (word_t) arg);
 	if (status < 0) return status;
 
-	const uint8_t *stack_bottom = thrd_stack_base(this);
-	const uint16_t hw_stackframe_offset = sizeof(hw_stackframe_t);
-	uint8_t *hw_stackframe_loc = (uint8_t *) (stack_bottom - hw_stackframe_offset);
-
-	status = thrd_context_init(this, (word_t) hw_stackframe_loc, (word_t) arg);
+	/**
+	 * Add exit handler to thread
+	 */
 
 	this->ret_addr = (pc_t) thrd_exit;
-	this->exec_cnt = 0;
+
+	/**
+	 * Initialize the semaphore that other threads can wait on
+	 */
+
+	sem_init(&this->join_sem, 0);
+
+	/**
+	 * Set the priority levels for WRR scheduling
+	 */
+
+	this->fixed_prio = priority;
+	this->working_prio = priority;
 
 	return status;
 }
 
-int thrd_exit(int ret_code) {
-	// need to post on semaphore for thrd_join
+int thrd_create(int (*routine)(void *), void *arg, size_t priority) {
+	if (routine == NULL) return -1;
+	if (priority == 0) return -1;
 
+	int status = 0;
+
+	start_critical();
+
+	extern os_task_t *os_task_create(int (*routine)(void *), void *arg);
+	os_task_t *thrd = os_task_create(routine, arg);
+
+	if (thrd) thrd_init((thrd_t *) thrd, routine, arg, priority);
+	else status = -1;
+
+	end_critical();
+
+	return status;
 }
 
-int thrd_create(int (*routine)(void *), void *arg) {
-	return task_create(routine, arg);
+void thrd_yield(void) {
+	extern void os_task_yield(void);
+	os_task_yield();
+}
+
+void thrd_sleep(size_t ticks) {
+	extern void os_task_sleep(thrd_t *caller, size_t ticks);
+	thrd_t *caller = (thrd_t *) thrd_current();
+	os_task_sleep(caller, ticks);
+}
+
+const thrd_t *thrd_current(void) {
+	extern const thrd_t *os_task_current(void);
+	return os_task_current();
+}
+
+int thrd_equal(thrd_t *lhs, thrd_t *rhs) {
+	return lhs == rhs;
+}
+
+void thrd_join(thrd_t *other, int *const ret_code) {
+	extern int os_task_join(thrd_t *other, int *const ret_code);
+	os_task_join(other, ret_code);
+}
+
+int thrd_detach(thrd_t *thr) {
+	extern int os_task_detach(thrd_t *thr);
+	return os_task_detach(thr);
 }

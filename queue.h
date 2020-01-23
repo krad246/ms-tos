@@ -41,9 +41,9 @@ queue_*_foreach takes a function pointer and pointer to some context and for eac
 #define QUEUE(name, type, size)                                                         \
 struct queue_##name {                                                                   \
     type storage[size];                                                                 \
-    /*index of the read head, initialy 0*/                                              \
+    /*index of the read head, initially 0*/                                             \
     size_t read;                                                                        \
-    /*index of the write head, initialy 0*/                                             \
+    /*index of the write head, initially 0*/                                            \
     size_t write;                                                                       \
     /*number of items in the queue*/                                                    \
     size_t count;                                                                       \
@@ -52,6 +52,7 @@ static inline void queue_##name##_init(volatile struct queue_##name *q) {       
     q->read = 0;                                                                        \
     q->write = 0;                                                                       \
     q->count = 0;                                                                       \
+	memset((void *) q->storage, 0, size * sizeof(type));								\
 }                                                                                       \
 static inline int queue_##name##_push(volatile struct queue_##name *q,                  \
                                       const volatile type *item) {                      \
@@ -77,6 +78,27 @@ static inline int queue_##name##_pop(volatile struct queue_##name *q,           
         return -1;                                                                      \
     }                                                                                   \
 }                                                                                       \
+static inline void queue_##name##_clear(volatile struct queue_##name *q) {              \
+	queue_##name_##init(q);                                                             \
+}            																			\
+static inline int queue_##name##_front(volatile struct queue_##name *q,                 \
+                                     volatile type *item) {                             \
+    if (q->count > 0) {                                                                 \
+    	*item = q->storage[q->read + 1];												\
+        return 0;                                                                       \
+    } else {                                                                            \
+        return -1;                                                                      \
+    }                                                                                   \
+}																						\
+static inline int queue_##name##_back(volatile struct queue_##name *q,                 	\
+                                     volatile type *item) {                             \
+    if (q->count > 0) {                                                                 \
+    	*item = q->storage[q->write + 1];												\
+        return 0;                                                                       \
+    } else {                                                                            \
+        return -1;                                                                      \
+    }                                                                                   \
+}																						\
 static inline size_t queue_##name##_count(const volatile struct queue_##name *q) {      \
     return q->count;                                                                    \
 }                                                                                       \
@@ -88,7 +110,7 @@ static inline void queue_##name##_foreach(volatile struct queue_##name *q,      
     for (i = 0; i < q->count; ++i) {                                             		\
         if (fun(&q->storage[(q->read + i + 1) % size], ctx) != 0) break;                \
     }                                                                                   \
-}
+}																						\
 
 
 #endif //QUEUE_H
