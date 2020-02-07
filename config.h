@@ -9,6 +9,6 @@
 #define CONFIG_H_
 
 #define NUM_THREADS 16
-#define STACKSIZE 40
+#define STACKSIZE 160
 
 #endif /* CONFIG_H_ */

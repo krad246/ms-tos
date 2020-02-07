@@ -41,7 +41,7 @@ static int os_idle(void *arg) {
 	}
 }
 
-static void os_panic(int error) {
+void os_panic(int error) {
 	start_critical();
 	os_idle(NULL);
 }
@@ -228,7 +228,7 @@ void os_task_block(thrd_t *thrd) {
 void os_update(void) {
 	os_tick_cnt++;
 
-	volatile const size_t sq_cleanup_thresh = sleep_queue.count / 2;
+	register volatile const size_t sq_cleanup_thresh = sleep_queue.count / 2;
 	while (sleep_queue.count > sq_cleanup_thresh && --sleep_queue.storage[1].priority <= 0) {
 		struct sleep_deadline deadline;
 		pqueue_sleep_pop(&sleep_queue, &deadline);
@@ -240,7 +240,7 @@ void os_update(void) {
 		next_deadline->data.ticks += deadline.ticks;
 	}
 
-	volatile const size_t t_wq_cleanup_thresh = t_waitqueue.count / 2;
+	register volatile const size_t t_wq_cleanup_thresh = t_waitqueue.count / 2;
 	while (t_waitqueue.count > t_wq_cleanup_thresh && (--t_waitqueue.storage[1].priority <= 0 || t_waitqueue.storage[1].data.data->state == ACTIVE)) {
 		struct sleep_deadline deadline;
 		pqueue_timedwait_pop(&t_waitqueue, &deadline);

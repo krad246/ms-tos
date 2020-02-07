@@ -165,6 +165,7 @@ os_tick:
 
 			_profile_end			; sstop timer
 
+			bic.w #CPUOFF, 0(sp)
 			reti
 
 os_cleanup:
