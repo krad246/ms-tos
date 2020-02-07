@@ -22,7 +22,7 @@ int foo(void *arg) {
 	P1DIR |= BIT0;
 	bob = (thrd_t *) thrd_current();
 	int i = 0;
-	while (i++ < 10) {
+	while (++i < 25) {
 		P1OUT ^= BIT0;
 		thrd_sleep(250);
 	}
@@ -30,13 +30,10 @@ int foo(void *arg) {
 	return -1;
 }
 int blinker(void *arg) {
-	int i = 0;
-	while (++i < 30) {
+	while (1) {
 		P4OUT ^= BIT7;
-		thrd_sleep(50);
+		thrd_sleep(10);
 	}
-
-//	os_exit();
 }
 
 int bar(void *arg) {
@@ -44,7 +41,7 @@ int bar(void *arg) {
 	int status;
 	thrd_join((thrd_t *) bob, &status);
 	int i = 0;
-	while (i++ < 20) {
+	while (++i < 30) {
 		P4OUT ^= BIT7;
 		thrd_sleep(100);
 	}
@@ -56,35 +53,35 @@ int bar(void *arg) {
 
 int printer1(void *arg) {
 	uart_init();
+	int status;
+	int x = 1000;
 	while (1) {
-		sem_wait(&uart_sem);
-//		mtx_lock(&uart_mtx);
-		uart_printf("hello1\r\n");
-//		thrd_sleep(20);
-//		mtx_unlock(&uart_mtx);
-		sem_post(&uart_sem);
+		status = mtx_timedlock(&uart_mtx, 30);
+		if (status == 0) {
+			uart_printf("hello1\r\n");
+			while (x > 0) x--;
+			x = 1000;
+			mtx_unlock(&uart_mtx);
+		}
+
+		thrd_sleep(10);
 	}
 }
 
 int printer2(void *arg) {
 	uart_init();
-	volatile int status;
+	int status;
+	int x = 1000;
 	while (1) {
-		status = sem_timedwait(&uart_sem, 26);
-//		status = mtx_timedlock(&uart_mtx,25);
+		status = mtx_timedlock(&uart_mtx, 50);
 		if (status == 0) {
 			uart_printf("hello2\r\n");
-//			mtx_unlock(&uart_mtx);
-			sem_post(&uart_sem);
+			while (x > 0) x--;
+			x = 10000;
+			mtx_unlock(&uart_mtx);
 		}
+
 		thrd_sleep(10);
-	}
-}
-
-int printer3(void *arg) {
-	uart_init();
-	while (1) {
-
 	}
 }
 
@@ -95,20 +92,18 @@ int main(void) {
 	sem_init(&uart_sem, 1);
 	mtx_init(&uart_mtx);
 
-	thrd_create(foo, NULL, 2);
+	thrd_create(foo, NULL, 1);
 	thrd_create(bar, NULL, 1);
 	thrd_create(printer1, NULL, 1);
-	thrd_create(printer2, NULL, 1);
-//	thrd_create(printer3, NULL);
+	thrd_create(printer2, NULL, 2);
 
 	for (;;) {
-	os_launch(); // -- need to fix rebooting system
+		os_launch(); // -- need to fix rebooting system
 
-	P1OUT &= ~BIT0;
-	P4OUT &= ~BIT7;
+		P1OUT &= ~BIT0;
+		P4OUT &= ~BIT7;
 
-	__delay_cycles(30000);
-//	_low_power_mode_3();
+		__delay_cycles(30000);
 	}
 	return 0;
 }

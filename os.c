@@ -14,8 +14,9 @@
 static size_t crit_sec_nest_counter = 0;
 static os_task_t idle_thrd;
 static struct pqueue_sleep sleep_queue;
+static struct pqueue_timedwait t_waitqueue;
 void *os_sp;
-static size_t os_tick_cnt;
+static size_t os_tick_cnt = 0;
 
 /**
  * Memory pool for threads
@@ -208,20 +209,46 @@ void os_task_pause(thrd_t *thrd) {
 
 void os_task_unpause(thrd_t *thrd) {
 	start_critical();
+
+	thrd->state = ACTIVE;
 	os_add_task((os_task_t *) thrd);
+
+	end_critical();
+}
+
+void os_task_block(thrd_t *thrd) {
+	start_critical();
+
+	thrd->state = BLOCKING;
+	os_task_pause(thrd);
+
 	end_critical();
 }
 
 void os_update(void) {
-//	os_tick_cnt++;
-	const size_t cleanup_thresh = 0 ;// (sleep_queue.count * 3) / 4;
-	while (sleep_queue.count > cleanup_thresh && --sleep_queue.storage[1].priority <= 0) {
+	os_tick_cnt++;
+
+	volatile const size_t sq_cleanup_thresh = sleep_queue.count / 2;
+	while (sleep_queue.count > sq_cleanup_thresh && --sleep_queue.storage[1].priority <= 0) {
 		struct sleep_deadline deadline;
 		pqueue_sleep_pop(&sleep_queue, &deadline);
 		os_add_task_mmang((os_task_t *) deadline.data);
+		deadline.data->state = ACTIVE;
 
 		struct pqueue_sleep_node *next_deadline = &sleep_queue.storage[1];
+		next_deadline->priority -= (deadline.ticks - 1);
+		next_deadline->data.ticks += deadline.ticks;
+	}
+
+	volatile const size_t t_wq_cleanup_thresh = t_waitqueue.count / 2;
+	while (t_waitqueue.count > t_wq_cleanup_thresh && (--t_waitqueue.storage[1].priority <= 0 || t_waitqueue.storage[1].data.data->state == ACTIVE)) {
+		struct sleep_deadline deadline;
+		pqueue_timedwait_pop(&t_waitqueue, &deadline);
+		os_add_task_mmang((os_task_t *) deadline.data);
+
+		struct pqueue_timedwait_node *next_deadline = &t_waitqueue.storage[1];
 		next_deadline->priority -= deadline.ticks;
+		next_deadline->data.ticks += deadline.ticks;
 	}
 }
 
@@ -233,19 +260,14 @@ void os_first_task(void) {
 }
 
 static void os_next(void) {
-//	if (--run_ptr->working_prio == 0) {
-//		run_ptr->working_prio = run_ptr->fixed_prio;
-//
-//		#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
-//		struct list_element *current;
-//		list_iterator_next_circular(&it, &current);
-//		run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
-//	}
-//
-	#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
-	struct list_element *current;
-	list_iterator_next_circular(&it, &current);
-	run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+	if (run_ptr->state == BLOCKING || run_ptr->state == SLEEPING || --run_ptr->working_prio == 0) {
+		run_ptr->working_prio = run_ptr->fixed_prio;
+
+		#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+		struct list_element *current;
+		list_iterator_next_circular(&it, &current);
+		run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+	}
 }
 
 void os_schedule(void) {
@@ -264,19 +286,39 @@ size_t os_time(void) {
 }
 
 void os_task_sleep(thrd_t *caller, size_t ticks) {
-	start_critical();
-
 	if (ticks == 0) {
 		os_task_yield();
 	} else {
+		start_critical();
+
 		struct sleep_deadline deadline = { caller, ticks };
 		pqueue_sleep_push(&sleep_queue, ticks, &deadline);
 
+		caller->state = SLEEPING;
 		caller->working_prio = caller->fixed_prio;	// reset the caller's time slice
+
+		end_critical();
+
 		os_task_pause(caller);
 	}
+}
 
-	end_critical();
+void os_task_timedwait(thrd_t *caller, size_t ticks) {
+	if (ticks == 0) {
+		os_task_yield();
+	} else {
+		start_critical();
+
+		struct sleep_deadline deadline = { caller, ticks };
+		pqueue_timedwait_push(&t_waitqueue, ticks, &deadline);
+
+		caller->state = SLEEPING;
+		caller->working_prio = caller->fixed_prio;	// reset the caller's time slice
+
+		end_critical();
+
+		os_task_pause(caller);
+	}
 }
 
 void os_task_exit(int ret_code) {
@@ -341,6 +383,7 @@ void os_init(void) {
 	OS_ASSERT(status);
 
 	pqueue_sleep_init(&sleep_queue);
+	pqueue_timedwait_init(&t_waitqueue);
 
 	end_critical();
 }

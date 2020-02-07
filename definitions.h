@@ -130,6 +130,7 @@ struct sleep_deadline {
 };
 
 PQUEUE(sleep, struct sleep_deadline, NUM_THREADS);
+PQUEUE(timedwait, struct sleep_deadline, NUM_THREADS);
 
 /**
  * Thread struct: contains context and data stack
@@ -151,8 +152,11 @@ typedef struct thrd_t {
 
 	int mbox;
 
+	size_t base_prio;
 	size_t fixed_prio;
 	size_t working_prio;
+
+	thrd_state_t state;
 } thrd_t;
 
 /**

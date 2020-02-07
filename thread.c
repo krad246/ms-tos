@@ -88,8 +88,14 @@ int thrd_init(thrd_t *this, int (*routine)(void *), void *arg, size_t priority) 
 	 * Set the priority levels for WRR scheduling
 	 */
 
+	this->base_prio = priority;
 	this->fixed_prio = priority;
 	this->working_prio = priority;
+
+	/**
+	 * Mark as active
+	 */
+	this->state = ACTIVE;
 
 	return status;
 }
