@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v19.6.0                     
 ******************************************************************************
->> Linked Fri Feb  7 16:59:59 2020
+>> Linked Fri Feb  7 17:02:00 2020
 
 OUTPUT FILE NAME:   <ms-qos.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 00005226
+ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 0000520e
 
 
 MEMORY CONFIGURATION
@@ -20,7 +20,7 @@ MEMORY CONFIGURATION
   INFOA                 00001980   00000080  00000000  00000080  RWIX
   USBRAM                00001c00   00000800  00000000  00000800  RWIX
   RAM                   00002400   00002000  00001044  00000fbc  RWIX
-  FLASH                 00004400   0000bb80  000010aa  0000aad6  RWIX
+  FLASH                 00004400   0000bb80  000010a6  0000aada  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
   INT02                 0000ff84   00000002  00000000  00000002  RWIX
@@ -113,7 +113,7 @@ section   page    origin      length       input sections
                   00004360    00000002     rts430x_sc_sd_eabi.lib : boot.c.obj (.stack)
                   00004362    0000009e     --HOLE--
 
-.text      0    00004400    00000fd4     
+.text      0    00004400    00000fd0     
                   00004400    00000102     main.obj (.text:uart_printf)
                   00004502    000000d6     os.obj (.text:pqueue_sleep_pop)
                   000045d8    000000d6     os.obj (.text:pqueue_timedwait_pop)
@@ -121,86 +121,87 @@ section   page    origin      length       input sections
                   0000474c    00000094     os.obj (.text:os_init)
                   000047e0    0000008e     mutex.obj (.text:mtx_timedlock)
                   0000486e    00000076     thread.obj (.text:thrd_init)
-                  000048e4    00000072     os.obj (.text:pqueue_sleep_push)
-                  00004956    00000072     os.obj (.text:pqueue_timedwait_push)
-                  000049c8    0000006e     rts430x_sc_sd_eabi.lib : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
-                  00004a36    0000006e     os.obj (.text:os_task_create)
-                  00004aa4    0000006c     main.obj (.text:main)
-                  00004b10    0000006c     mutex.obj (.text:mtx_unlock)
-                  00004b7c    00000062     os.obj (.text:os_del_task)
-                  00004bde    0000005a     main.obj (.text:xtoa)
-                  00004c38    00000056     os.obj (.text:os_schedule)
-                  00004c8e    00000056     os.obj (.text:os_task_exit)
-                  00004ce4    00000052     rts430x_sc_sd_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
-                  00004d36    00000052     os.obj (.text:os_task_kill)
-                  00004d88    00000052     os.obj (.text:os_task_sleep)
-                  00004dda    00000052     os.obj (.text:os_task_timedwait)
-                  00004e2c    0000004e     os.obj (.text:os_add_task_mmang)
-                  00004e7a    00000040     semaphore.obj (.text:sem_wait)
-                  00004eba    0000003e     main.obj (.text:bar)
-                  00004ef8    0000003e     thread.obj (.text:thrd_create)
-                  00004f36    0000003c     main.obj (.text:uart_init)
-                  00004f72    0000003a     semaphore.obj (.text:sem_init)
-                  00004fac    00000038     semaphore.obj (.text:sem_post)
-                  00004fe4    00000034     main.obj (.text:printer1)
-                  00005018    00000034     main.obj (.text:printer2)
-                  0000504c    00000032     mutex.obj (.text:mtx_init)
-                  0000507e    00000028     main.obj (.text:foo)
-                  000050a6    00000026     os.obj (.text:os_task_block)
-                  000050cc    00000026     mutex.obj (.text:queue_wait_push)
-                  000050f2    00000026     semaphore.obj (.text:queue_wait_push)
-                  00005118    00000024     os.obj (.text:os_task_pause)
-                  0000513c    00000024     os.obj (.text:os_task_unpause)
-                  00005160    00000024     mutex.obj (.text:queue_wait_pop)
-                  00005184    00000024     semaphore.obj (.text:queue_wait_pop)
-                  000051a8    00000022     os.obj (.text:os_first_task)
-                  000051ca    00000020     os.obj (.text:os_add_task)
-                  000051ea    00000020     os.obj (.text:os_task_join)
-                  0000520a    0000001c     main.obj (.text:USCI_A1_ISR)
-                  00005226    0000001c     rts430x_sc_sd_eabi.lib : boot.c.obj (.text:_c_int00_noargs)
-                  00005242    0000001c     os.obj (.text:os_task_current)
-                  0000525e    00000018     os.obj (.text:queue_wait_back)
-                  00005276    00000018     main.obj (.text:uart_puts)
-                  0000528e    00000016     mutex.obj (.text:queue_wait_init)
-                  000052a4    00000016     semaphore.obj (.text:queue_wait_init)
-                  000052ba    00000014     os.obj (.text:end_critical)
-                  000052ce    00000014     rts430x_sc_sd_eabi.lib : memset.c.obj (.text:memset)
-                  000052e2    00000014     os.obj (.text:os_panic)
-                  000052f6    00000014     main.obj (.text:puth)
-                  0000530a    00000014     rts430x_sc_sd_eabi.lib : mult16_f5hw.asm.obj (.text)
-                  0000531e    00000012     main.obj (.text:blinker)
-                  00005330    00000012     rts430x_sc_sd_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
-                  00005342    00000012                            : memcpy.c.obj (.text:memcpy)
-                  00005354    00000012     thread.obj (.text:thrd_sleep)
-                  00005366    0000000e     os.obj (.text:pqueue_sleep_init)
-                  00005374    0000000e     os.obj (.text:pqueue_timedwait_init)
-                  00005382    0000000c     thread.obj (.text:hw_stackframe_init)
-                  0000538e    0000000c     os.obj (.text:os_idle)
-                  0000539a    0000000c     os.obj (.text:os_tick_init)
-                  000053a6    0000000a     os.obj (.text:start_critical)
-                  000053b0    00000008     thread.obj (.text:thrd_exit)
-                  000053b8    00000006     rts430x_sc_sd_eabi.lib : exit.c.obj (.text:abort)
-                  000053be    00000006     mutex.obj (.text:queue_wait_count)
-                  000053c4    00000006     os.obj (.text:queue_wait_count)
-                  000053ca    00000004     rts430x_sc_sd_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
-                  000053ce    00000004     thread.obj (.text:thrd_join)
-                  000053d2    00000002     rts430x_sc_sd_eabi.lib : startup.c.obj (.text:_system_post_cinit)
+                  000048e4    00000072     mutex.obj (.text:mtx_unlock)
+                  00004956    00000072     os.obj (.text:pqueue_sleep_push)
+                  000049c8    00000072     os.obj (.text:pqueue_timedwait_push)
+                  00004a3a    0000006e     rts430x_sc_sd_eabi.lib : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
+                  00004aa8    0000006e     os.obj (.text:os_task_create)
+                  00004b16    0000006c     main.obj (.text:main)
+                  00004b82    00000062     os.obj (.text:os_del_task)
+                  00004be4    0000005a     main.obj (.text:xtoa)
+                  00004c3e    00000056     os.obj (.text:os_task_exit)
+                  00004c94    00000052     rts430x_sc_sd_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
+                  00004ce6    00000052     os.obj (.text:os_task_kill)
+                  00004d38    00000052     os.obj (.text:os_task_sleep)
+                  00004d8a    00000052     os.obj (.text:os_task_timedwait)
+                  00004ddc    0000004e     os.obj (.text:os_add_task_mmang)
+                  00004e2a    00000040     semaphore.obj (.text:sem_wait)
+                  00004e6a    0000003e     main.obj (.text:bar)
+                  00004ea8    0000003e     thread.obj (.text:thrd_create)
+                  00004ee6    0000003c     main.obj (.text:uart_init)
+                  00004f22    0000003a     semaphore.obj (.text:sem_init)
+                  00004f5c    00000038     os.obj (.text:os_schedule)
+                  00004f94    00000038     semaphore.obj (.text:sem_post)
+                  00004fcc    00000034     main.obj (.text:printer1)
+                  00005000    00000034     main.obj (.text:printer2)
+                  00005034    00000032     mutex.obj (.text:mtx_init)
+                  00005066    00000028     main.obj (.text:foo)
+                  0000508e    00000026     os.obj (.text:os_task_block)
+                  000050b4    00000026     mutex.obj (.text:queue_wait_push)
+                  000050da    00000026     semaphore.obj (.text:queue_wait_push)
+                  00005100    00000024     os.obj (.text:os_task_pause)
+                  00005124    00000024     os.obj (.text:os_task_unpause)
+                  00005148    00000024     mutex.obj (.text:queue_wait_pop)
+                  0000516c    00000024     semaphore.obj (.text:queue_wait_pop)
+                  00005190    00000022     os.obj (.text:os_change_task)
+                  000051b2    00000020     os.obj (.text:os_add_task)
+                  000051d2    00000020     os.obj (.text:os_task_join)
+                  000051f2    0000001c     main.obj (.text:USCI_A1_ISR)
+                  0000520e    0000001c     rts430x_sc_sd_eabi.lib : boot.c.obj (.text:_c_int00_noargs)
+                  0000522a    0000001c     os.obj (.text:os_task_current)
+                  00005246    00000018     os.obj (.text:queue_wait_back)
+                  0000525e    00000018     main.obj (.text:uart_puts)
+                  00005276    00000016     mutex.obj (.text:queue_wait_init)
+                  0000528c    00000016     semaphore.obj (.text:queue_wait_init)
+                  000052a2    00000014     os.obj (.text:end_critical)
+                  000052b6    00000014     rts430x_sc_sd_eabi.lib : memset.c.obj (.text:memset)
+                  000052ca    00000014     os.obj (.text:os_first_task)
+                  000052de    00000014     os.obj (.text:os_panic)
+                  000052f2    00000014     main.obj (.text:puth)
+                  00005306    00000014     rts430x_sc_sd_eabi.lib : mult16_f5hw.asm.obj (.text)
+                  0000531a    00000012     main.obj (.text:blinker)
+                  0000532c    00000012     rts430x_sc_sd_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
+                  0000533e    00000012                            : memcpy.c.obj (.text:memcpy)
+                  00005350    00000012     thread.obj (.text:thrd_sleep)
+                  00005362    0000000e     os.obj (.text:pqueue_sleep_init)
+                  00005370    0000000e     os.obj (.text:pqueue_timedwait_init)
+                  0000537e    0000000c     thread.obj (.text:hw_stackframe_init)
+                  0000538a    0000000c     os.obj (.text:os_idle)
+                  00005396    0000000c     os.obj (.text:os_tick_init)
+                  000053a2    0000000a     os.obj (.text:start_critical)
+                  000053ac    00000008     thread.obj (.text:thrd_exit)
+                  000053b4    00000006     rts430x_sc_sd_eabi.lib : exit.c.obj (.text:abort)
+                  000053ba    00000006     mutex.obj (.text:queue_wait_count)
+                  000053c0    00000006     os.obj (.text:queue_wait_count)
+                  000053c6    00000004     rts430x_sc_sd_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
+                  000053ca    00000004     thread.obj (.text:thrd_join)
+                  000053ce    00000002     rts430x_sc_sd_eabi.lib : startup.c.obj (.text:_system_post_cinit)
 
 .text:_isr 
-*          0    000053d4    0000007a     
-                  000053d4    00000072     krnl_swtch.obj (.text:_isr)
-                  00005446    00000008     rts430x_sc_sd_eabi.lib : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
+*          0    000053d0    0000007a     
+                  000053d0    00000072     krnl_swtch.obj (.text:_isr)
+                  00005442    00000008     rts430x_sc_sd_eabi.lib : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
 
-.const     0    0000544e    0000004c     
-                  0000544e    00000028     main.obj (.const:dv)
-                  00005476    00000014     main.obj (.const:.string)
-                  0000548a    00000010     main.obj (.const:.string:hex$1)
+.const     0    0000544a    0000004c     
+                  0000544a    00000028     main.obj (.const:dv)
+                  00005472    00000014     main.obj (.const:.string)
+                  00005486    00000010     main.obj (.const:.string:hex$1)
 
-.cinit     0    0000549a    00000010     
-                  0000549a    00000007     (.cinit..data.load) [load image, compression = lzss]
-                  000054a1    00000001     --HOLE-- [fill = 0]
-                  000054a2    00000004     (__TI_handler_table)
-                  000054a6    00000004     (__TI_cinit_table)
+.cinit     0    00005496    00000010     
+                  00005496    00000007     (.cinit..data.load) [load image, compression = lzss]
+                  0000549d    00000001     --HOLE-- [fill = 0]
+                  0000549e    00000004     (__TI_handler_table)
+                  000054a2    00000004     (__TI_cinit_table)
 
 .binit     0    00004400    00000000     
 
@@ -289,14 +290,14 @@ MODULE SUMMARY
        Module                       code   ro data   rw data
        ------                       ----   -------   -------
     .\
-       os.obj                       2034   0         3922   
+       os.obj                       2024   0         3922   
        main.obj                     812    78        82     
-       mutex.obj                    402    0         0      
+       mutex.obj                    408    0         0      
        semaphore.obj                274    0         0      
        thread.obj                   222    0         0      
        krnl_swtch.obj               114    2         0      
     +--+----------------------------+------+---------+---------+
-       Total:                       3858   80        4004   
+       Total:                       3854   80        4004   
                                                             
     C:\ti\ccsv8\tools\compiler\ti-cgt-msp430_19.6.0.STS\lib\rts430x_sc_sd_eabi.lib
        copy_decompress_lzss.c.obj   110    0         0      
@@ -336,18 +337,18 @@ MODULE SUMMARY
        Stack:                       0      0         160    
        Linker Generated:            0      15        0      
     +--+----------------------------+------+---------+---------+
-       Grand Total:                 4174   137       4164   
+       Grand Total:                 4170   137       4164   
 
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 000054a6 records: 1, size/record: 4, table size: 4
-	.data: load addr=0000549a, load size=00000007 bytes, run addr=0000339e, run size=00000006 bytes, compression=lzss
+__TI_cinit_table @ 000054a2 records: 1, size/record: 4, table size: 4
+	.data: load addr=00005496, load size=00000007 bytes, run addr=0000339e, run size=00000006 bytes, compression=lzss
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 000054a2 records: 2, size/record: 2, table size: 4
+__TI_handler_table @ 0000549e records: 2, size/record: 2, table size: 4
 	index: 0, handler: __TI_decompress_lzss
 	index: 1, handler: __TI_decompress_none
 
@@ -438,7 +439,7 @@ address   name
 00000732  ADC12MEM9                              
 00000733  ADC12MEM9_H                            
 00000732  ADC12MEM9_L                            
-000053b8  C$$EXIT                                
+000053b4  C$$EXIT                                
 000008c0  CBCTL0                                 
 000008c1  CBCTL0_H                               
 000008c0  CBCTL0_L                               
@@ -1084,20 +1085,20 @@ address   name
 00000932  USBVECINT                              
 00000933  USBVECINT_H                            
 00000932  USBVECINT_L                            
-0000520a  USCI_A1_ISR                            
+000051f2  USCI_A1_ISR                            
 0000015c  WDTCTL                                 
 0000015d  WDTCTL_H                               
 0000015c  WDTCTL_L                               
 00004400  __STACK_END                            
 000000a0  __STACK_SIZE                           
-000054a6  __TI_CINIT_Base                        
-000054aa  __TI_CINIT_Limit                       
-000054a2  __TI_Handler_Table_Base                
-000054a6  __TI_Handler_Table_Limit               
-00005446  __TI_ISR_TRAP                          
-00004ce4  __TI_auto_init_nobinit_nopinit_hold_wdt
-000049c8  __TI_decompress_lzss                   
-00005330  __TI_decompress_none                   
+000054a2  __TI_CINIT_Base                        
+000054a6  __TI_CINIT_Limit                       
+0000549e  __TI_Handler_Table_Base                
+000054a2  __TI_Handler_Table_Limit               
+00005442  __TI_ISR_TRAP                          
+00004c94  __TI_auto_init_nobinit_nopinit_hold_wdt
+00004a3a  __TI_decompress_lzss                   
+0000532c  __TI_decompress_none                   
 0000ffd2  __TI_int41                             
 0000ffd4  __TI_int42                             
 0000ffd6  __TI_int43                             
@@ -1124,61 +1125,61 @@ ffffffff  __TI_pprof_out_hndl
 ffffffff  __TI_prof_data_size                    
 ffffffff  __TI_prof_data_start                   
 ffffffff  __c_args__                             
-0000530a  __mspabi_mpyi_f5hw                     
-00005226  _c_int00_noargs                        
+00005306  __mspabi_mpyi_f5hw                     
+0000520e  _c_int00_noargs                        
 0000fffe  _reset_vector                          
 00004360  _stack                                 
-000053d2  _system_post_cinit                     
-000053ca  _system_pre_init                       
-000053b8  abort                                  
-00004eba  bar                                    
-0000531e  blinker                                
+000053ce  _system_post_cinit                     
+000053c6  _system_pre_init                       
+000053b4  abort                                  
+00004e6a  bar                                    
+0000531a  blinker                                
 00003398  bob                                    
-000052ba  end_critical                           
-0000507e  foo                                    
-00005382  hw_stackframe_init                     
-00004aa4  main                                   
-00005342  memcpy                                 
-000052ce  memset                                 
-0000504c  mtx_init                               
+000052a2  end_critical                           
+00005066  foo                                    
+0000537e  hw_stackframe_init                     
+00004b16  main                                   
+0000533e  memcpy                                 
+000052b6  memset                                 
+00005034  mtx_init                               
 000047e0  mtx_timedlock                          
-00004b10  mtx_unlock                             
-0000543c  os_cleanup                             
-000051a8  os_first_task                          
+000048e4  mtx_unlock                             
+00005438  os_cleanup                             
+000052ca  os_first_task                          
 0000474c  os_init                                
-000053d4  os_launch                              
-000052e2  os_panic                               
-00004c38  os_schedule                            
+000053d0  os_launch                              
+000052de  os_panic                               
+00004f5c  os_schedule                            
 0000339a  os_sp                                  
-000053d4  os_start                               
-000050a6  os_task_block                          
-00004a36  os_task_create                         
-00005242  os_task_current                        
-00004c8e  os_task_exit                           
-000051ea  os_task_join                           
-00004d36  os_task_kill                           
-00005118  os_task_pause                          
-00004d88  os_task_sleep                          
-00004dda  os_task_timedwait                      
-0000513c  os_task_unpause                        
-0000539a  os_tick_init                           
+000053d0  os_start                               
+0000508e  os_task_block                          
+00004aa8  os_task_create                         
+0000522a  os_task_current                        
+00004c3e  os_task_exit                           
+000051d2  os_task_join                           
+00004ce6  os_task_kill                           
+00005100  os_task_pause                          
+00004d38  os_task_sleep                          
+00004d8a  os_task_timedwait                      
+00005124  os_task_unpause                        
+00005396  os_tick_init                           
 000046ae  os_update                              
-00004fe4  printer1                               
-00005018  printer2                               
+00004fcc  printer1                               
+00005000  printer2                               
 0000339c  run_ptr                                
-00004f72  sem_init                               
-00004fac  sem_post                               
-00004e7a  sem_wait                               
-000053a6  start_critical                         
-00004ef8  thrd_create                            
-00005242  thrd_current                           
+00004f22  sem_init                               
+00004f94  sem_post                               
+00004e2a  sem_wait                               
+000053a2  start_critical                         
+00004ea8  thrd_create                            
+0000522a  thrd_current                           
 0000486e  thrd_init                              
-000053ce  thrd_join                              
-00005354  thrd_sleep                             
-00004f36  uart_init                              
+000053ca  thrd_join                              
+00005350  thrd_sleep                             
+00004ee6  uart_init                              
 00003340  uart_mtx                               
 00004400  uart_printf                            
-00005276  uart_puts                              
+0000525e  uart_puts                              
 00003368  uart_sem                               
 
 
@@ -1929,60 +1930,60 @@ address   name
 0000474c  os_init                                
 000047e0  mtx_timedlock                          
 0000486e  thrd_init                              
-000049c8  __TI_decompress_lzss                   
-00004a36  os_task_create                         
-00004aa4  main                                   
-00004b10  mtx_unlock                             
-00004c38  os_schedule                            
-00004c8e  os_task_exit                           
-00004ce4  __TI_auto_init_nobinit_nopinit_hold_wdt
-00004d36  os_task_kill                           
-00004d88  os_task_sleep                          
-00004dda  os_task_timedwait                      
-00004e7a  sem_wait                               
-00004eba  bar                                    
-00004ef8  thrd_create                            
-00004f36  uart_init                              
-00004f72  sem_init                               
-00004fac  sem_post                               
-00004fe4  printer1                               
-00005018  printer2                               
-0000504c  mtx_init                               
-0000507e  foo                                    
-000050a6  os_task_block                          
-00005118  os_task_pause                          
-0000513c  os_task_unpause                        
-000051a8  os_first_task                          
-000051ea  os_task_join                           
-0000520a  USCI_A1_ISR                            
-00005226  _c_int00_noargs                        
-00005242  os_task_current                        
-00005242  thrd_current                           
-00005276  uart_puts                              
-000052ba  end_critical                           
-000052ce  memset                                 
-000052e2  os_panic                               
-0000530a  __mspabi_mpyi_f5hw                     
-0000531e  blinker                                
-00005330  __TI_decompress_none                   
-00005342  memcpy                                 
-00005354  thrd_sleep                             
-00005382  hw_stackframe_init                     
-0000539a  os_tick_init                           
-000053a6  start_critical                         
-000053b8  C$$EXIT                                
-000053b8  abort                                  
-000053ca  _system_pre_init                       
-000053ce  thrd_join                              
-000053d2  _system_post_cinit                     
-000053d4  os_launch                              
-000053d4  os_start                               
-0000543c  os_cleanup                             
-00005446  __TI_ISR_TRAP                          
-000054a2  __TI_Handler_Table_Base                
-000054a6  __TI_CINIT_Base                        
-000054a6  __TI_Handler_Table_Limit               
-000054aa  __TI_CINIT_Limit                       
+000048e4  mtx_unlock                             
+00004a3a  __TI_decompress_lzss                   
+00004aa8  os_task_create                         
+00004b16  main                                   
+00004c3e  os_task_exit                           
+00004c94  __TI_auto_init_nobinit_nopinit_hold_wdt
+00004ce6  os_task_kill                           
+00004d38  os_task_sleep                          
+00004d8a  os_task_timedwait                      
+00004e2a  sem_wait                               
+00004e6a  bar                                    
+00004ea8  thrd_create                            
+00004ee6  uart_init                              
+00004f22  sem_init                               
+00004f5c  os_schedule                            
+00004f94  sem_post                               
+00004fcc  printer1                               
+00005000  printer2                               
+00005034  mtx_init                               
+00005066  foo                                    
+0000508e  os_task_block                          
+00005100  os_task_pause                          
+00005124  os_task_unpause                        
+000051d2  os_task_join                           
+000051f2  USCI_A1_ISR                            
+0000520e  _c_int00_noargs                        
+0000522a  os_task_current                        
+0000522a  thrd_current                           
+0000525e  uart_puts                              
+000052a2  end_critical                           
+000052b6  memset                                 
+000052ca  os_first_task                          
+000052de  os_panic                               
+00005306  __mspabi_mpyi_f5hw                     
+0000531a  blinker                                
+0000532c  __TI_decompress_none                   
+0000533e  memcpy                                 
+00005350  thrd_sleep                             
+0000537e  hw_stackframe_init                     
+00005396  os_tick_init                           
+000053a2  start_critical                         
+000053b4  C$$EXIT                                
+000053b4  abort                                  
+000053c6  _system_pre_init                       
+000053ca  thrd_join                              
+000053ce  _system_post_cinit                     
+000053d0  os_launch                              
+000053d0  os_start                               
+00005438  os_cleanup                             
+00005442  __TI_ISR_TRAP                          
+0000549e  __TI_Handler_Table_Base                
+000054a2  __TI_CINIT_Base                        
+000054a2  __TI_Handler_Table_Limit               
+000054a6  __TI_CINIT_Limit                       
 0000ffd2  __TI_int41                             
 0000ffd4  __TI_int42                             
 0000ffd6  __TI_int43                             

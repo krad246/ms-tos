@@ -155,6 +155,9 @@ int mtx_unlock(mtx_t *mtx) {
 	extern const thrd_t *os_task_current(void);
 	if (mtx->holder != os_task_current()) {
 		status = -1;
+
+		extern void os_panic(int);
+		os_panic(status);
 	} else {
 		volatile thrd_t *curr_holder = mtx->holder;
 

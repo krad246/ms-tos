@@ -252,7 +252,7 @@ void os_update(void) {
 	}
 }
 
-void os_first_task(void) {
+static void os_change_task(void) {
 	#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 	struct list_element *current;
 	list_iterator_next_circular(&it, &current);
@@ -262,16 +262,17 @@ void os_first_task(void) {
 static void os_next(void) {
 	if (run_ptr->state == BLOCKING || run_ptr->state == SLEEPING || --run_ptr->working_prio == 0) {
 		run_ptr->working_prio = run_ptr->fixed_prio;
-
-		#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
-		struct list_element *current;
-		list_iterator_next_circular(&it, &current);
-		run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+		os_change_task();
 	}
 }
 
 void os_schedule(void) {
 	if (task_active_cnt > 0) os_next();
+	else run_ptr = (thrd_t *) &idle_thrd;
+}
+
+void os_first_task(void) {
+	if (task_active_cnt > 0) os_change_task();
 	else run_ptr = (thrd_t *) &idle_thrd;
 }
 
