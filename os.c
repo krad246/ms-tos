@@ -41,7 +41,7 @@ static int os_idle(void *arg) {
 	}
 }
 
-static void os_panic(int error) {
+void os_panic(int error) {
 	start_critical();
 	os_idle(NULL);
 }
@@ -228,7 +228,7 @@ void os_task_block(thrd_t *thrd) {
 void os_update(void) {
 	os_tick_cnt++;
 
-	volatile const size_t sq_cleanup_thresh = sleep_queue.count / 2;
+	register volatile const size_t sq_cleanup_thresh = sleep_queue.count / 2;
 	while (sleep_queue.count > sq_cleanup_thresh && --sleep_queue.storage[1].priority <= 0) {
 		struct sleep_deadline deadline;
 		pqueue_sleep_pop(&sleep_queue, &deadline);
@@ -240,7 +240,7 @@ void os_update(void) {
 		next_deadline->data.ticks += deadline.ticks;
 	}
 
-	volatile const size_t t_wq_cleanup_thresh = t_waitqueue.count / 2;
+	register volatile const size_t t_wq_cleanup_thresh = t_waitqueue.count / 2;
 	while (t_waitqueue.count > t_wq_cleanup_thresh && (--t_waitqueue.storage[1].priority <= 0 || t_waitqueue.storage[1].data.data->state == ACTIVE)) {
 		struct sleep_deadline deadline;
 		pqueue_timedwait_pop(&t_waitqueue, &deadline);
@@ -252,7 +252,7 @@ void os_update(void) {
 	}
 }
 
-void os_first_task(void) {
+static void os_change_task(void) {
 	#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 	struct list_element *current;
 	list_iterator_next_circular(&it, &current);
@@ -262,16 +262,17 @@ void os_first_task(void) {
 static void os_next(void) {
 	if (run_ptr->state == BLOCKING || run_ptr->state == SLEEPING || --run_ptr->working_prio == 0) {
 		run_ptr->working_prio = run_ptr->fixed_prio;
-
-		#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
-		struct list_element *current;
-		list_iterator_next_circular(&it, &current);
-		run_ptr = (thrd_t *) CONTAINER_OF(current, os_task_t, elem);
+		os_change_task();
 	}
 }
 
 void os_schedule(void) {
 	if (task_active_cnt > 0) os_next();
+	else run_ptr = (thrd_t *) &idle_thrd;
+}
+
+void os_first_task(void) {
+	if (task_active_cnt > 0) os_change_task();
 	else run_ptr = (thrd_t *) &idle_thrd;
 }
 

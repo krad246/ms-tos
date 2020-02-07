@@ -107,7 +107,7 @@ QUEUE(wait, struct thrd_t *, NUM_THREADS);
  */
 
 typedef struct sem_t {
-	int8_t val;
+	int16_t val;
 	struct queue_wait wq;
 } sem_t;
 
@@ -145,7 +145,7 @@ typedef enum thrd_state_t {
 
 typedef struct thrd_t {
 	word_t sp;
-	uint16_t stack[STACKSIZE];
+	uint16_t stack[STACKSIZE / 2];
 
 	pc_t ret_addr;		// Thread exit address at the edge of the stack
 	sem_t join_sem;
