@@ -50,6 +50,53 @@ typedef union port_iframe {
 
 /*-----------------------------------------------------------*/
 
+static inline __attribute__((always_inline)) void port_save_regs() {
+	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
+		#ifdef __MSP430X_LARGE__
+			__asm__ __volatile__("pushm.a #12, r15");	// pushes 15 -> 4
+		#else
+			__asm__ __volatile__("pushm.w #12, r15");
+		#endif
+	#else
+		__asm__ __volatile__("push.w r15");
+		__asm__ __volatile__("push.w r14");
+		__asm__ __volatile__("push.w r13");
+		__asm__ __volatile__("push.w r12");
+		__asm__ __volatile__("push.w r11");
+		__asm__ __volatile__("push.w r10");
+		__asm__ __volatile__("push.w r9");
+		__asm__ __volatile__("push.w r8");
+		__asm__ __volatile__("push.w r7");
+		__asm__ __volatile__("push.w r6");
+		__asm__ __volatile__("push.w r5");
+		__asm__ __volatile__("push.w r4");
+	#endif
+}
+
+static inline __attribute__((always_inline)) void port_restore_regs() {
+	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
+		#ifdef __MSP430X_LARGE__
+				__asm__ __volatile__("popm.a #12, r15");	// pops 4 -> 15
+		#else
+				__asm__ __volatile__("popm.w #12, r15");
+		#endif
+	#else
+		__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_active_thread->sp));
+		__asm__ __volatile__("pop.w r4");
+		__asm__ __volatile__("pop.w r5");
+		__asm__ __volatile__("pop.w r6");
+		__asm__ __volatile__("pop.w r7");
+		__asm__ __volatile__("pop.w r8");
+		__asm__ __volatile__("pop.w r9");
+		__asm__ __volatile__("pop.w r10");
+		__asm__ __volatile__("pop.w r11");
+		__asm__ __volatile__("pop.w r12");
+		__asm__ __volatile__("pop.w r13");
+		__asm__ __volatile__("pop.w r14");
+		__asm__ __volatile__("pop.w r15");
+	#endif
+}
+
 static inline __attribute__((always_inline)) void port_save_context() {
 	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
 		#ifdef __MSP430X_LARGE__
@@ -160,14 +207,11 @@ bool port_interrupts_enabled(void);
 
 /*-----------------------------------------------------------*/
 
-// Task and scheduler utilities
-
-// delete / refactor to port_
-void app_setup_timer_interrupt(void);
+// Task and scheduler utilities_
+void port_setup_timer_interrupt(void);
 
 // tickless will require 2nd timer
 
-// move to thread.h
 port_reg_t *port_init_stack(port_reg_t *ptr_stack_top, thread_fn_t ptr_xcode, void *ptr_fn_args);
 
 void port_sched_start(void);

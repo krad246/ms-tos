@@ -3,15 +3,14 @@
 
 # But do not ignore the core RTOS files...
 !/core
-!/include
-!/compat
-
 /core/*
 !/core/*
 
+!/include
 /include/*
 !/include/*
 
+!/compat
 /compat/*
 !/compat/*
 

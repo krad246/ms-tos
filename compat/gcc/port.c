@@ -132,16 +132,25 @@ port_reg_t *port_init_stack(port_reg_t *ptr_stack_top, thread_fn_t ptr_xcode, vo
 	return ptr_stack_top;
 }
 
-static void port_setup_timer_interrupt(void) {
-	app_setup_timer_interrupt();
-}
+static port_reg_t port_boot_sp = (port_reg_t) NULL;
+void port_sched_start(void) {
 
-void port_start_sched(void) {
-	// save context for spawning spot
-	// setup timer interrupt
+	port_disable_interrupts();
+
+	port_save_regs();
+
+	#ifdef __MSP430X_LARGE__
+		__asm__ __volatile__("mov.a sp, %0" : "=r"(port_boot_sp));
+	#else
+		__asm__ __volatile__("mov.w sp, %0" : "=r"(port_boot_sp));
+	#endif
+
 	port_setup_timer_interrupt();
-	// schedule a new function
+
+	sched_run();
+
 	// restore context into the function
+	port_restore_context();
 
 	// barrier -------------------------
 
@@ -149,9 +158,24 @@ void port_start_sched(void) {
 	// ret
 }
 
-void port_end_sched(void) {
-	// point the stack pointer to the spawning stack top
-	// restore context
+void __attribute__((naked)) port_sched_end(void) {
+
+	port_disable_interrupts();
+
+	#ifdef __MSP430X_LARGE__
+		__asm__ __volatile__("mov.a %0, sp" : : "m"(port_boot_sp));
+	#else
+		__asm__ __volatile__("mov.w %0, sp" : : "m"(port_boot_sp));
+	#endif
+
+	port_restore_regs();
+
+	#ifdef __MSP430X_LARGE__
+		__asm__ __volatile__("reta");
+	#else
+		__asm__ __volatile__("ret");
+	#endif
+
 }
 
 static __attribute__((naked, interrupt(CONFIG_TICK_VECTOR))) void sched_tick_irq(void) {
