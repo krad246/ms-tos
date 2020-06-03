@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "../portable/port_defs.h"
+#include "port_defs.h"
 
 #ifdef __cplusplus
 }

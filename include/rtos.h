@@ -16,7 +16,6 @@ extern "C" {
 #endif
 
 #include "port_config.h"
-#include "rtos_defs.h"
 #include "port.h"
 
 #ifdef __cplusplus
