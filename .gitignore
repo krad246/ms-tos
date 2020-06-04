@@ -14,5 +14,7 @@
 /compat/*
 !/compat/*
 
+!/port_config.h
+
 # And the .gitignore because that's important
 !/.gitignore

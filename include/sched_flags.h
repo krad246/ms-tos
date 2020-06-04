@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 
+#include "port_config.h"
 #include "panic.h"
 
 #ifdef __cplusplus
@@ -30,42 +31,19 @@ extern "C" {
 
 typedef uint16_t sched_flags_t;
 
-static void sched_flags_cs_set(sched_flags_t *ptr_flags, sched_flags_t mask) {
-	*ptr_flags = SCHED_STATUS(*ptr_flags) | SCHED_CS(mask);
-}
+void sched_flags_cs_set(sched_flags_t *ptr_flags, sched_flags_t mask);
 
-static sched_flags_t sched_flags_cs_get(sched_flags_t *ptr_flags) {
-	return SCHED_CS(*ptr_flags);
-}
+sched_flags_t sched_flags_cs_get(sched_flags_t *ptr_flags);
 
-static void sched_flags_cs_increment(sched_flags_t *ptr_flags) {
-	#if (CONFIG_CHECK_CRITICAL_SECTION_VALIDITY == 1)
-		*ptr_flags = SCHED_STATUS(*ptr_flags) | SCHED_CS(*ptr_flags + 1);
-	#else
-		*ptr_flags -= 1;
-	#endif
-}
+void sched_flags_cs_increment(sched_flags_t *ptr_flags);
 
-static void sched_flags_cs_decrement(sched_flags_t *ptr_flags) {
-	#if (CONFIG_CHECK_CRITICAL_SECTION_VALIDITY == 1)
-		*ptr_flags = SCHED_STATUS(*ptr_flags) | SCHED_CS(*ptr_flags - 1);
-	#else
-		*ptr_flags -= 1;
-	#endif
-}
+void sched_flags_cs_decrement(sched_flags_t *ptr_flags);
 
-static void sched_set_status_flags(sched_flags_t *ptr_flags, sched_flags_t mask) {
-	*ptr_flags |= SCHED_STATUS(mask);
-}
+void sched_set_status_flags(sched_flags_t *ptr_flags, sched_flags_t mask);
 
-static void sched_clear_status_flags(sched_flags_t *ptr_flags, sched_flags_t mask) {
-	*ptr_flags &= ~SCHED_STATUS(mask);
-}
+void sched_clear_status_flags(sched_flags_t *ptr_flags, sched_flags_t mask);
 
-static void sched_assign_status_flags(sched_flags_t *ptr_flags, sched_flags_t mask) {
-	sched_clear_flags(ptr_flags, mask);
-	sched_set_flags(ptr_flags, mask);
-}
+void sched_assign_status_flags(sched_flags_t *ptr_flags, sched_flags_t mask);
 
 #ifdef __cplusplus
 }

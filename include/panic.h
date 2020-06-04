@@ -8,8 +8,22 @@
 #ifndef INCLUDE_PANIC_H_
 #define INCLUDE_PANIC_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+typedef enum {
+    PANIC_GENERAL_ERROR,
+    PANIC_SOFT_REBOOT,
+    PANIC_HARD_REBOOT,
+    PANIC_ASSERT_FAIL,
+    PANIC_EXPECT_FAIL,
+    PANIC_SSP,                  /**< stack smashing protector failure */
+    PANIC_UNDEFINED
+} panic_code_t;
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INCLUDE_PANIC_H_ */
