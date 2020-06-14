@@ -5,7 +5,7 @@
  *      Author: krad2
  */
 
-#include "sched.h"
+#include "include/sched.h"
 
 extern bool port_interrupts_enabled(void);
 extern void port_disable_interrupts(void);

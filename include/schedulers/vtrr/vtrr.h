@@ -77,7 +77,7 @@ static void vtrr_client_init(vtrr_client_t *client, unsigned int priority) {
 }
 
 static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
-	client->fin_time = mgr->group_time + (SCHED_VTRR_QUANTUM / client->shares);//max(client->fin_time, mgr->group_time + (SCHED_VTRR_QUANTUM / client->shares));
+	client->fin_time = max(client->fin_time, mgr->group_time + (SCHED_VTRR_QUANTUM / client->shares));
 
 	if (mgr->shares > 0) client->runs_left = (client->shares * mgr->runs_left) / mgr->shares;
 	else client->runs_left = client->shares;
@@ -131,6 +131,7 @@ static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
 	// delete all nodes
 }
 
+// call this after grabbing sched_active_thread because this will point to the NEXT thread to be run.
 static int vtrr_mgr_run(vtrr_mgr_t *mgr) {
 	vtrr_client_t *curr_client = rb_entry_safe(mgr->rq_iterator, vtrr_client_t, rq_entry);
 
@@ -167,20 +168,43 @@ static int vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 }
 
+// the NEXT logical thread after the currently running thread will be run, then rq_iterator points to the new NEXT (i.e. 2 steps ahead).
+// grab sched_active_thread before calling this.
 static void vtrr_mgr_yield(vtrr_mgr_t *mgr) {
-	vtrr_mgr_run(mgr);
+	vtrr_mgr_run(mgr);	// move in the order of the logical next process
 }
 
+// the new NEXT is pointed to by rq_iterator.
+// grab sched_active_thread after calling this.
+// then call vtrr_mgr_run().
 static void vtrr_mgr_yield_higher(vtrr_mgr_t *mgr) {
+	// move to the highest priority runnable node, starting from the highest priority
+	rb_node *node;
+	vtrr_client_t *client;
 
+	do {
+		node = rb_last_cached(&mgr->rq);
+		client = rb_entry_safe(node, vtrr_client_t, rq_entry);
+	} while (!vtrr_client_is_runnable(client)); // could be optimized using a __clz implementation and an array of pointers to nodes.
+
+	mgr->rq_iterator = node; // when we call run, we will resume our loop from the highest node.
 }
 
-static void vtrr_mgr_sleep(vtrr_mgr_t *mgr, vtrr_client_t *client) {
-	vtrr_client_remove_from_list(mgr, client);
+// sched_change_thread = set_sched_active_thread(); vtrr_mgr_run();
+
+// the currently running process (i.e. 1 before rq_iterator) will be removed
+// sched_active_thread will point to the currently running process.
+// if sched_set_status sleeps sched_active_thread, then we will switch to the new thread and remove sched_active_thread from the list.
+// default behavior ^ so we can just remove the client from the list (client arg == sched_active_thread)
+
+// the time service will migrate the client to the timer queue.
+static void vtrr_mgr_sleep(vtrr_mgr_t *mgr, vtrr_mgr_t *client) {
+	vtrr_mgr_remove_from_list(mgr, client);	// simply remove the entry from the list
 }
 
+// similarly, waking up an arbitrary thread means adding it back into the list. called by the time service.
 static void vtrr_mgr_wakeup(vtrr_mgr_t *mgr, vtrr_client_t *client) {
-	vtrr_client_add_to_list(mgr, client);
+	vtrr_mgr_add_to_list(mgr, client);
 }
 
 #endif /* INCLUDE_SCHEDULERS_VTRR_H_ */

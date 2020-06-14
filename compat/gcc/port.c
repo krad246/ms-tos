@@ -143,8 +143,7 @@ port_reg_t *port_init_stack(port_reg_t *stack_top, thread_fn_t xcode, void *fn_a
  * @name MSP430 ISA-specific scheduler initialization (and preparations for port_sched_end()).
  * @{
  */
-
-static port_reg_t port_boot_sp = (port_reg_t) NULL;
+extern port_reg_t port_boot_sp;
 void __attribute__((noinline)) port_sched_start(void) {
 	port_disable_interrupts();
 
@@ -159,7 +158,7 @@ void __attribute__((noinline)) port_sched_start(void) {
 
 	port_setup_timer_interrupt();
 
-	sched_run();
+//	sched_run();
 
 	port_restore_context();
 
@@ -253,7 +252,7 @@ void port_yield(void) {
  * @brief Scheduler preemption tick. Invokes sched_run() to distribute time slices.
  */
 
-static __attribute__((naked, interrupt(CONFIG_TICK_VECTOR))) void sched_tick_irq(void) {
+__attribute__((naked, interrupt(CONFIG_TICK_VECTOR))) void sched_tick_irq(void) {
 	port_save_context();
 	sched_run();
 	port_restore_context();

@@ -12,7 +12,13 @@
 extern "C" {
 #endif
 
-#include "port_defs.h"
+#ifdef __GNUC__
+	#include "compat/gcc/port_defs.h"
+#else
+	#ifdef __TI_COMPILER_VERSION__
+		#include "compat/ccs/port_defs.h"
+	#endif
+#endif
 
 #ifdef __cplusplus
 }
