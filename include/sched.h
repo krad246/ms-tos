@@ -14,12 +14,11 @@
 
 #include "sched_flags.h"
 
-
-
 extern volatile int sched_context_switch_request;
 extern sched_flags_t sched_status_flags;
 extern uint8_t sched_isr_stack[CONFIG_ISR_STACK_SIZE];
 extern volatile int __irq_is_in;
+
 #include "sched_impl.h"
 
 
@@ -35,7 +34,7 @@ typedef enum {
 } thread_status_t;
 
 void sched_run(void);
-
+void sched_yield_higher(void);
 
 
 #endif /* INCLUDE_SCHED_H_ */

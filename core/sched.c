@@ -5,15 +5,15 @@
  *      Author: krad2
  */
 
-#include "include/sched.h"
+#include "sched.h"
 
-extern bool port_interrupts_enabled(void);
-extern void port_disable_interrupts(void);
-extern void port_enable_interrupts(void);
+extern bool arch_interrupts_enabled(void);
+extern void arch_disable_interrupts(void);
+extern void arch_enable_interrupts(void);
 
 static void sched_enter_critical(void) {
-	if (port_interrupts_enabled()) {
-		port_disable_interrupts();
+	if (arch_interrupts_enabled()) {
+		arch_disable_interrupts();
 		sched_flags_cs_set(&sched_status_flags, 0);	// replace with discrete variable modifications if event groups are unselected
 	}
 
@@ -25,6 +25,6 @@ static void sched_exit_critical(void) {
 
 	if (sched_flags_cs_get(&sched_status_flags) == 0) {
 		sched_flags_cs_set(&sched_status_flags, 1);
-		port_enable_interrupts();
+		arch_enable_interrupts();
 	}
 }

@@ -5,7 +5,7 @@
  *      Author: krad2
  */
 
-#include "include/sched_flags.h"
+#include "sched_flags.h"
 
 void sched_flags_cs_set(sched_flags_t *ptr_flags, sched_flags_t mask) {
 	*ptr_flags = SCHED_STATUS(*ptr_flags) | SCHED_CS(mask);
