@@ -87,6 +87,12 @@ arch_reg_t *arch_init_stack(arch_reg_t *stack_top, thread_fn_t xcode, void *fn_a
 	 * then create the frame centered on that memory space at stack_top.
 	 */
 	const uint8_t *stack_base = (uint8_t *) stack_top;
+
+//	/* allocate a word for the exit handler */
+//	stack_top--;
+//	*stack_top = (arch_reg_t) sched_task_exit;
+
+	/* allocate an interrupt frame for context switching */
 	stack_top = (arch_reg_t *) (stack_base - sizeof(arch_iframe_t));
 	arch_create_irq_frame((arch_iframe_t *) stack_top, xcode, GIE);
 
@@ -194,6 +200,28 @@ void __attribute__((naked)) arch_sched_end(void) {
 
 /** @} */
 
+void arch_panic(panic_code_t crash_code, const char *message) {
+
+	switch (crash_code) {
+	case PANIC_GENERAL_ERROR: break;
+	case PANIC_SOFT_REBOOT: break;
+	case PANIC_HARD_REBOOT: break;
+	case PANIC_ASSERT_FAIL: break;
+	case PANIC_EXPECT_FAIL: break;
+	case PANIC_SSP: break;
+	case PANIC_UNDEFINED: break;
+	}
+
+	#if (CONFIG_DEBUG_MODE == 1)
+		while (1) __bis_SR_register(LPM4_bits & ~GIE);
+	#else
+		// display a message
+		// wait a bit
+		// then reboot
+		arch_system_reset();
+	#endif
+}
+
 static inline void __attribute__((always_inline)) arch_context_stack(void) {
 
 	/**
@@ -244,20 +272,27 @@ static inline void __attribute__((always_inline)) arch_context_stack(void) {
 	#endif
 }
 
-void __attribute__((noinline)) arch_yield(void) {
+void __attribute__((noinline, naked)) arch_yield(void) {
 
 	/* Manual context stacking. */
 	arch_context_stack();
 
 	/** Standard context switching logic. */
 	arch_save_context();
+
+	#if (CONFIG_CHECK_FOR_STACK_OVERFLOW == 1)
+
+	#else
+
+	#endif
+
 	sched_run();
 	arch_restore_context();
 }
 
 /** @} */
 
-void __attribute__((noinline)) arch_yield_higher(void) {
+void __attribute__((noinline, naked)) arch_yield_higher(void) {
 
 	/* Manual context stacking. */
 	arch_context_stack();
@@ -271,7 +306,6 @@ void __attribute__((noinline)) arch_yield_higher(void) {
 /**
  * @brief Scheduler preemption tick. Invokes sched_run() to distribute time slices.
  */
-
 __attribute__((naked, interrupt(CONFIG_TICK_VECTOR))) void sched_tick_irq(void) {
 	arch_save_context();
 	sched_run();

@@ -82,10 +82,10 @@ static inline __attribute__((always_inline)) void arch_save_context(void) {
 	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
 		#ifdef __MSP430X_LARGE__
 			__asm__ __volatile__("pushm.a #12, r15");
-			__asm__ __volatile__("mov.a sp, %0" : "=r"(sched_active_thread->sp));
+			__asm__ __volatile__("mov.a sp, %0" : "=r"(sched_g.sched_active_thread->sp));
 		#else
 			__asm__ __volatile__("pushm.w #12, r15");
-			__asm__ __volatile__("mov.w sp, %0" : "=r"(sched_active_thread->sp));
+			__asm__ __volatile__("mov.w sp, %0" : "=r"(sched_g.sched_active_thread->sp));
 		#endif
 	#else
 		__asm__ __volatile__("push.w r15");
@@ -101,7 +101,7 @@ static inline __attribute__((always_inline)) void arch_save_context(void) {
 		__asm__ __volatile__("push.w r5");
 		__asm__ __volatile__("push.w r4");
 
-		__asm__ __volatile__("mov.w sp, %0" : "=r"(sched_active_thread->sp));
+		__asm__ __volatile__("mov.w sp, %0" : "=r"(sched_g.sched_active_thread->sp));
 	#endif
 }
 
@@ -113,17 +113,17 @@ static inline __attribute__((always_inline)) void arch_restore_context(void) {
 	/* grabs sched_active_thread, pops registers r4 -> r15, then returns into the task */
 	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
 		#ifdef __MSP430X_LARGE__
-				__asm__ __volatile__("mov.a %0, sp" : : "m"(sched_active_thread->sp));
+				__asm__ __volatile__("mov.a %0, sp" : : "m"(sched_g.sched_active_thread->sp));
 				__asm__ __volatile__("popm.a #12, r15");	// pops 4 -> 15
 		#else
-				__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_active_thread->sp));
+				__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_g.sched_active_thread->sp));
 				__asm__ __volatile__("popm.w #12, r15");
 		#endif
 
 		__asm__ __volatile__("bic %0, 0(sp)" : : "i"(CPUOFF | OSCOFF | SCG0 | SCG1));
 		__asm__ __volatile__("reti");
 	#else
-		__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_active_thread->sp));
+		__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_g.sched_active_thread->sp));
 		__asm__ __volatile__("pop.w r4");
 		__asm__ __volatile__("pop.w r5");
 		__asm__ __volatile__("pop.w r6");

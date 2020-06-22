@@ -11,12 +11,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "port_config.h"
+
+#include "panic.h"
+#include "irq.h"
+#include "sched.h"
+#include "thread.h"
+
+#include "port.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "port_config.h"
-#include "port.h"
 
 #ifdef __cplusplus
 }

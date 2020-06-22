@@ -14,9 +14,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "sched.h"
-#include "thread.h"
-
+#include "rtos.h"
 #include "internals.h"
 
 #ifdef __cplusplus
@@ -48,6 +46,27 @@ typedef union arch_iframe {
 	uint8_t bytes[4];
 	uint16_t words[2];
 } arch_iframe_t;
+
+/**
+ * @brief The layout of thread context as seen on the stack.
+ */
+
+typedef struct arch_task_context {
+	arch_reg_t r4;				/* top of stack */
+	arch_reg_t r5;
+	arch_reg_t r6;
+	arch_reg_t r7;
+	arch_reg_t r8;
+	arch_reg_t r9;
+	arch_reg_t r10;
+	arch_reg_t r11;
+	arch_reg_t r12;
+	arch_reg_t r13;
+	arch_reg_t r14;
+	arch_reg_t r15;
+	arch_iframe_t task_addr;	/* return address into the task */
+	arch_reg_t task_exit;		/* return address for task deletion */
+} arch_context_t;
 
 /**
  * @brief Underlying data type used for timekeeping.
@@ -85,16 +104,16 @@ static inline void __attribute__((always_inline)) arch_enter_isr(void) {
 	arch_save_context();
 
 	/* changing to a separate kernel interrupt stack reduces stack overflow potential */
-	#ifdef CONFIG_USE_KERNEL_STACK
+	#if (CONFIG_USE_KERNEL_STACK == 1)
 		#ifdef __MSP430X_LARGE__
-				__asm__ __volatile__("mov.a %0, sp" : : "i"(sched_isr_stack + CONFIG_ISR_STACK_SIZE));
+				__asm__ __volatile__("mov.a %0, sp" : : "i"(sched_g.sched_isr_stack + CONFIG_ISR_STACK_SIZE));
 		#else
-				__asm__ __volatile__("mov.w %0, sp" : : "i"(sched_isr_stack + CONFIG_ISR_STACK_SIZE));
+				__asm__ __volatile__("mov.w %0, sp" : : "i"(sched_g.sched_isr_stack + CONFIG_ISR_STACK_SIZE));
 		#endif
 	#endif
 
 	/* notify that we're in an IRQ */
-	sched_set_status_flags(&sched_status_flags, SCHED_FLAG_IN_IRQ);
+	sched_set_status(STATUS_IN_IRQ);
 }
 
 /**
@@ -103,12 +122,13 @@ static inline void __attribute__((always_inline)) arch_enter_isr(void) {
 static inline void __attribute__((always_inline)) arch_exit_isr(void) {
 
 	/* notify that the IRQ is done */
-	sched_clear_status_flags(&sched_status_flags, SCHED_FLAG_IN_IRQ);
+	sched_clear_status(STATUS_IN_IRQ);
 
 	/* if the interrupt awakened a high priority thread, select that for context switch */
-    if (sched_status_flags & SCHED_FLAG_CONTEXT_SWITCH_REQUESTED) {
-        sched_run();
-    }
+
+	if (sched_get_status() & STATUS_CONTEXT_SWITCH_REQUEST) {
+		sched_run();
+	}
 
     /**
      * if a new task was chosen, switch into that one.
@@ -161,6 +181,17 @@ bool arch_interrupts_enabled(void);
 /*-----------------------------------------------------------*/
 
 /**
+ * @name Interrupt control helpers
+ * @{
+ */
+
+void arch_panic(panic_code_t crash_code, const char *message);
+
+/** @} */
+
+/*-----------------------------------------------------------*/
+
+/**
  * @name Task and scheduler contract functions
  * @{
  */
@@ -198,12 +229,12 @@ void __attribute__((naked)) arch_sched_end(void);
 /**
  * @brief Manual context switch. Surrenders time slice to the next thread in the run queue.
  */
-void __attribute__((noinline)) arch_yield(void);
+void __attribute__((noinline, naked)) arch_yield(void);
 
 /**
  * @brief Manual context switch. Surrenders time slice to the highest priority thread in the run queue.
  */
-void __attribute__((noinline)) arch_yield_higher(void);
+void __attribute__((noinline, naked)) arch_yield_higher(void);
 
 /** @} */
 

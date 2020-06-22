@@ -16,19 +16,25 @@
 #define CONFIG_USE_TICKLESS_IDLE
 #define CONFIG_TICK_VECTOR 											WDT_VECTOR
 
-#define CONFIG_USE_KERNEL_STACK
-#define CONFIG_ISR_STACK_SIZE 256
+#define CONFIG_USE_KERNEL_STACK										1
+#define CONFIG_ISR_STACK_SIZE 										256
 
-#define CONFIG_HEAP_SIZE
+// static allocation requires a preallocated heap buffer with a certain size
+#define CONFIG_STATIC_ALLOCATION
+#define CONFIG_STATIC_HEAP_SIZE
 
-#define CONFIG_SCHED_VTRR 1
+#define CONFIG_DYNAMIC_ALLOCATION
+
+#define CONFIG_SCHED_RR												0
+#define CONFIG_SCHED_VTRR 											1
+#define CONFIG_SCHED_LOTTERY										0
+#define CONFIG_SCHED_MULTIQ											0
 
 #define CONFIG_USE_IDLE_HOOK                     					0
 #define CONFIG_USE_TICK_HOOK                     					0
-#define CONFIG_CHECK_CRITICAL_SECTION_VALIDITY						1
 #define CONFIG_CHECK_FOR_STACK_OVERFLOW          					0
-#define CONFIG_USE_MALLOC_FAILED_HOOK           		 			0
 
 #define CONFIG_DEBUG_MODE											1
+#define CONFIG_BENCHMARK_MODE										1
 
 #endif /* PORT_CONFIG_H_ */

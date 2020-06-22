@@ -57,7 +57,7 @@ typedef struct sched_vtrr_mgr {
  * @{
  */
 
-#define __vtrr_entry(ptr) rb_entry_safe((ptr), vtrr_client_t, rq_entry)
+#define __vtrr_entry(ptr) rb_entry((ptr), vtrr_client_t, rq_entry)
 #define vtrr_entry(ptr) __vtrr_entry((ptr))
 #define vtrr_active_client(mptr) __vtrr_entry((mptr)->curr_cli)
 #define vtrr_next_client(mptr) __vtrr_entry((mptr)->next_cli)
@@ -67,7 +67,7 @@ typedef struct sched_vtrr_mgr {
 /*-----------------------------------------------------------*/
 
 /**
- * @name Simple container_of() semantic macros provided to access threads through their bookkeeping.
+ * @name VTRR wrapper functions.
  * @{
  */
 

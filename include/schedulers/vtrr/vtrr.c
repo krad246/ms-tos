@@ -79,7 +79,6 @@ static void vtrr_client_run(vtrr_client_t *client) {
 /**
  * @brief Comparator callback between 2 clients.
  */
-
 static int vtrr_client_cmp(const void *left, const void *right) {
     vtrr_client_t *a = vtrr_entry(left);
     vtrr_client_t *b = vtrr_entry(right);
@@ -90,7 +89,6 @@ static int vtrr_client_cmp(const void *left, const void *right) {
 /**
  * @brief Copy node callback between 2 clients.
  */
-
 static void vtrr_client_copy(const void *src, void *dst) {
     vtrr_client_t *a = vtrr_entry(src);
     vtrr_client_t *b = vtrr_entry(dst);
@@ -103,7 +101,6 @@ static void vtrr_client_copy(const void *src, void *dst) {
 /**
  * @brief Foreach callback. Invoked at the end of every scheduling cycle.
  */
-
 static void vtrr_client_reset(void *key) {
 	vtrr_client_t *node = vtrr_entry(key);
 	node->runs_left = node->shares;
@@ -121,7 +118,6 @@ static void vtrr_client_reset(void *key) {
 /**
  * @brief Adds a thread to the run queue.
  */
-
 static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 
 	/* the arrival time of the task is the proportion of time in a cycle */
@@ -141,7 +137,6 @@ static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 /**
  * @brief Deletes a thread from the run queue.
  */
-
 static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 	mgr->shares -= client->shares;
 	mgr->runs_left -= client->runs_left;		/* shorten the scheduling cycle */
@@ -162,7 +157,6 @@ static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client)
 /**
  * @brief Sets up a scheduling instance.
  */
-
 static void vtrr_mgr_init(vtrr_mgr_t *mgr) {
 	rbtree_rcached_init(&mgr->rq);
 
@@ -179,7 +173,6 @@ static void vtrr_mgr_init(vtrr_mgr_t *mgr) {
 /**
  * @brief Begins the scheduler, assuming at least 1 task is installed.
  */
-
 static void vtrr_mgr_start(vtrr_mgr_t *mgr) {
 	mgr->curr_max = rb_last_cached(&mgr->rq);
 	mgr->curr_cli = mgr->curr_max;
@@ -190,7 +183,6 @@ static void vtrr_mgr_start(vtrr_mgr_t *mgr) {
 /**
  * @brief Kills the scheduler.
  */
-
 static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
 	mgr->curr_cli = NULL;
 	mgr->next_cli = NULL;
@@ -203,7 +195,6 @@ static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
 /**
  * @brief Scheduling algorithm invoked by yield() and the timeslicer.
  */
-
 static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 	/* assign the thread previously planned for execution */
@@ -240,6 +231,13 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 	/* assume that the next thread to be scheduled will be the next thread in sorted order */
 	rbnode *next_node = (rbnode *) rb_prev(mgr->curr_cli);
+
+	/* if it doesn't exist, just go back to the top */
+	if (next_node == NULL) {
+		mgr->next_cli = mgr->curr_max;
+		return;
+	}
+
 	vtrr_client_t *next_client = vtrr_entry(next_node);
 
 	/* if the next thread violates the 'even progress invariant' by not maintaining sorted order */
@@ -259,18 +257,19 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 /**
  * @brief Surrenders timeslice by scheduling the next thread in order.
  */
-
 static void vtrr_mgr_yield(vtrr_mgr_t *mgr) {
-	vtrr_mgr_run(mgr);
+	vtrr_mgr_run(mgr);	/* rerunning vtrr_run() will move to the next step in the cycle */
 }
 
 /**
  * @brief Selects the highest priority runnable thread to be run, otherwise does nothing.
  */
-
 static void vtrr_mgr_yield_higher(vtrr_mgr_t *mgr) {
+
+	/* check if the highest priority runnable thread is worth it */
 	if (vtrr_client_cmp(mgr->curr_max, mgr->curr_cli) > 0) {
-		vtrr_mgr_run(mgr);
+
+		/* switch it and run it if that's true */
 		mgr->next_cli = mgr->curr_max;
 		vtrr_mgr_run(mgr);
 	}
