@@ -6,131 +6,98 @@
  */
 
 #include "rtos.h"
+#include "sched_impl.h"
 #include "sched.h"
 
 void sched_init(void) {
 	irq_disable();
-
-	sched_impl_init((sched_impl_mgr_t *) &sched_g.instance);
-	sched_g.state = 0;
-	sched_g.sched_active_thread = NULL;	// should point to idle thread by default, idle thread should always return itself as the next runnable thread
-
+	sched_impl_init();
 	irq_enable();
 }
 
-void sched_add(thread_t *new, unsigned int priority) {
+void sched_add(volatile thread_t *new, volatile unsigned int priority) {
 	irq_lock();
-
-	sched_impl_add((sched_impl_mgr_t *) &sched_g.instance, &new->cli, priority);
-
+	sched_impl_add((thread_impl_t *) &new->base, priority);
 	irq_unlock();
 }
 
-void sched_register(thread_t *new) {
+void sched_register(volatile thread_t *new) {
 	irq_lock();
-
-	sched_impl_register((sched_impl_mgr_t *) &sched_g.instance, &new->cli);
-
+	sched_impl_register((thread_impl_t *) &new->base);
 	irq_unlock();
 }
 
-void sched_deregister(thread_t *new) {
+void sched_deregister(volatile thread_t *new) {
 	irq_lock();
-
-	sched_impl_deregister((sched_impl_mgr_t *) &sched_g.instance, &new->cli);
-
+	sched_impl_deregister((thread_impl_t *) &new->base);
 	irq_unlock();
 }
 
-void sched_reregister(thread_t *new, unsigned int priority) {
+void sched_reregister(volatile thread_t *new, volatile unsigned int priority) {
 	irq_lock();
-
-	sched_impl_reregister((sched_impl_mgr_t *) &sched_g.instance, &new->cli, priority);
-
+	sched_impl_reregister((thread_impl_t *) &new->base, priority);
 	irq_unlock();
 }
 
 void sched_start(void) {
 	irq_disable();
-
-	sched_impl_start((sched_impl_mgr_t *) &sched_g.instance);
-	sched_g.sched_active_thread = container_of(vtrr_entry(sched_g.instance.curr_cli), thread_t, cli);
-
+	sched_impl_start();
 	arch_sched_start();
-
-	vtrr_entry(sched_g.instance.curr_cli);
-	__sched_impl_active_client(vtrr, &sched_g.instance);
 }
 
 void sched_end(void) {
 	irq_disable();
-
-	sched_impl_end((sched_impl_mgr_t *) &sched_g.instance);
-}
-extern uint16_t rc ;
-extern uint32_t tt;;
-extern void profile_start(void);
-extern void profile_end(void);
-
-extern thread_t tcbs[6];
-void sched_run(void) {
-	rc++;
-	profile_start();
-
-	sched_impl_run((sched_impl_mgr_t *) &sched_g.instance);
-	sched_g.sched_active_thread = container_of(vtrr_entry(sched_g.instance.curr_cli), thread_t, cli);
-
-		profile_end();
-		tt += TA0R;
+	sched_impl_end();
+	arch_sched_end();
 }
 
 void sched_yield(void) {
-	rc++;
-	profile_start();
-
-	sched_impl_yield((sched_impl_mgr_t *) &sched_g.instance);
-	sched_g.sched_active_thread = container_of(vtrr_entry(sched_g.instance.curr_cli), thread_t, cli);
-
-	profile_end();
-		tt += TA0R;
+	irq_lock();
+	arch_yield();
+	irq_unlock();
 }
 
 void sched_yield_higher(void) {
-	rc++;
-	profile_start();
+	irq_lock();
+	arch_yield_higher();
+	irq_unlock();
+}
 
-
-	sched_impl_yield_higher((sched_impl_mgr_t *) &sched_g.instance);
-	sched_g.sched_active_thread = container_of(vtrr_entry(sched_g.instance.curr_cli), thread_t, cli);
-
-	profile_end();
-		tt += TA0R;
+void sched_sleep(unsigned int ms) {
+	irq_lock();
+	arch_sleep_for(ms);
+	irq_unlock();
 }
 
 sched_status_t sched_get_status(void) {
-	irq_lock();
-
-	sched_status_t curr_state = sched_g.state;
-
-	irq_unlock();
-
-	return curr_state;
+//	arch_disable_interrupts();
+//	sched_status_t state = sched_g.state;
+//	bool in_irq = (state & SCHED_STATUS_IN_IRQ) != 0;
+//	bool locked = (state & SCHED_STATUS_IRQ_LOCKED) != 0;
+//	if (!locked && !in_irq) arch_enable_interrupts();
+	return true;;
 }
 
 void sched_set_status(sched_status_t status) {
-
+//	sched_g.state |= status;
 }
 
 void sched_clear_status(sched_status_t status) {
+//	sched_g.state &= ~status;
+}
 
+unsigned int sched_thread_count(void) {
+//	irq_lock();
+//	unsigned int count = (sched_g.state & SCHED_STATUS_THREAD_COUNT_MASK) >> SCHED_STATUS_THREAD_COUNT_POS;
+//	irq_unlock();
+
+	return 1;
 }
 
 thread_t *sched_current_thread() {
-	irq_lock();
+//	irq_lock();
+//	thread_t *curr = sched_g.sched_active_thread;
+//	irq_unlock();
 
-	thread_t *curr = sched_g.sched_active_thread;
-
-	irq_unlock();
-
-	return curr;
+//	return curr;
 }

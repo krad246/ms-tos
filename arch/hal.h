@@ -14,8 +14,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "rtos.h"
-#include "internals.h"
+#include "sched_impl.h"
+#include "thread_impl.h"
+#include "panic.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,6 +83,134 @@ typedef struct arch_task_context {
 /*-----------------------------------------------------------*/
 
 /**
+ * @name CPU context control helpers
+ * @{
+ */
+
+/**
+ * @brief Pushes / saves system registers on the stack. No bookkeeping data maintained.
+ */
+static inline __attribute__((always_inline)) void arch_save_regs(void) {
+	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
+		#ifdef __MSP430X_LARGE__
+			__asm__ __volatile__("pushm.a #12, r15");	/* pushes 15 -> 4 */
+		#else
+			__asm__ __volatile__("pushm.w #12, r15");
+		#endif
+	#else
+		__asm__ __volatile__("push.w r15");
+		__asm__ __volatile__("push.w r14");
+		__asm__ __volatile__("push.w r13");
+		__asm__ __volatile__("push.w r12");
+		__asm__ __volatile__("push.w r11");
+		__asm__ __volatile__("push.w r10");
+		__asm__ __volatile__("push.w r9");
+		__asm__ __volatile__("push.w r8");
+		__asm__ __volatile__("push.w r7");
+		__asm__ __volatile__("push.w r6");
+		__asm__ __volatile__("push.w r5");
+		__asm__ __volatile__("push.w r4");
+	#endif
+}
+
+/**
+ * @brief Pops / pulls system registers off the stack. No bookkeeping data maintained.
+ */
+static inline __attribute__((always_inline)) void arch_restore_regs(void) {
+	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
+		#ifdef __MSP430X_LARGE__
+				__asm__ __volatile__("popm.a #12, r15");	/* pops 4 -> 15 */
+		#else
+				__asm__ __volatile__("popm.w #12, r15");
+		#endif
+	#else
+		__asm__ __volatile__("pop.w r4");
+		__asm__ __volatile__("pop.w r5");
+		__asm__ __volatile__("pop.w r6");
+		__asm__ __volatile__("pop.w r7");
+		__asm__ __volatile__("pop.w r8");
+		__asm__ __volatile__("pop.w r9");
+		__asm__ __volatile__("pop.w r10");
+		__asm__ __volatile__("pop.w r11");
+		__asm__ __volatile__("pop.w r12");
+		__asm__ __volatile__("pop.w r13");
+		__asm__ __volatile__("pop.w r14");
+		__asm__ __volatile__("pop.w r15");
+	#endif
+}
+
+/**
+ * @brief Saves system registers and then updates sched_active_thread for calls to arch_restore_context().
+ */
+static inline __attribute__((always_inline)) void arch_save_context(void) {
+
+	/* pushes registers r15 -> r4, then sets sched_active_thread */
+	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
+		#ifdef __MSP430X_LARGE__
+			__asm__ __volatile__("pushm.a #12, r15");
+			__asm__ __volatile__("mov.a sp, %0" : "=r"(sched_p.sched_active_thread->sp));
+		#else
+			__asm__ __volatile__("pushm.w #12, r15");
+			__asm__ __volatile__("mov.w sp, %0" : "=r"(sched_p.sched_active_thread->sp));
+		#endif
+	#else
+		__asm__ __volatile__("push.w r15");
+		__asm__ __volatile__("push.w r14");
+		__asm__ __volatile__("push.w r13");
+		__asm__ __volatile__("push.w r12");
+		__asm__ __volatile__("push.w r11");
+		__asm__ __volatile__("push.w r10");
+		__asm__ __volatile__("push.w r9");
+		__asm__ __volatile__("push.w r8");
+		__asm__ __volatile__("push.w r7");
+		__asm__ __volatile__("push.w r6");
+		__asm__ __volatile__("push.w r5");
+		__asm__ __volatile__("push.w r4");
+
+		__asm__ __volatile__("mov.w sp, %0" : "=r"(sched_p.sched_active_thread->sp));
+	#endif
+}
+
+/**
+ * @brief Grabs sched_active_thread's bookkeeping data and then pulls system registers off the stack.
+ */
+static inline __attribute__((always_inline)) void arch_restore_context(void) {
+
+	/* grabs sched_active_thread, pops registers r4 -> r15, then returns into the task */
+	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
+		#ifdef __MSP430X_LARGE__
+				__asm__ __volatile__("mov.a %0, sp" : : "m"(sched_p.sched_active_thread->sp));
+				__asm__ __volatile__("popm.a #12, r15");	// pops 4 -> 15
+		#else
+				__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_p.sched_active_thread->sp));
+				__asm__ __volatile__("popm.w #12, r15");
+		#endif
+
+		__asm__ __volatile__("bic %0, 0(sp)" : : "i"(CPUOFF | OSCOFF | SCG0 | SCG1));
+		__asm__ __volatile__("reti");
+	#else
+		__asm__ __volatile__("mov.w %0, sp" : : "m"(sched_p.sched_active_thread->sp));
+		__asm__ __volatile__("pop.w r4");
+		__asm__ __volatile__("pop.w r5");
+		__asm__ __volatile__("pop.w r6");
+		__asm__ __volatile__("pop.w r7");
+		__asm__ __volatile__("pop.w r8");
+		__asm__ __volatile__("pop.w r9");
+		__asm__ __volatile__("pop.w r10");
+		__asm__ __volatile__("pop.w r11");
+		__asm__ __volatile__("pop.w r12");
+		__asm__ __volatile__("pop.w r13");
+		__asm__ __volatile__("pop.w r14");
+		__asm__ __volatile__("pop.w r15");
+
+		__asm__ __volatile__("bic %0, 0(sp)" : : "i"(CPUOFF | OSCOFF | SCG0 | SCG1));
+		__asm__ __volatile__("reti");
+	#endif
+}
+
+/** @} */
+
+/**
  * @name OS-aware ISR helpers
  * @{
  */
@@ -106,14 +235,14 @@ static inline void __attribute__((always_inline)) arch_enter_isr(void) {
 	/* changing to a separate kernel interrupt stack reduces stack overflow potential */
 	#if (CONFIG_USE_KERNEL_STACK == 1)
 		#ifdef __MSP430X_LARGE__
-				__asm__ __volatile__("mov.a %0, sp" : : "i"(sched_g.sched_isr_stack + CONFIG_ISR_STACK_SIZE));
+				__asm__ __volatile__("mov.a %0, sp" : : "i"(sched_p.sched_isr_stack + CONFIG_ISR_STACK_SIZE));
 		#else
-				__asm__ __volatile__("mov.w %0, sp" : : "i"(sched_g.sched_isr_stack + CONFIG_ISR_STACK_SIZE));
+				__asm__ __volatile__("mov.w %0, sp" : : "i"(sched_p.sched_isr_stack + CONFIG_ISR_STACK_SIZE));
 		#endif
 	#endif
 
 	/* notify that we're in an IRQ */
-	sched_set_status(STATUS_IN_IRQ);
+	sched_p.state |= SCHED_STATUS_IN_IRQ;
 }
 
 /**
@@ -122,12 +251,12 @@ static inline void __attribute__((always_inline)) arch_enter_isr(void) {
 static inline void __attribute__((always_inline)) arch_exit_isr(void) {
 
 	/* notify that the IRQ is done */
-	sched_clear_status(STATUS_IN_IRQ);
+	sched_p.state &= ~SCHED_STATUS_IN_IRQ;
 
 	/* if the interrupt awakened a high priority thread, select that for context switch */
 
-	if (sched_get_status() & STATUS_CONTEXT_SWITCH_REQUEST) {
-		sched_run();
+	if (sched_p.state & SCHED_STATUS_CONTEXT_SWITCH_REQUEST) {
+		sched_impl_yield_higher();
 	}
 
     /**
@@ -181,17 +310,6 @@ bool arch_interrupts_enabled(void);
 /*-----------------------------------------------------------*/
 
 /**
- * @name Interrupt control helpers
- * @{
- */
-
-void arch_panic(panic_code_t crash_code, const char *message);
-
-/** @} */
-
-/*-----------------------------------------------------------*/
-
-/**
  * @name Task and scheduler contract functions
  * @{
  */
@@ -202,19 +320,9 @@ void arch_panic(panic_code_t crash_code, const char *message);
  * @param[in] ptr_xcode			Pointer to the thread runnable.
  * @param[in] ptr_fn_args		Pointer to the runnable function arguments.
  */
-arch_reg_t *arch_init_stack(arch_reg_t *stack_top, thread_fn_t xcode, void *fn_args);
-
-/**
- * @brief Sets up the hardware time slicer.
- * @details Not implemented. Must be provided by user.
- */
-void arch_setup_timer_interrupt(void);
-
-/**
- * @brief Stops the hardware time slicer.
- * @details Not implemented. Must be provided by user.
- */
-void arch_disable_timer_interrupt(void);
+volatile arch_reg_t *arch_init_stack(volatile arch_reg_t *stack_top,
+									volatile thread_fn_t xcode,
+									volatile void *fn_args);
 
 /**
  * @brief Starts the OS scheduler. Invokes arch_setup_timer_interrupt().
@@ -225,6 +333,13 @@ void __attribute__((noinline)) arch_sched_start(void);
  * @brief Exits the currently running thread and disables the scheduler. Invokes arch_disable_timer_interrupt().
  */
 void __attribute__((naked)) arch_sched_end(void);
+
+/**
+ * @brief Arch-specific kernel panic handler. If CONFIG_DEBUG_MODE is enabled, halts; otherwise, reboots the system.
+ * @param[in] crash_code Reason for crashing.
+ * @param[in] message More details on the crash.
+ */
+void __attribute__((noinline)) arch_panic(panic_code_t crash_code, const char *message);
 
 /**
  * @brief Manual context switch. Surrenders time slice to the next thread in the run queue.

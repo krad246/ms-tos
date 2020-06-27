@@ -8,13 +8,18 @@
 #ifndef INCLUDE_THREAD_H_
 #define INCLUDE_THREAD_H_
 
-typedef int (*thread_fn_t)(void *);
+#include "sched.h"
+#include "sleep_queue.h"
+#include "thread_impl.h"
+
+//typedef struct sched_impl_client sched_impl_client_t;
+//typedef struct sleep_queue_entry sleep_queue_entry_t;
+
+
 
 typedef struct thread {
-	void *sp;
+	thread_impl_t base;
 	irq_lock_t cs_lock;
-
-	sched_impl_client_t cli;
 } thread_t;
 
 #endif /* INCLUDE_THREAD_H_ */

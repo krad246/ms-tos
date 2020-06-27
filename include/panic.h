@@ -24,7 +24,7 @@ typedef enum panic_code {
     PANIC_UNDEFINED
 } panic_code_t;
 
-void __attribute__((noreturn)) panic(panic_code_t crash_code, const char *message);
+void __attribute__((noreturn, noinline)) panic(panic_code_t crash_code, const char *message);
 
 #ifdef __cplusplus
 }

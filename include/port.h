@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "hal.h"
+//#include "hal.h"
 
 #ifdef __cplusplus
 }

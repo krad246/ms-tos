@@ -1,36 +1,41 @@
 #include "rtos.h"
-
+#include "msp430.h"
 #define NUM_THREADS		6
 #define STACK_SIZE		256
 
-uint8_t sched_isr_stack[CONFIG_ISR_STACK_SIZE];
-arch_reg_t arch_boot_sp = (arch_reg_t) NULL;
+volatile uint8_t sched_isr_stack[CONFIG_ISR_STACK_SIZE];
 
-volatile sched_t sched_g;
+
+//volatile sched_t sched_g;
 
 volatile thread_t tcbs[NUM_THREADS];
-uint8_t sched_test_stacks[NUM_THREADS][STACK_SIZE];
+volatile uint8_t sched_test_stacks[NUM_THREADS][STACK_SIZE];
 volatile uint32_t run_counts[NUM_THREADS] = { 0 };
 
 /*-----------------------------------------------------------*/
 
+volatile uint16_t rc = 0;
+volatile uint32_t tt = 0;
+
 void profile_start(void) {
-	TA0CTL = MC_0 | TACLR;
-	TA0CTL = MC_2 | TASSEL_2;
+	TA1CTL = MC_0 | TACLR;
+	TA1CTL = MC_2 | TASSEL_2;
 }
 
 void profile_end(void) {
-	TA0CTL = MC_0;
+	TA1CTL = MC_0;
+	tt += TA1R;
+	rc++;
 }
 
-void arch_setup_timer_interrupt(void) {
-	WDTCTL = WDT_ADLY_1_9;
-	SFRIE1 |= WDTIE;
-}
+//https://www.desmos.com/calculator/bc87vbzhtr approximation calculator
+// tradeoff with the timer divider is between resolution and max sleep length without intervention
 
-void arch_disable_timer_interrupt(void) {
-	WDTCTL = WDTPW | WDTHOLD;
-}
+
+//
+//void sched_inc_tick() {
+//	TA0CCR0 += MS_TO_TICKS(10);
+//}
 
 /*-----------------------------------------------------------*/
 
@@ -41,6 +46,28 @@ ISR(PORT1_VECTOR, on_button_press) {
 }
 
 /*-----------------------------------------------------------*/
+#define ARCH_MS_TO_TICKS(ms)						((((uint32_t) 4096) * ((uint32_t) ms)) >> 10)
+
+extern void arch_sleep(unsigned int);
+void sleepfor(volatile unsigned int ms) {
+	irq_lock();
+
+//	arch_sleep(ARCH_MS_TO_TICKS(ms));
+//	volatile thread_t *me = sched_current_thread();
+//
+//		volatile unsigned int now = TA0R;
+//		volatile unsigned int wake_time = now + ARCH_MS_TO_TICKS(ms);
+//
+//		sleep_queue_push(&sched_g.sleep_mgr, me, wake_time);
+//		sched_deregister(me);
+
+//		thread_t *next_thread_to_awaken = sleep_queue_peek(&sched_g.sleep_mgr);
+//		arch_schedule_next_wakeup(next_thread_to_awaken->slp.wake_time);
+
+		arch_yield();
+
+	irq_unlock();
+}
 
 void a(void *arg) {
 	while (1) {
@@ -63,6 +90,8 @@ void c(void *arg) {
 	while (1) {
 		run_counts[2]++;
 		_low_power_mode_3();
+		sched_sleep(500);
+		P1OUT ^= BIT0;
 		arch_yield();
 	}
 }
@@ -101,27 +130,6 @@ void f(void *arg) {
 // MSP430s MUST use the ACLK for the scheduler and the tick timer so 32768 Hz is a constant.
 // 32768 Hz implies 32.768 ticks
 
-uint16_t rc = 0;
-uint32_t tt = 0;
-
-//void sched_run(void) {
-//	rc++;
-//	profile_start();
-//	irq_lock();
-//	sched_run();
-//	irq_unlock();
-//	profile_end();
-//	tt += TA0R;
-//}
-//
-//void sched_yield_higher(void) {
-//	rc++;
-//	profile_start();
-//	sched_yield_higher();
-//	profile_end();
-//	tt += TA0R;
-//}
-
 /*-----------------------------------------------------------*/
 
 /**
@@ -140,15 +148,15 @@ int main(void)
 	P1IFG &= ~BIT1;                           // P1.1 IFG cleared
 	P1IE |= BIT1;
 
-	tcbs[0].sp = arch_init_stack(sched_test_stacks[0] + 256, a, run_counts[0]);
-	tcbs[1].sp = arch_init_stack(sched_test_stacks[1] + 256, b, run_counts[1]);
-	tcbs[2].sp = arch_init_stack(sched_test_stacks[2] + 256, c, run_counts[2]);
-	tcbs[3].sp = arch_init_stack(sched_test_stacks[3] + 256, d, run_counts[3]);
-	tcbs[4].sp = arch_init_stack(sched_test_stacks[4] + 256, e, run_counts[4]);
-	tcbs[5].sp = arch_init_stack(sched_test_stacks[5] + 256, f, run_counts[5]);
+	tcbs[0].base.sp = arch_init_stack(sched_test_stacks[0] + 256, a, run_counts[0]);
+	tcbs[1].base.sp = arch_init_stack(sched_test_stacks[1] + 256, b, run_counts[1]);
+	tcbs[2].base.sp = arch_init_stack(sched_test_stacks[2] + 256, c, run_counts[2]);
+	tcbs[3].base.sp = arch_init_stack(sched_test_stacks[3] + 256, d, run_counts[3]);
+	tcbs[4].base.sp = arch_init_stack(sched_test_stacks[4] + 256, e, run_counts[4]);
+	tcbs[5].base.sp = arch_init_stack(sched_test_stacks[5] + 256, f, run_counts[5]);
 
+	__disable_interrupt();
 	sched_init();
-	sched_g.sched_active_thread = &tcbs[0];
 
 	for (int i = 0; i < 6; ++i) {
 		tcbs[i].cs_lock = 1;

@@ -132,6 +132,7 @@ static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
 
 	rb_rcached_insert(&mgr->rq, &client->rq_entry, vtrr_client_cmp);
+	mgr->curr_max = rb_last_cached(&mgr->rq);	/* update the max whenever something is added or deleted */
 }
 
 /**
@@ -143,6 +144,7 @@ static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client)
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
 
 	rb_rcached_delete(&mgr->rq, &client->rq_entry, vtrr_client_cmp, vtrr_client_copy);
+	mgr->curr_max = rb_last_cached(&mgr->rq);	/* update the max whenever something is added or deleted */
 }
 
 /** @} */
@@ -193,25 +195,34 @@ static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
 }
 
 /**
+ * @brief Iterates over all tasks and applies a callback to them.
+ * @param[in] cb Function to apply per task.
+ */
+static void vtrr_mgr_task_foreach(vtrr_mgr_t *mgr, void (*cb)(void *)) {
+	rb_inorder_foreach(&mgr->rq.tree, cb);
+}
+
+/**
  * @brief Scheduling algorithm invoked by yield() and the timeslicer.
  */
 static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
+	/* execution of the scheduled thread */
+	vtrr_client_t *curr_client = vtrr_active_client(mgr);
+	vtrr_client_run(curr_client);
+
 	/* assign the thread previously planned for execution */
 	mgr->curr_cli = mgr->next_cli;
-	vtrr_client_t *curr_client = vtrr_active_client(mgr);
-
-
-	/* execution of the scheduled thread */
-	vtrr_client_run(curr_client);
 	mgr->group_time += mgr->timestep;
 	if (mgr->runs_left > 0) mgr->runs_left--;
+
+	if (mgr->curr_cli == NULL) panic(0, "current client is null");
 
 	/* if a cycle has completed */
 	if (mgr->runs_left == 0) {
 
 		/* go through all tasks and reset their run counters */
-		rb_inorder_foreach(&mgr->rq.tree, vtrr_client_reset);
+		vtrr_mgr_task_foreach(mgr, vtrr_client_reset);
 
 		/* reset the manager's cycle counter */
 		mgr->runs_left = mgr->shares;
@@ -227,6 +238,7 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 		/* the 2nd highest priority thread becomes the highest so far */
 		mgr->curr_max = (rbnode *) rb_prev(mgr->curr_max);
+		if (mgr->curr_max == NULL) panic(0, "curr max is null");
 	}
 
 	/* assume that the next thread to be scheduled will be the next thread in sorted order */
@@ -243,14 +255,17 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 	/* if the next thread violates the 'even progress invariant' by not maintaining sorted order */
 	if (next_client->runs_left > curr_client->runs_left) {
 		mgr->next_cli = next_node;
+		if (mgr->next_cli == NULL) panic(0, "next client is null");
 
 	/* if the already-running client will allow enough time to squeeze this new thread in for a slice */
 	} else if (curr_client->fin_time < mgr->group_time + (2 * curr_client->timestep)) {
 		mgr->next_cli = next_node;
+		if (mgr->next_cli == NULL) panic(0, "next client is null");
 
 	/* default to maximum possible priority */
 	} else {
 		mgr->next_cli = mgr->curr_max;
+		if (mgr->next_cli == NULL) panic(0, "next client is null");
 	}
 }
 
