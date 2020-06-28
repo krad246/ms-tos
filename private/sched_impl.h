@@ -92,6 +92,7 @@ void sched_impl_end(void);
 void sched_impl_run(void);
 void sched_impl_yield(void);
 void sched_impl_yield_higher(void);
+void sched_impl_thread_exit(void);
 
 #ifdef __cplusplus
 }

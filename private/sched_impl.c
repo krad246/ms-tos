@@ -111,5 +111,8 @@ volatile sched_impl_t sched_p;
 						(thread_impl_t *) sched_p.sched_active_thread, wake_time);							\
 		sched_impl_deregister((thread_impl_t *) sched_p.sched_active_thread);								\
 	}																										\
+	void sched_impl_thread_exit(void) {																		\
+																											\
+	}																										\
 
 DECLARE_SCHED_IMPL_FNS(vtrr);

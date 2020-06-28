@@ -26,13 +26,21 @@
 #define CONFIG_TICK_RATE_MS								(unsigned int) (1000.0 / CONFIG_TICK_RATE_HZ)
 
 /* Calculate hardware parameters to achieve the constants above, with or w / o approximation */
+#define ROUND(x) 										((x) >= 0 ? (long) ((x) + 0.5) : (long) ((x) - 0.5))
+
 #if (CONFIG_USE_FAST_MATH == 1)
-	#define ARCH_1MS									((ARCH_TICK_CLK_FREQ) >> 10)
-	#define ARCH_MS_TO_CYCLES(ms)						((((uint32_t) ARCH_TICK_CLK_FREQ) * ((uint32_t) ms)) >> 10)
+	#define __ARCH_FAST_MATH_BINARY_POINT				(10)
+	#define __ARCH_FAST_MATH_1000						((unsigned long) (1ul << (__ARCH_FAST_MATH_BINARY_POINT)))
+	#define __ARCH_FAST_MATH_500						((unsigned long) (1ul << ((__ARCH_FAST_MATH_BINARY_POINT) - 1)))
+	#define __ARCH_FAST_MATH_8							(ROUND((__ARCH_FAST_MATH_1000) / 125.0))
+	#define __ARCH_FAST_ROUND(val, bpoint)				(((((unsigned long) (val)) + (__ARCH_FAST_MATH_500))) >> (bpoint))
+	#define __ARCH_MS_TO_CYCLES_1_8(ms)					((((unsigned long) ARCH_TICK_CLK_FREQ) * ((unsigned long) (ms))) >> 3)
+	#define __ARCH_MS_TO_CYCLES_1_125(ms)				(((unsigned long) (ms)) * (((unsigned long) __ARCH_FAST_MATH_8)))
+	#define __ARCH_MS_TO_CYCLES_1_1000(ms)				__ARCH_MS_TO_CYCLES_1_125( __ARCH_MS_TO_CYCLES_1_8((ms)))
+	#define __ARCH_MS_TO_CYCLES(ms)						__ARCH_FAST_ROUND(__ARCH_MS_TO_CYCLES_1_1000((ms)), __ARCH_FAST_MATH_BINARY_POINT)
+	#define ARCH_MS_TO_CYCLES(ms)						__ARCH_MS_TO_CYCLES((ms))
 #else
-	#define ROUND(x) 									((x) >= 0 ? (long) ((x) + 0.5) : (long) ((x) - 0.5))
-	#define ARCH_1MS									(double) (ARCH_TICK_CLK_FREQ / 1000.0)
-	#define ARCH_MS_TO_CYCLES(ms)						ROUND(((double) ms) * ARCH_1MS)
+	#define ARCH_MS_TO_CYCLES(ms)						ROUND(((double) ms) * (ARCH_TICK_CLK_FREQ / 1000.0))
 #endif
 
 /*-----------------------------------------------------------*/
@@ -159,7 +167,7 @@ void arch_idle(void) {
  */
 static void __attribute__((naked, noreturn)) arch_thread_exit(int exit_code) {
 	arch_disable_interrupts();
-//	sched_impl_thread_exit();
+	sched_impl_thread_exit();
 	arch_restore_context();
 
 	while (1) {
@@ -341,6 +349,7 @@ void __attribute__((naked)) arch_sched_end(void) {
 
 /**
  * @brief Kernel panic function.
+ * TODO: __VA_ARGS__ semantics
  */
 static char panic_log[CONFIG_PANIC_DUMP_SIZE];
 void __attribute__((noreturn, noinline)) arch_panic(panic_code_t crash_code, const char *message) {
@@ -358,6 +367,7 @@ void __attribute__((noreturn, noinline)) arch_panic(panic_code_t crash_code, con
 	#endif
 	caller -= 4;
 
+	/* Put the crash reason in the panic log so we can see the cause as well as the faulting address. */
 	snprintf(panic_log, CONFIG_PANIC_DUMP_SIZE, "%s (%p)", message, (void *) caller);
 
 	/* Handle the crash reasons differently. */
@@ -561,7 +571,6 @@ static void arch_sleep_until(unsigned int wake_time) {
 void arch_sleep_for(unsigned int ms) {
 	unsigned int now = arch_time_now();
 	unsigned int wake_time = now + ARCH_MS_TO_CYCLES(ms);
-
 	sched_impl_sleep_until(wake_time);
 	arch_sleep_until(wake_time);
 }
@@ -575,7 +584,6 @@ __attribute__((naked, interrupt(ARCH_TICK_VECTOR))) void arch_tick_irq(void) {
 
 	/* Standard context switching logic. */
 	arch_save_context();
-
 	arch_acknowledge_tick_interrupt();
 
 	/* Check for stack overflow. */
@@ -641,39 +649,10 @@ __attribute__((naked, interrupt(ARCH_TIMEKEEPING_VECTOR))) void arch_time_irq(vo
 			break;
 
 		/* Unused for now, so these are all unexpected traps. */
-		case TA0IV_TACCR2:
-			#if (CONFIG_DEBUG_MODE == 1)
-				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
-			#endif
-			break;
-
-		case TAxIV_TACCR3:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
-			break;
-
-		case TAxIV_TACCR4:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
-			break;
-
-		case TA0IV_5:
-			#if (CONFIG_DEBUG_MODE == 1)
-				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
-			#endif
-			break;
-
-		case TA0IV_6:
-			#if (CONFIG_DEBUG_MODE == 1)
-				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
-			#endif
-			break;
-
-		case TA0IV_TAIFG:
-			#if (CONFIG_DEBUG_MODE == 1)
-				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
-			#endif
-			break;
-
 		default:
+			#if (CONFIG_DEBUG_MODE == 1)
+				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#endif
 			break;
 	}
 	arch_exit_isr();

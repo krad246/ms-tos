@@ -144,7 +144,6 @@ static inline __attribute__((always_inline)) void arch_restore_regs(void) {
  * @brief Saves system registers and then updates sched_active_thread for calls to arch_restore_context().
  */
 static inline __attribute__((always_inline)) void arch_save_context(void) {
-
 	extern volatile sched_impl_t sched_p;
 
 	/* pushes registers r15 -> r4, then sets sched_active_thread */
@@ -178,7 +177,6 @@ static inline __attribute__((always_inline)) void arch_save_context(void) {
  * @brief Grabs sched_active_thread's bookkeeping data and then pulls system registers off the stack.
  */
 static inline __attribute__((always_inline)) void arch_restore_context(void) {
-
 	extern volatile sched_impl_t sched_p;
 
 	/* grabs sched_active_thread, pops registers r4 -> r15, then returns into the task */
@@ -233,7 +231,6 @@ static inline __attribute__((always_inline)) void arch_restore_context(void) {
  * @brief ISR entry hook. Switches to a kernel interrupt stack if appropriate, then sets IRQ_IN.
  */
 static inline void __attribute__((always_inline)) arch_enter_isr(void) {
-
 	extern volatile sched_impl_t sched_p;
 
 	/* back up all context on the interrupted task stack */
@@ -256,7 +253,6 @@ static inline void __attribute__((always_inline)) arch_enter_isr(void) {
  * @brief ISR exit hook. Clears IRQ_IN, and yields to a higher priority thread if appropriate.
  */
 static inline void __attribute__((always_inline)) arch_exit_isr(void) {
-
 	extern volatile sched_impl_t sched_p;
 
 	/* notify that the IRQ is done */

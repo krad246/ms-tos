@@ -1025,7 +1025,7 @@ __reset_vector  0x0000fffe        0x2
                 0x000042be                . = ALIGN (0x2)
  *(.lower.text.* .lower.text)
 
-.text           0x000042be     0x2c36
+.text           0x000042be     0x2c3c
                 0x000042be                PROVIDE (_start = .)
                 0x000042be                . = ALIGN (0x2)
  *(SORT_BY_NAME(.crt_*))
@@ -1061,270 +1061,273 @@ __reset_vector  0x0000fffe        0x2
                 0x00004430       0xd8 ./main.o
                 0x00004430                main
  .text.arch_thread_exit
-                0x00004508       0x1e ./arch/hal.o
+                0x00004508       0x22 ./arch/hal.o
  .text.arch_idle
-                0x00004526        0xa ./arch/hal.o
-                0x00004526                arch_idle
+                0x0000452a        0xa ./arch/hal.o
+                0x0000452a                arch_idle
  .text.arch_init_stack
-                0x00004530       0x98 ./arch/hal.o
-                0x00004530                arch_init_stack
+                0x00004534       0x98 ./arch/hal.o
+                0x00004534                arch_init_stack
  .text.arch_sched_start
-                0x000045c8       0x48 ./arch/hal.o
-                0x000045c8                arch_sched_start
+                0x000045cc       0x48 ./arch/hal.o
+                0x000045cc                arch_sched_start
  .text.arch_panic
-                0x00004610       0x4e ./arch/hal.o
-                0x00004610                arch_panic
+                0x00004614       0x4e ./arch/hal.o
+                0x00004614                arch_panic
  .text.arch_yield
-                0x0000465e       0x78 ./arch/hal.o
-                0x0000465e                arch_yield
+                0x00004662       0x78 ./arch/hal.o
+                0x00004662                arch_yield
  .text.arch_yield_higher
-                0x000046d6       0x78 ./arch/hal.o
-                0x000046d6                arch_yield_higher
+                0x000046da       0x78 ./arch/hal.o
+                0x000046da                arch_yield_higher
  .text.arch_sleep_for
-                0x0000474e       0x3c ./arch/hal.o
-                0x0000474e                arch_sleep_for
+                0x00004752       0x3c ./arch/hal.o
+                0x00004752                arch_sleep_for
  .text.irq_disable
-                0x0000478a        0x6 ./core/irq.o
-                0x0000478a                irq_disable
+                0x0000478e        0x6 ./core/irq.o
+                0x0000478e                irq_disable
  .text.irq_enable
-                0x00004790        0x8 ./core/irq.o
-                0x00004790                irq_enable
+                0x00004794        0x8 ./core/irq.o
+                0x00004794                irq_enable
  .text.irq_lock
-                0x00004798       0x2e ./core/irq.o
-                0x00004798                irq_lock
+                0x0000479c       0x2e ./core/irq.o
+                0x0000479c                irq_lock
  .text.irq_unlock
-                0x000047c6       0x26 ./core/irq.o
-                0x000047c6                irq_unlock
- .text.panic    0x000047ec        0x8 ./core/panic.o
-                0x000047ec                panic
+                0x000047ca       0x26 ./core/irq.o
+                0x000047ca                irq_unlock
+ .text.panic    0x000047f0        0x8 ./core/panic.o
+                0x000047f0                panic
  .text.sched_init
-                0x000047f4        0xe ./core/sched.o
-                0x000047f4                sched_init
+                0x000047f8        0xe ./core/sched.o
+                0x000047f8                sched_init
  .text.sched_add
-                0x00004802       0x24 ./core/sched.o
-                0x00004802                sched_add
+                0x00004806       0x24 ./core/sched.o
+                0x00004806                sched_add
  .text.sched_start
-                0x00004826        0xe ./core/sched.o
-                0x00004826                sched_start
+                0x0000482a        0xe ./core/sched.o
+                0x0000482a                sched_start
  .text.sched_yield
-                0x00004834        0xe ./core/sched.o
-                0x00004834                sched_yield
+                0x00004838        0xe ./core/sched.o
+                0x00004838                sched_yield
  .text.sched_yield_higher
-                0x00004842        0xe ./core/sched.o
-                0x00004842                sched_yield_higher
+                0x00004846        0xe ./core/sched.o
+                0x00004846                sched_yield_higher
  .text.sched_sleep
-                0x00004850       0x1c ./core/sched.o
-                0x00004850                sched_sleep
+                0x00004854       0x1c ./core/sched.o
+                0x00004854                sched_sleep
  .text.__rb_inorder_foreach
-                0x0000486c       0x32 ./ds/rbtree.o
+                0x00004870       0x32 ./ds/rbtree.o
  .text.__rb_delete_rebalance
-                0x0000489e      0x50e ./ds/rbtree.o
+                0x000048a2      0x50e ./ds/rbtree.o
  .text.rb_delete.part.0
-                0x00004dac      0x1be ./ds/rbtree.o
+                0x00004db0      0x1be ./ds/rbtree.o
  .text.rbtree_lcached_init
-                0x00004f6a       0x14 ./ds/rbtree.o
-                0x00004f6a                rbtree_lcached_init
+                0x00004f6e       0x14 ./ds/rbtree.o
+                0x00004f6e                rbtree_lcached_init
  .text.rbtree_rcached_init
-                0x00004f7e       0x14 ./ds/rbtree.o
-                0x00004f7e                rbtree_rcached_init
+                0x00004f82       0x14 ./ds/rbtree.o
+                0x00004f82                rbtree_rcached_init
  .text.rbnode_init
-                0x00004f92       0x14 ./ds/rbtree.o
-                0x00004f92                rbnode_init
+                0x00004f96       0x14 ./ds/rbtree.o
+                0x00004f96                rbnode_init
  .text.rb_insert
-                0x00004fa6      0x6c4 ./ds/rbtree.o
-                0x00004fa6                rb_insert
+                0x00004faa      0x6c4 ./ds/rbtree.o
+                0x00004faa                rb_insert
  .text.rb_lcached_insert
-                0x0000566a       0x3e ./ds/rbtree.o
-                0x0000566a                rb_lcached_insert
+                0x0000566e       0x3e ./ds/rbtree.o
+                0x0000566e                rb_lcached_insert
  .text.rb_rcached_insert
-                0x000056a8       0x3e ./ds/rbtree.o
-                0x000056a8                rb_rcached_insert
- .text.rb_prev  0x000056e6       0x68 ./ds/rbtree.o
-                0x000056e6                rb_prev
+                0x000056ac       0x3e ./ds/rbtree.o
+                0x000056ac                rb_rcached_insert
+ .text.rb_prev  0x000056ea       0x68 ./ds/rbtree.o
+                0x000056ea                rb_prev
  .text.rb_lcached_delete
-                0x0000574e       0xb2 ./ds/rbtree.o
-                0x0000574e                rb_lcached_delete
+                0x00005752       0xb2 ./ds/rbtree.o
+                0x00005752                rb_lcached_delete
  .text.rb_rcached_delete
-                0x00005800       0xb2 ./ds/rbtree.o
-                0x00005800                rb_rcached_delete
+                0x00005804       0xb2 ./ds/rbtree.o
+                0x00005804                rb_rcached_delete
  .text.rb_inorder_foreach
-                0x000058b2       0x32 ./ds/rbtree.o
-                0x000058b2                rb_inorder_foreach
- .text.idle     0x000058e4        0xe ./private/sched_impl.o
+                0x000058b6       0x32 ./ds/rbtree.o
+                0x000058b6                rb_inorder_foreach
+ .text.idle     0x000058e8        0xe ./private/sched_impl.o
  .text.sched_impl_init
-                0x000058f2       0x38 ./private/sched_impl.o
-                0x000058f2                sched_impl_init
+                0x000058f6       0x38 ./private/sched_impl.o
+                0x000058f6                sched_impl_init
  .text.sched_impl_add
-                0x0000592a       0x1c ./private/sched_impl.o
-                0x0000592a                sched_impl_add
+                0x0000592e       0x1c ./private/sched_impl.o
+                0x0000592e                sched_impl_add
  .text.sched_impl_register
-                0x00005946       0x1a ./private/sched_impl.o
-                0x00005946                sched_impl_register
+                0x0000594a       0x1a ./private/sched_impl.o
+                0x0000594a                sched_impl_register
  .text.sched_impl_start
-                0x00005960        0xa ./private/sched_impl.o
-                0x00005960                sched_impl_start
+                0x00005964        0xa ./private/sched_impl.o
+                0x00005964                sched_impl_start
  .text.sched_impl_run
-                0x0000596a       0x30 ./private/sched_impl.o
-                0x0000596a                sched_impl_run
+                0x0000596e       0x30 ./private/sched_impl.o
+                0x0000596e                sched_impl_run
  .text.sched_impl_yield
-                0x0000599a       0x28 ./private/sched_impl.o
-                0x0000599a                sched_impl_yield
+                0x0000599e       0x28 ./private/sched_impl.o
+                0x0000599e                sched_impl_yield
  .text.sched_impl_yield_higher
-                0x000059c2       0x28 ./private/sched_impl.o
-                0x000059c2                sched_impl_yield_higher
+                0x000059c6       0x28 ./private/sched_impl.o
+                0x000059c6                sched_impl_yield_higher
  .text.sched_impl_sleep_until
-                0x000059ea       0x2c ./private/sched_impl.o
-                0x000059ea                sched_impl_sleep_until
+                0x000059ee       0x2c ./private/sched_impl.o
+                0x000059ee                sched_impl_sleep_until
+ .text.sched_impl_thread_exit
+                0x00005a1a        0x2 ./private/sched_impl.o
+                0x00005a1a                sched_impl_thread_exit
  .text.sleepq_entry_cmp
-                0x00005a16       0x1c ./private/sleep_queue.o
+                0x00005a1c       0x1c ./private/sleep_queue.o
  .text.sleepq_entry_copy
-                0x00005a32       0x1c ./private/sleep_queue.o
+                0x00005a38       0x1c ./private/sleep_queue.o
  .text.sleep_queue_init
-                0x00005a4e        0x6 ./private/sleep_queue.o
-                0x00005a4e                sleep_queue_init
+                0x00005a54        0x6 ./private/sleep_queue.o
+                0x00005a54                sleep_queue_init
  .text.sleep_queue_push
-                0x00005a54       0x12 ./private/sleep_queue.o
-                0x00005a54                sleep_queue_push
+                0x00005a5a       0x12 ./private/sleep_queue.o
+                0x00005a5a                sleep_queue_push
  .text.sleep_queue_peek
-                0x00005a66       0x10 ./private/sleep_queue.o
-                0x00005a66                sleep_queue_peek
+                0x00005a6c       0x10 ./private/sleep_queue.o
+                0x00005a6c                sleep_queue_peek
  .text.sleep_queue_pop
-                0x00005a76       0x18 ./private/sleep_queue.o
-                0x00005a76                sleep_queue_pop
+                0x00005a7c       0x18 ./private/sleep_queue.o
+                0x00005a7c                sleep_queue_pop
  .text.thread_impl_init
-                0x00005a8e       0x16 ./private/thread_impl.o
-                0x00005a8e                thread_impl_init
+                0x00005a94       0x16 ./private/thread_impl.o
+                0x00005a94                thread_impl_init
  .text.vtrr_client_cmp
-                0x00005aa4        0xa ./schedulers/vtrr/vtrr.o
+                0x00005aaa        0xa ./schedulers/vtrr/vtrr.o
  .text.vtrr_client_copy
-                0x00005aae       0x22 ./schedulers/vtrr/vtrr.o
+                0x00005ab4       0x22 ./schedulers/vtrr/vtrr.o
  .text.vtrr_client_reset
-                0x00005ad0        0x8 ./schedulers/vtrr/vtrr.o
+                0x00005ad6        0x8 ./schedulers/vtrr/vtrr.o
  .text.vtrr_init
-                0x00005ad8       0x32 ./schedulers/vtrr/vtrr.o
-                0x00005ad8                vtrr_init
+                0x00005ade       0x32 ./schedulers/vtrr/vtrr.o
+                0x00005ade                vtrr_init
  .text.vtrr_start
-                0x00005b0a       0x24 ./schedulers/vtrr/vtrr.o
-                0x00005b0a                vtrr_start
+                0x00005b10       0x24 ./schedulers/vtrr/vtrr.o
+                0x00005b10                vtrr_start
  .text.vtrr_add
-                0x00005b2e       0xb2 ./schedulers/vtrr/vtrr.o
-                0x00005b2e                vtrr_add
+                0x00005b34       0xb2 ./schedulers/vtrr/vtrr.o
+                0x00005b34                vtrr_add
  .text.vtrr_register
-                0x00005be0       0x94 ./schedulers/vtrr/vtrr.o
-                0x00005be0                vtrr_register
+                0x00005be6       0x94 ./schedulers/vtrr/vtrr.o
+                0x00005be6                vtrr_register
  .text.vtrr_deregister
-                0x00005c74       0x46 ./schedulers/vtrr/vtrr.o
-                0x00005c74                vtrr_deregister
+                0x00005c7a       0x46 ./schedulers/vtrr/vtrr.o
+                0x00005c7a                vtrr_deregister
  .text.vtrr_run
-                0x00005cba       0xea ./schedulers/vtrr/vtrr.o
-                0x00005cba                vtrr_run
+                0x00005cc0       0xea ./schedulers/vtrr/vtrr.o
+                0x00005cc0                vtrr_run
  .text.vtrr_yield
-                0x00005da4       0xea ./schedulers/vtrr/vtrr.o
-                0x00005da4                vtrr_yield
+                0x00005daa       0xea ./schedulers/vtrr/vtrr.o
+                0x00005daa                vtrr_yield
  .text.vtrr_yield_higher
-                0x00005e8e       0xf6 ./schedulers/vtrr/vtrr.o
-                0x00005e8e                vtrr_yield_higher
+                0x00005e94       0xf6 ./schedulers/vtrr/vtrr.o
+                0x00005e94                vtrr_yield_higher
  .text.udivmodhi4
-                0x00005f84       0x3c c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divHI.o)
-                0x00005f84                udivmodhi4
+                0x00005f8a       0x3c c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divHI.o)
+                0x00005f8a                udivmodhi4
  .text.__udivhi3
-                0x00005fc0        0x8 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divHI.o)
-                0x00005fc0                __mspabi_divu
+                0x00005fc6        0x8 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divHI.o)
+                0x00005fc6                __mspabi_divu
  .text.snprintf
-                0x00005fc8       0x80 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-snprintf.o)
-                0x00005fc8                sniprintf
-                0x00005fc8                snprintf
+                0x00005fce       0x80 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-snprintf.o)
+                0x00005fce                sniprintf
+                0x00005fce                snprintf
  .text.__ssputs_r
-                0x00006048      0x11a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-svfprintf.o)
-                0x00006048                __ssputs_r
+                0x0000604e      0x11a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-svfprintf.o)
+                0x0000604e                __ssputs_r
  .text._svfprintf_r
-                0x00006162      0x29c c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-svfprintf.o)
-                0x00006162                _svfiprintf_r
-                0x00006162                _svfprintf_r
+                0x00006168      0x29c c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-svfprintf.o)
+                0x00006168                _svfiprintf_r
+                0x00006168                _svfprintf_r
  .text._printf_common
-                0x000063fe      0x118 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-vfprintf_i.o)
-                0x000063fe                _printf_common
+                0x00006404      0x118 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-vfprintf_i.o)
+                0x00006404                _printf_common
  .text._printf_i
-                0x00006516      0x392 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-vfprintf_i.o)
-                0x00006516                _printf_i
- .text.memchr   0x000068a8       0x24 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memchr.o)
-                0x000068a8                memchr
- .text.memcpy   0x000068cc       0x30 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memcpy.o)
-                0x000068cc                memcpy
- .text.memmove  0x000068fc       0x66 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memmove.o)
-                0x000068fc                memmove
- .text._free_r  0x00006962      0x12a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-freer.o)
-                0x00006962                _free_r
+                0x0000651c      0x392 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-vfprintf_i.o)
+                0x0000651c                _printf_i
+ .text.memchr   0x000068ae       0x24 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memchr.o)
+                0x000068ae                memchr
+ .text.memcpy   0x000068d2       0x30 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memcpy.o)
+                0x000068d2                memcpy
+ .text.memmove  0x00006902       0x66 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memmove.o)
+                0x00006902                memmove
+ .text._free_r  0x00006968      0x12a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-freer.o)
+                0x00006968                _free_r
  .text._malloc_r
-                0x00006a8c      0x132 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-mallocr.o)
-                0x00006a8c                _malloc_r
+                0x00006a92      0x132 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-mallocr.o)
+                0x00006a92                _malloc_r
  .text._realloc_r
-                0x00006bbe       0x6a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-reallocr.o)
-                0x00006bbe                _realloc_r
- .text._sbrk_r  0x00006c28       0x28 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-sbrkr.o)
-                0x00006c28                _sbrk_r
+                0x00006bc4       0x6a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-reallocr.o)
+                0x00006bc4                _realloc_r
+ .text._sbrk_r  0x00006c2e       0x28 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-sbrkr.o)
+                0x00006c2e                _sbrk_r
  .text._malloc_usable_size_r
-                0x00006c50       0x32 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-msizer.o)
-                0x00006c50                _malloc_usable_size_r
+                0x00006c56       0x32 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-nano-msizer.o)
+                0x00006c56                _malloc_usable_size_r
  .text.udivmodsi4
-                0x00006c82       0x86 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divSI.o)
-                0x00006c82                udivmodsi4
+                0x00006c88       0x86 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divSI.o)
+                0x00006c88                udivmodsi4
  .text.__udivsi3
-                0x00006d08       0x12 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divSI.o)
-                0x00006d08                __mspabi_divlu
-                0x00006d08                __mspabi_divul
+                0x00006d0e       0x12 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divSI.o)
+                0x00006d0e                __mspabi_divlu
+                0x00006d0e                __mspabi_divul
  .text.__umodsi3
-                0x00006d1a       0x12 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divSI.o)
-                0x00006d1a                __mspabi_remul
+                0x00006d20       0x12 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(lib2divSI.o)
+                0x00006d20                __mspabi_remul
  .text.__mspabi_slli
-                0x00006d2c        0xa c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(slli.o)
-                0x00006d30                __mspabi_slli
- .text._sbrk    0x00006d36       0x3e c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
-                0x00006d36                sbrk
-                0x00006d36                _sbrk
- .text.write    0x00006d74       0x88 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
-                0x00006d74                write
- .text          0x00006dfc        0x4 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
-                0x00006dfc                _libgloss_cio_hook
-                0x00006dfc                C$$IO$$
- .text.abort    0x00006e00        0xe c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-abort.o)
-                0x00006e00                abort
- .text.memset   0x00006e0e       0x1a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memset.o)
-                0x00006e0e                memset
+                0x00006d32        0xa c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/large/full-memory-range\libgcc.a(slli.o)
+                0x00006d36                __mspabi_slli
+ .text._sbrk    0x00006d3c       0x3e c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+                0x00006d3c                sbrk
+                0x00006d3c                _sbrk
+ .text.write    0x00006d7a       0x88 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+                0x00006d7a                write
+ .text          0x00006e02        0x4 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
+                0x00006e02                _libgloss_cio_hook
+                0x00006e02                C$$IO$$
+ .text.abort    0x00006e06        0xe c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-abort.o)
+                0x00006e06                abort
+ .text.memset   0x00006e14       0x1a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-memset.o)
+                0x00006e14                memset
  .text._raise_r
-                0x00006e28       0x72 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signal.o)
-                0x00006e28                _raise_r
- .text.raise    0x00006e9a        0xc c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signal.o)
-                0x00006e9a                raise
- .text._kill_r  0x00006ea6       0x28 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signalr.o)
-                0x00006ea6                _kill_r
+                0x00006e2e       0x72 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signal.o)
+                0x00006e2e                _raise_r
+ .text.raise    0x00006ea0        0xc c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signal.o)
+                0x00006ea0                raise
+ .text._kill_r  0x00006eac       0x28 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signalr.o)
+                0x00006eac                _kill_r
  .text._getpid_r
-                0x00006ece        0x6 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signalr.o)
-                0x00006ece                _getpid_r
- .text.getpid   0x00006ed4        0x6 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
-                0x00006ed4                getpid
- .text.kill     0x00006eda       0x10 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
-                0x00006eda                kill
- .text.exit     0x00006eea        0x4 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
-                0x00006eea                _exit
-                0x00006eea                exit
- .text.__errno  0x00006eee        0x6 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-errno.o)
-                0x00006eee                __errno
+                0x00006ed4        0x6 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-signalr.o)
+                0x00006ed4                _getpid_r
+ .text.getpid   0x00006eda        0x6 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+                0x00006eda                getpid
+ .text.kill     0x00006ee0       0x10 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+                0x00006ee0                kill
+ .text.exit     0x00006ef0        0x4 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+                0x00006ef0                _exit
+                0x00006ef0                exit
+ .text.__errno  0x00006ef4        0x6 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libc.a(lib_a-errno.o)
+                0x00006ef4                __errno
  *(.text.*personality*)
  *(.gnu.warning)
  *(.interp .hash .dynsym .dynstr .gnu.version*)
                 [!provide]                PROVIDE (__etext = .)
                 [!provide]                PROVIDE (_etext = .)
                 [!provide]                PROVIDE (etext = .)
-                0x00006ef4                . = ALIGN (0x2)
+                0x00006efa                . = ALIGN (0x2)
  *(.init)
  *(.fini)
  *(.tm_clone_table)
 
-.lowtext        0x00006ef4      0x17c
- .lowtext       0x00006ef4      0x17c ./arch/hal.o
-                0x00006ef4                arch_tick_irq
-                0x00006f72                arch_time_irq
+.lowtext        0x00006efa      0x134
+ .lowtext       0x00006efa      0x134 ./arch/hal.o
+                0x00006efa                arch_tick_irq
+                0x00006f78                arch_time_irq
 
 .upper.text     0x00010002        0x0
                 0x00010002                . = ALIGN (0x2)
@@ -1508,7 +1511,7 @@ __reset_vector  0x0000fffe        0x2
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000      0x500
+.debug_aranges  0x00000000      0x508
  *(.debug_aranges)
  .debug_aranges
                 0x00000000       0x60 ./main.o
@@ -1523,44 +1526,44 @@ __reset_vector  0x0000fffe        0x2
  .debug_aranges
                 0x000001b8      0x110 ./ds/rbtree.o
  .debug_aranges
-                0x000002c8       0x78 ./private/sched_impl.o
+                0x000002c8       0x80 ./private/sched_impl.o
  .debug_aranges
-                0x00000340       0x50 ./private/sleep_queue.o
+                0x00000348       0x50 ./private/sleep_queue.o
  .debug_aranges
-                0x00000390       0x20 ./private/thread_impl.o
+                0x00000398       0x20 ./private/thread_impl.o
  .debug_aranges
-                0x000003b0       0x78 ./schedulers/vtrr/vtrr.o
+                0x000003b8       0x78 ./schedulers/vtrr/vtrr.o
  .debug_aranges
-                0x00000428       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+                0x00000430       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
  .debug_aranges
-                0x00000448       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+                0x00000450       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
  .debug_aranges
-                0x00000468       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
+                0x00000470       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
  .debug_aranges
-                0x00000488       0x58 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+                0x00000490       0x58 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
  .debug_aranges
-                0x000004e0       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+                0x000004e8       0x20 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000    0x304a5
+.debug_info     0x00000000    0x304a0
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000     0x5b02 ./main.o
- .debug_info    0x00005b02     0x69de ./arch/hal.o
- .debug_info    0x0000c4e0     0x6327 ./core/irq.o
- .debug_info    0x00012807     0x614e ./core/panic.o
- .debug_info    0x00018955     0x62e5 ./core/sched.o
- .debug_info    0x0001ec3a     0x3496 ./ds/rbtree.o
- .debug_info    0x000220d0     0x639c ./private/sched_impl.o
- .debug_info    0x0002846c      0x6d6 ./private/sleep_queue.o
- .debug_info    0x00028b42     0x6127 ./private/thread_impl.o
- .debug_info    0x0002ec69      0xb8e ./schedulers/vtrr/vtrr.o
- .debug_info    0x0002f7f7      0x155 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
- .debug_info    0x0002f94c      0xac2 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
- .debug_info    0x0003040e       0x26 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
- .debug_info    0x00030434       0x22 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
- .debug_info    0x00030456       0x4f c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+ .debug_info    0x00005b02     0x69c5 ./arch/hal.o
+ .debug_info    0x0000c4c7     0x6327 ./core/irq.o
+ .debug_info    0x000127ee     0x614e ./core/panic.o
+ .debug_info    0x0001893c     0x62e5 ./core/sched.o
+ .debug_info    0x0001ec21     0x3496 ./ds/rbtree.o
+ .debug_info    0x000220b7     0x63b0 ./private/sched_impl.o
+ .debug_info    0x00028467      0x6d6 ./private/sleep_queue.o
+ .debug_info    0x00028b3d     0x6127 ./private/thread_impl.o
+ .debug_info    0x0002ec64      0xb8e ./schedulers/vtrr/vtrr.o
+ .debug_info    0x0002f7f2      0x155 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+ .debug_info    0x0002f947      0xac2 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+ .debug_info    0x00030409       0x26 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
+ .debug_info    0x0003042f       0x22 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+ .debug_info    0x00030451       0x4f c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
 
 .debug_abbrev   0x00000000     0x1d5a
  *(.debug_abbrev)
@@ -1580,7 +1583,7 @@ __reset_vector  0x0000fffe        0x2
  .debug_abbrev  0x00001cf9       0x12 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
  .debug_abbrev  0x00001d0b       0x4f c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
 
-.debug_line     0x00000000     0x6849
+.debug_line     0x00000000     0x6876
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x1f5 ./main.o
  .debug_line.text.a
@@ -1601,176 +1604,178 @@ __reset_vector  0x0000fffe        0x2
                 0x00000563        0x0 ./main.o
  .debug_line    0x00000563      0x257 ./arch/hal.o
  .debug_line.text.arch_thread_exit
-                0x000007ba       0x75 ./arch/hal.o
+                0x000007ba       0x7b ./arch/hal.o
  .debug_line.text.arch_idle
-                0x0000082f       0x24 ./arch/hal.o
+                0x00000835       0x24 ./arch/hal.o
  .debug_line.text.arch_init_stack
-                0x00000853      0x1c8 ./arch/hal.o
+                0x00000859      0x1c8 ./arch/hal.o
  .debug_line.text.arch_sched_start
-                0x00000a1b       0xe8 ./arch/hal.o
+                0x00000a21       0xe8 ./arch/hal.o
  .debug_line.text.arch_panic
-                0x00000b03       0x7d ./arch/hal.o
+                0x00000b09       0x7d ./arch/hal.o
  .debug_line.text.arch_yield
-                0x00000b80      0x167 ./arch/hal.o
+                0x00000b86      0x167 ./arch/hal.o
  .debug_line.text.arch_yield_higher
-                0x00000ce7      0x16a ./arch/hal.o
+                0x00000ced      0x16a ./arch/hal.o
  .debug_line.text.arch_sleep_for
-                0x00000e51       0xb7 ./arch/hal.o
+                0x00000e57       0xb7 ./arch/hal.o
  .debug_line.lowtext
-                0x00000f08      0x377 ./arch/hal.o
+                0x00000f0e      0x385 ./arch/hal.o
  .debug_line_end
-                0x0000127f        0x0 ./arch/hal.o
- .debug_line    0x0000127f      0x28d ./core/irq.o
+                0x00001293        0x0 ./arch/hal.o
+ .debug_line    0x00001293      0x28d ./core/irq.o
  .debug_line.text.irq_disable
-                0x0000150c       0x2f ./core/irq.o
+                0x00001520       0x2f ./core/irq.o
  .debug_line.text.irq_enable
-                0x0000153b       0x2f ./core/irq.o
+                0x0000154f       0x2f ./core/irq.o
  .debug_line.text.irq_lock
-                0x0000156a       0xc9 ./core/irq.o
+                0x0000157e       0xc9 ./core/irq.o
  .debug_line.text.irq_unlock
-                0x00001633       0x8d ./core/irq.o
+                0x00001647       0x8d ./core/irq.o
  .debug_line_end
-                0x000016c0        0x0 ./core/irq.o
- .debug_line    0x000016c0      0x285 ./core/panic.o
+                0x000016d4        0x0 ./core/irq.o
+ .debug_line    0x000016d4      0x285 ./core/panic.o
  .debug_line.text.panic
-                0x00001945       0x2c ./core/panic.o
+                0x00001959       0x2c ./core/panic.o
  .debug_line_end
-                0x00001971        0x0 ./core/panic.o
- .debug_line    0x00001971      0x25a ./core/sched.o
+                0x00001985        0x0 ./core/panic.o
+ .debug_line    0x00001985      0x25a ./core/sched.o
  .debug_line.text.sched_init
-                0x00001bcb       0x2f ./core/sched.o
+                0x00001bdf       0x2f ./core/sched.o
  .debug_line.text.sched_add
-                0x00001bfa       0x2f ./core/sched.o
+                0x00001c0e       0x2f ./core/sched.o
  .debug_line.text.sched_start
-                0x00001c29       0x2f ./core/sched.o
+                0x00001c3d       0x2f ./core/sched.o
  .debug_line.text.sched_yield
-                0x00001c58       0x2f ./core/sched.o
+                0x00001c6c       0x2f ./core/sched.o
  .debug_line.text.sched_yield_higher
-                0x00001c87       0x2f ./core/sched.o
+                0x00001c9b       0x2f ./core/sched.o
  .debug_line.text.sched_sleep
-                0x00001cb6       0x30 ./core/sched.o
+                0x00001cca       0x30 ./core/sched.o
  .debug_line_end
-                0x00001ce6        0x0 ./core/sched.o
- .debug_line    0x00001ce6       0xb0 ./ds/rbtree.o
+                0x00001cfa        0x0 ./core/sched.o
+ .debug_line    0x00001cfa       0xb0 ./ds/rbtree.o
  .debug_line.text.__rb_inorder_foreach
-                0x00001d96       0x5c ./ds/rbtree.o
+                0x00001daa       0x5c ./ds/rbtree.o
  .debug_line.text.__rb_delete_rebalance
-                0x00001df2      0xeed ./ds/rbtree.o
+                0x00001e06      0xeed ./ds/rbtree.o
  .debug_line.text.rb_delete.part.0
-                0x00002cdf      0x4c7 ./ds/rbtree.o
+                0x00002cf3      0x4c7 ./ds/rbtree.o
  .debug_line.text.rbtree_lcached_init
-                0x000031a6       0x58 ./ds/rbtree.o
+                0x000031ba       0x58 ./ds/rbtree.o
  .debug_line.text.rbtree_rcached_init
-                0x000031fe       0x58 ./ds/rbtree.o
+                0x00003212       0x58 ./ds/rbtree.o
  .debug_line.text.rbnode_init
-                0x00003256       0x5e ./ds/rbtree.o
+                0x0000326a       0x5e ./ds/rbtree.o
  .debug_line.text.rb_insert
-                0x000032b4     0x16f6 ./ds/rbtree.o
+                0x000032c8     0x16f6 ./ds/rbtree.o
  .debug_line.text.rb_lcached_insert
-                0x000049aa       0x74 ./ds/rbtree.o
+                0x000049be       0x74 ./ds/rbtree.o
  .debug_line.text.rb_rcached_insert
-                0x00004a1e       0x74 ./ds/rbtree.o
+                0x00004a32       0x74 ./ds/rbtree.o
  .debug_line.text.rb_prev
-                0x00004a92       0xce ./ds/rbtree.o
+                0x00004aa6       0xce ./ds/rbtree.o
  .debug_line.text.rb_lcached_delete
-                0x00004b60      0x162 ./ds/rbtree.o
+                0x00004b74      0x162 ./ds/rbtree.o
  .debug_line.text.rb_rcached_delete
-                0x00004cc2      0x162 ./ds/rbtree.o
+                0x00004cd6      0x162 ./ds/rbtree.o
  .debug_line.text.rb_inorder_foreach
-                0x00004e24       0x62 ./ds/rbtree.o
+                0x00004e38       0x62 ./ds/rbtree.o
  .debug_line_end
-                0x00004e86        0x0 ./ds/rbtree.o
- .debug_line    0x00004e86      0x229 ./private/sched_impl.o
+                0x00004e9a        0x0 ./ds/rbtree.o
+ .debug_line    0x00004e9a      0x229 ./private/sched_impl.o
  .debug_line.text.idle
-                0x000050af       0x42 ./private/sched_impl.o
+                0x000050c3       0x42 ./private/sched_impl.o
  .debug_line.text.sched_impl_init
-                0x000050f1       0x31 ./private/sched_impl.o
+                0x00005105       0x31 ./private/sched_impl.o
  .debug_line.text.sched_impl_add
-                0x00005122       0x1f ./private/sched_impl.o
+                0x00005136       0x1f ./private/sched_impl.o
  .debug_line.text.sched_impl_register
-                0x00005141       0x1f ./private/sched_impl.o
+                0x00005155       0x1f ./private/sched_impl.o
  .debug_line.text.sched_impl_start
-                0x00005160       0x19 ./private/sched_impl.o
+                0x00005174       0x19 ./private/sched_impl.o
  .debug_line.text.sched_impl_run
-                0x00005179       0x43 ./private/sched_impl.o
+                0x0000518d       0x43 ./private/sched_impl.o
  .debug_line.text.sched_impl_yield
-                0x000051bc       0x3d ./private/sched_impl.o
+                0x000051d0       0x3d ./private/sched_impl.o
  .debug_line.text.sched_impl_yield_higher
-                0x000051f9       0x3d ./private/sched_impl.o
+                0x0000520d       0x3d ./private/sched_impl.o
  .debug_line.text.sched_impl_sleep_until
-                0x00005236       0x2b ./private/sched_impl.o
+                0x0000524a       0x2b ./private/sched_impl.o
+ .debug_line.text.sched_impl_thread_exit
+                0x00005275       0x19 ./private/sched_impl.o
  .debug_line_end
-                0x00005261        0x0 ./private/sched_impl.o
- .debug_line    0x00005261      0x186 ./private/sleep_queue.o
+                0x0000528e        0x0 ./private/sched_impl.o
+ .debug_line    0x0000528e      0x186 ./private/sleep_queue.o
  .debug_line.text.sleepq_entry_cmp
-                0x000053e7       0x67 ./private/sleep_queue.o
+                0x00005414       0x67 ./private/sleep_queue.o
  .debug_line.text.sleepq_entry_copy
-                0x0000544e       0x6f ./private/sleep_queue.o
+                0x0000547b       0x6f ./private/sleep_queue.o
  .debug_line.text.sleep_queue_init
-                0x000054bd       0x23 ./private/sleep_queue.o
+                0x000054ea       0x23 ./private/sleep_queue.o
  .debug_line.text.sleep_queue_push
-                0x000054e0       0x35 ./private/sleep_queue.o
+                0x0000550d       0x35 ./private/sleep_queue.o
  .debug_line.text.sleep_queue_peek
-                0x00005515       0x77 ./private/sleep_queue.o
+                0x00005542       0x77 ./private/sleep_queue.o
  .debug_line.text.sleep_queue_pop
-                0x0000558c       0x23 ./private/sleep_queue.o
+                0x000055b9       0x23 ./private/sleep_queue.o
  .debug_line_end
-                0x000055af        0x0 ./private/sleep_queue.o
- .debug_line    0x000055af      0x1f0 ./private/thread_impl.o
+                0x000055dc        0x0 ./private/sleep_queue.o
+ .debug_line    0x000055dc      0x1f0 ./private/thread_impl.o
  .debug_line.text.thread_impl_init
-                0x0000579f       0x33 ./private/thread_impl.o
+                0x000057cc       0x33 ./private/thread_impl.o
  .debug_line_end
-                0x000057d2        0x0 ./private/thread_impl.o
- .debug_line    0x000057d2      0x129 ./schedulers/vtrr/vtrr.o
+                0x000057ff        0x0 ./private/thread_impl.o
+ .debug_line    0x000057ff      0x129 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_client_cmp
-                0x000058fb       0x50 ./schedulers/vtrr/vtrr.o
+                0x00005928       0x50 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_client_copy
-                0x0000594b       0x72 ./schedulers/vtrr/vtrr.o
+                0x00005978       0x72 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_client_reset
-                0x000059bd       0x42 ./schedulers/vtrr/vtrr.o
+                0x000059ea       0x42 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_init
-                0x000059ff       0xa6 ./schedulers/vtrr/vtrr.o
+                0x00005a2c       0xa6 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_start
-                0x00005aa5       0x7a ./schedulers/vtrr/vtrr.o
+                0x00005ad2       0x7a ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_add
-                0x00005b1f      0x15b ./schedulers/vtrr/vtrr.o
+                0x00005b4c      0x15b ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_register
-                0x00005c7a       0xe5 ./schedulers/vtrr/vtrr.o
+                0x00005ca7       0xe5 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_deregister
-                0x00005d5f       0x78 ./schedulers/vtrr/vtrr.o
+                0x00005d8c       0x78 ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_run
-                0x00005dd7      0x29d ./schedulers/vtrr/vtrr.o
+                0x00005e04      0x29d ./schedulers/vtrr/vtrr.o
  .debug_line.text.vtrr_yield_higher
-                0x00006074      0x2f4 ./schedulers/vtrr/vtrr.o
+                0x000060a1      0x2f4 ./schedulers/vtrr/vtrr.o
  .debug_line_end
-                0x00006368        0x0 ./schedulers/vtrr/vtrr.o
- .debug_line    0x00006368       0x5e c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+                0x00006395        0x0 ./schedulers/vtrr/vtrr.o
+ .debug_line    0x00006395       0x5e c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
  .debug_line.text._sbrk
-                0x000063c6       0x8d c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+                0x000063f3       0x8d c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
  .debug_line_end
-                0x00006453        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
- .debug_line    0x00006453      0x13f c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+                0x00006480        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+ .debug_line    0x00006480      0x13f c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
  .debug_line.text.write
-                0x00006592      0x150 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+                0x000065bf      0x150 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
  .debug_line_end
-                0x000066e2        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
- .debug_line    0x000066e2       0x65 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
+                0x0000670f        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+ .debug_line    0x0000670f       0x65 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
  .debug_line_end
-                0x00006747        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
- .debug_line    0x00006747       0x57 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+                0x00006774        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
+ .debug_line    0x00006774       0x57 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
  .debug_line.text.getpid
-                0x0000679e       0x16 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+                0x000067cb       0x16 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
  .debug_line.text.kill
-                0x000067b4       0x11 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+                0x000067e1       0x11 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
  .debug_line_end
-                0x000067c5        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
- .debug_line    0x000067c5       0x50 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+                0x000067f2        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+ .debug_line    0x000067f2       0x50 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
  .debug_line.text.exit
-                0x00006815       0x34 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+                0x00006842       0x34 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
  .debug_line_end
-                0x00006849        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+                0x00006876        0x0 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
 
-.debug_frame    0x00000000     0x149c
+.debug_frame    0x00000000     0x14ac
  *(.debug_frame)
  .debug_frame   0x00000000      0x16c ./main.o
  .debug_frame   0x0000016c      0x100 ./arch/hal.o
@@ -1778,20 +1783,20 @@ __reset_vector  0x0000fffe        0x2
  .debug_frame   0x000002e0       0x24 ./core/panic.o
  .debug_frame   0x00000304      0x17c ./core/sched.o
  .debug_frame   0x00000480      0x970 ./ds/rbtree.o
- .debug_frame   0x00000df0      0x1b0 ./private/sched_impl.o
- .debug_frame   0x00000fa0       0x98 ./private/sleep_queue.o
- .debug_frame   0x00001038       0x38 ./private/thread_impl.o
- .debug_frame   0x00001070      0x35c ./schedulers/vtrr/vtrr.o
- .debug_frame   0x000013cc       0x44 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
- .debug_frame   0x00001410       0x68 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
- .debug_frame   0x00001478       0x24 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+ .debug_frame   0x00000df0      0x1c0 ./private/sched_impl.o
+ .debug_frame   0x00000fb0       0x98 ./private/sleep_queue.o
+ .debug_frame   0x00001048       0x38 ./private/thread_impl.o
+ .debug_frame   0x00001080      0x35c ./schedulers/vtrr/vtrr.o
+ .debug_frame   0x000013dc       0x44 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+ .debug_frame   0x00001420       0x68 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+ .debug_frame   0x00001488       0x24 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
 
-.debug_str      0x00000000     0x4e45
+.debug_str      0x00000000     0x4e5c
  *(.debug_str)
  .debug_str     0x00000000     0x3ab6 ./main.o
                                0x3b65 (size before relaxing)
  .debug_str     0x00003ab6      0x7e6 ./arch/hal.o
-                               0x4325 (size before relaxing)
+                               0x4311 (size before relaxing)
  .debug_str     0x0000429c       0xaa ./core/irq.o
                                0x3fba (size before relaxing)
  .debug_str     0x00004346       0x10 ./core/panic.o
@@ -1800,22 +1805,22 @@ __reset_vector  0x0000fffe        0x2
                                0x3fef (size before relaxing)
  .debug_str     0x00004431      0x41f ./ds/rbtree.o
                                 0x75f (size before relaxing)
- .debug_str     0x00004850       0xec ./private/sched_impl.o
-                               0x4063 (size before relaxing)
- .debug_str     0x0000493c       0xa8 ./private/sleep_queue.o
+ .debug_str     0x00004850      0x103 ./private/sched_impl.o
+                               0x407a (size before relaxing)
+ .debug_str     0x00004953       0xa8 ./private/sleep_queue.o
                                 0x500 (size before relaxing)
- .debug_str     0x000049e4       0x2a ./private/thread_impl.o
+ .debug_str     0x000049fb       0x2a ./private/thread_impl.o
                                0x3f07 (size before relaxing)
- .debug_str     0x00004a0e      0x1e3 ./schedulers/vtrr/vtrr.o
+ .debug_str     0x00004a25      0x1e3 ./schedulers/vtrr/vtrr.o
                                 0x56d (size before relaxing)
- .debug_str     0x00004bf1       0xaf c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+ .debug_str     0x00004c08       0xaf c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
                                  0xba (size before relaxing)
- .debug_str     0x00004ca0       0x8a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+ .debug_str     0x00004cb7       0x8a c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
                                 0x5bf (size before relaxing)
- .debug_str     0x00004d2a       0xb4 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
- .debug_str     0x00004dde       0x37 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+ .debug_str     0x00004d41       0xb4 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(cio.o)
+ .debug_str     0x00004df5       0x37 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
                                  0xbc (size before relaxing)
- .debug_str     0x00004e15       0x30 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+ .debug_str     0x00004e2c       0x30 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
                                  0xaa (size before relaxing)
 
 .debug_loc      0x00000000     0x4cc7
@@ -1851,7 +1856,7 @@ __reset_vector  0x0000fffe        0x2
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000     0x14b8
+.debug_ranges   0x00000000     0x14c0
  *(.debug_ranges)
  .debug_ranges  0x00000000       0x68 ./main.o
  .debug_ranges  0x00000068       0xd8 ./arch/hal.o
@@ -1859,14 +1864,14 @@ __reset_vector  0x0000fffe        0x2
  .debug_ranges  0x00000190       0x10 ./core/panic.o
  .debug_ranges  0x000001a0       0x70 ./core/sched.o
  .debug_ranges  0x00000210      0xfb0 ./ds/rbtree.o
- .debug_ranges  0x000011c0       0x68 ./private/sched_impl.o
- .debug_ranges  0x00001228       0x40 ./private/sleep_queue.o
- .debug_ranges  0x00001268       0x10 ./private/thread_impl.o
- .debug_ranges  0x00001278      0x178 ./schedulers/vtrr/vtrr.o
- .debug_ranges  0x000013f0       0x10 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
- .debug_ranges  0x00001400       0x58 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
- .debug_ranges  0x00001458       0x50 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
- .debug_ranges  0x000014a8       0x10 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
+ .debug_ranges  0x000011c0       0x70 ./private/sched_impl.o
+ .debug_ranges  0x00001230       0x40 ./private/sleep_queue.o
+ .debug_ranges  0x00001270       0x10 ./private/thread_impl.o
+ .debug_ranges  0x00001280      0x178 ./schedulers/vtrr/vtrr.o
+ .debug_ranges  0x000013f8       0x10 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(sbrk.o)
+ .debug_ranges  0x00001408       0x58 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(write.o)
+ .debug_ranges  0x00001460       0x50 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(ciosyscalls.o)
+ .debug_ranges  0x000014b0       0x10 c:/ti/msp430-gcc/bin/../lib/gcc/msp430-elf/9.2.0/../../../../msp430-elf/lib/large/full-memory-range\libnosys.a(exit.o)
 
 .debug_macro
  *(.debug_macro)
