@@ -133,11 +133,11 @@ int main(void)
 	for (int i = 0; i < 6; ++i) {
 		thread_impl_init(&tcbs[i].base, sched_test_stacks[i] + STACK_SIZE, fns[i], run_counts[i]);
 		tcbs[i].cs_lock = 1;
-		sched_add(&clients[i], i + 1);
+		sched_add(&tcbs[i], i + 1);
 	}
 
-//	sched_start();
-//
+	sched_start();
+
 
 	while (1) {
 		_low_power_mode_3();

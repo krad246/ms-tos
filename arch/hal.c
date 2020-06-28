@@ -159,7 +159,7 @@ void arch_idle(void) {
  */
 static void __attribute__((naked, noreturn)) arch_thread_exit(int exit_code) {
 	arch_disable_interrupts();
-	sched_impl_thread_exit();
+//	sched_impl_thread_exit();
 	arch_restore_context();
 
 	while (1) {
@@ -352,7 +352,7 @@ void __attribute__((noreturn, noinline)) arch_panic(panic_code_t crash_code, con
 	 * will cause the return PC to point 4 bytes ahead. Thus, we subtract 4 for the faulting address.
 	 */
 	#ifdef __MSP430X_LARGE__
-		__asm__ __volatile__("mov.a 8(sp), %0 " : : "m"(caller));
+		__asm__ __volatile__("movx.a 8(sp), %0 " : : "m"(caller));
 	#else
 		__asm__ __volatile__("mov.w 4(sp), %0" : : "m"(caller));
 	#endif
@@ -548,7 +548,7 @@ static void arch_sleep_until(unsigned int wake_time) {
 			panic(PANIC_ASSERT_FAIL, "arch_sleep_until() could not schedule a new thread wakeup because it was NULL");
 		}
 	#endif
-//	arch_schedule_next_wakeup(next_waker->sq_entry.wake_time);
+	arch_schedule_next_wakeup(next_waker->sq_entry.wake_time);
 
 	/* Transfer control to a new thread. */
 	arch_yield();

@@ -1,0 +1,9 @@
+!arch/
+!core/
+!ds/
+!ext/
+!include/
+!private/
+!schedulers/
+!main.c
+!port_config.h

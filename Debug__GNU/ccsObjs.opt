@@ -1,0 +1,1 @@
+"./main.o" "./arch/hal.o" "./core/irq.o" "./core/panic.o" "./core/sched.o" "./core/thread.o" "./ds/rbtree.o" "./private/sched_impl.o" "./private/sleep_queue.o" "./private/thread_impl.o" "./schedulers/lottery/lottery.o" "./schedulers/vtrr/vtrr.o" -T"../msp430fr5994.ld" -Wl,--start-group -lgcc -lc -Wl,--end-group 
