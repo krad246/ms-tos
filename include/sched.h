@@ -26,44 +26,6 @@ typedef struct thread thread_t;
 
 typedef unsigned int sched_status_t;
 
-//typedef struct sched {
-//	sched_impl_mgr_t instance;
-//	sleep_queue_t sleep_mgr;
-//
-//	sched_status_t state;
-//	thread_t *sched_active_thread;
-//
-//	#ifdef CONFIG_USE_KERNEL_STACK
-//		uint8_t sched_isr_stack[CONFIG_ISR_STACK_SIZE];
-//	#endif
-//
-//	#ifdef CONFIG_USE_TICK_HOOK
-//		void (*sched_tick_cb)(void *arg);
-//		void *tick_hook_params;
-//	#endif
-//
-//} sched_t;
-//
-//#define SCHED_STATUS_IN_IRQ_POS 								(0)
-//#define SCHED_STATUS_CONTEXT_SWITCH_REQUEST_POS 				(1)
-//#define SCHED_STATUS_IRQ_LOCKED_POS 							(2)
-//#define SCHED_STATUS_THREAD_COUNT_POS							(3)
-//
-//#define SCHED_STATUS_IN_IRQ_MASK 								(1 << SCHED_STATUS_IN_IRQ_POS)
-//#define SCHED_STATUS_CONTEXT_SWITCH_REQUEST_MASK 				(1 << SCHED_STATUS_CONTEXT_SWITCH_REQUEST_POS)
-//#define SCHED_STATUS_IRQ_LOCKED_MASK 							(1 << SCHED_STATUS_IRQ_LOCKED_POS)
-//
-//#define SCHED_STATUS_THREAD_COUNT_MASK 							~(SCHED_STATUS_IN_IRQ_MASK | \
-//																SCHED_STATUS_CONTEXT_SWITCH_REQUEST_MASK | \
-																SCHED_STATUS_IRQ_LOCKED_MASK)
-
-//#define SCHED_STATUS_IN_IRQ										SCHED_STATUS_IN_IRQ_MASK
-//#define SCHED_STATUS_CONTEXT_SWITCH_REQUEST 					SCHED_STATUS_CONTEXT_SWITCH_REQUEST_MASK
-//#define SCHED_STATUS_IRQ_LOCKED									SCHED_STATUS_IRQ_LOCKED_MASK
-
-//extern volatile sched_t sched_g;
-//#define sched_impl_active_client(mptr)	container_of(__sched_impl_active_client(mptr), thread_t, cli)
-
 typedef enum {
     STATUS_STOPPED,
     STATUS_ZOMBIE,

@@ -8,6 +8,10 @@
 #include "rtos.h"
 #include "sched_impl.h"
 #include "irq.h"
+#include "thread_impl.h"
+#include "hal.h"
+
+extern volatile sched_impl_t sched_p;
 
 inline void irq_disable(void) {
 	arch_disable_interrupts();

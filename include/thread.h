@@ -12,11 +12,6 @@
 #include "sleep_queue.h"
 #include "thread_impl.h"
 
-//typedef struct sched_impl_client sched_impl_client_t;
-//typedef struct sleep_queue_entry sleep_queue_entry_t;
-
-
-
 typedef struct thread {
 	thread_impl_t base;
 	irq_lock_t cs_lock;

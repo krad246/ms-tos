@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <limits.h>
 
+#include "port_config.h"
+#include "panic.h"
 #include "rbtree.h"
 
 #ifdef __cplusplus
@@ -27,25 +29,25 @@ extern "C" {
  */
 
 typedef struct sched_vtrr_client {
-	unsigned int shares;		/* thread priority */
-	unsigned int runs_left;		/* number of quanta left to go */
-	unsigned int fin_time;		/* virtual timestamp for VTRR allocation computations */
-	unsigned int timestep;		/* virtual progress amount for each timestep */
+	unsigned int shares;					/* thread priority */
+	unsigned int runs_left;					/* number of quanta left to go */
+	unsigned int fin_time;					/* virtual timestamp for VTRR allocation computations */
+	unsigned int timestep;					/* virtual progress amount for each timestep */
 
-	rbnode rq_entry;			/* red-black tree entry for sorted order */
+	rbnode rq_entry;						/* red-black tree entry for sorted order */
 } vtrr_client_t;
 
 typedef struct sched_vtrr_mgr {
-	unsigned int shares;		/* total number of slices to hand out per cycle */
-	unsigned int runs_left;		/* number of slices remaining before a new scheduling cycle */
-	unsigned int group_time;	/* virtual timestamp for thread progress comparisons */
-	unsigned int timestep;		/* virtual progress amount for each timestep */
+	unsigned int shares;					/* total number of slices to hand out per cycle */
+	unsigned int runs_left;					/* number of slices remaining before a new scheduling cycle */
+	unsigned int group_time;				/* virtual timestamp for thread progress comparisons */
+	unsigned int timestep;					/* virtual progress amount for each timestep */
 
-	rbtree_rcached rq;			/* red-black tree for sorted threads, maximum is cached */
-	rbnode *curr_max;			/* pointer to the highest priority runnable thread */
+	rbtree_rcached rq;						/* red-black tree for sorted threads, maximum is cached */
+	rbnode *curr_max;						/* pointer to the highest priority runnable thread */
 
-	rbnode *curr_cli;			/* pointer to the currently running thread */
-	rbnode *next_cli;			/* pointer to the thread scheduled for the next timeslice */
+	rbnode *curr_cli;						/* pointer to the currently running thread */
+	rbnode *next_cli;						/* pointer to the thread scheduled for the next timeslice */
 } vtrr_mgr_t;
 
 /** @} */

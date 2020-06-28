@@ -10,36 +10,142 @@
 /*-----------------------------------------------------------*/
 
 /**
- * @name Interrupt control wrappers
+ * @name MSP430 hardware-specific OS feature configuration.
  * @{
  */
 
-#define ARCH_FLAG_INTERRUPTS_ENABLED ((arch_flags_t) GIE)
+/* MSP430 hardware timer-specific interrupt vectors */
+#define ARCH_TICK_VECTOR 								TIMER0_A0_VECTOR
+#define ARCH_TIMEKEEPING_VECTOR							TIMER0_A1_VECTOR
 
-inline void arch_disable_interrupts(void) {
-	__disable_interrupt();	/* defined in msp430.h */
+/* Attributes of our timer setup */
+#define ARCH_TICK_CLK_FREQ								4096
+#define ARCH_TIME_MAX_SECONDS							(unsigned int) (65536.0 / ARCH_TICK_CLK_FREQ)
+
+/* Equivalent period for the configured tick rate */
+#define CONFIG_TICK_RATE_MS								(unsigned int) (1000.0 / CONFIG_TICK_RATE_HZ)
+
+/* Calculate hardware parameters to achieve the constants above, with or w / o approximation */
+#if (CONFIG_USE_FAST_MATH == 1)
+	#define ARCH_1MS									((ARCH_TICK_CLK_FREQ) >> 10)
+	#define ARCH_MS_TO_CYCLES(ms)						((((uint32_t) ARCH_TICK_CLK_FREQ) * ((uint32_t) ms)) >> 10)
+#else
+	#define ROUND(x) 									((x) >= 0 ? (long) ((x) + 0.5) : (long) ((x) - 0.5))
+	#define ARCH_1MS									(double) (ARCH_TICK_CLK_FREQ / 1000.0)
+	#define ARCH_MS_TO_CYCLES(ms)						ROUND(((double) ms) * ARCH_1MS)
+#endif
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Sets up OS time slicing interrupt.
+ * @param[in] ms period of timer interrupt, measured in cycles.
+ */
+static inline void arch_setup_os_timer(unsigned int period) {
+	TA0CTL = MC_0 | TACLR;
+	TA0CCR0 = period;
+	TA0CCTL0 = CCIE;
+	TA0CTL = TASSEL_1 | ID_3 | MC_2;
 }
 
-inline void arch_enable_interrupts(void) {
-	__enable_interrupt();	/* defined in msp430.h */
+/**
+ * @brief Stops and clears the OS timer.
+ */
+static inline void arch_disable_os_timer(void) {
+	TA0CTL = MC_0 | TACLR;
 }
 
-inline void arch_set_interrupt_state(arch_flags_t mask) {
-	/* erase the interrupt enable bit, then set it if appropriate */
-	__bic_SR_register(GIE);
-	__bis_SR_register(mask & GIE);
+inline unsigned int arch_time_now(void) {
+	return TA0R;
 }
 
-inline arch_flags_t arch_get_interrupt_state(void) {
-	/* nothing but the interrupt enable bit GIE matters */
-	return __get_SR_register() & GIE;
+/*---*/
+
+/**
+ * @brief Acknowledges a wakeup interrupt, but doesn't stop the system timer.
+ */
+static inline void arch_acknowledge_wakeup_interrupt(void) {
+	#if (CONFIG_USE_TICKLESS_IDLE == 1)
+		TA0CCR1 &= ~CCIFG;
+	#endif
 }
 
-inline bool arch_interrupts_enabled(void) {
-	return (arch_get_interrupt_state() == ARCH_FLAG_INTERRUPTS_ENABLED);
+/**
+ * @brief Sets up an interrupt at the specified time.
+ * @param[in] next_wake_time When to expect a thread awakening, measured in cycles.
+ */
+static inline void arch_schedule_next_wakeup(unsigned int next_wake_time) {
+	#if (CONFIG_USE_TICKLESS_IDLE == 1)
+		TA0CCR1 = next_wake_time;
+		TA0CCTL1 |= CCIE;
+	#else
+		(void) next_wake_time;
+	#endif
+}
+
+/**
+ * @brief Masks tick interrupts, but doesn't stop the tick timer.
+ */
+static inline void arch_suppress_wakeup_interrupt(void) {
+	#if (CONFIG_USE_TICKLESS_IDLE == 1)
+		TA0CCR1 &= ~CCIE;
+	#endif
+}
+
+/*---*/
+
+/**
+ * @brief Acknowledges a tick interrupt, but doesn't stop the tick timer.
+ */
+static inline void arch_acknowledge_tick_interrupt(void) {
+	#if (CONFIG_USE_TICKLESS_IDLE == 1)
+		TA0CCR0 &= ~CCIFG;
+	#endif
+}
+
+/**
+ * @brief Sets up an interrupt so the next context switch will occur.
+ * @param[in] next_wake_time When to expect a thread awakening, measured in cycles.
+ */
+static inline void arch_schedule_next_tick(unsigned int next_tick_time) {
+	#if (CONFIG_USE_TICKLESS_IDLE == 1)
+		TA0CCR0 = TA0R + next_tick_time;
+		TA0CCTL0 |= CCIE;
+	#endif
+}
+
+/**
+ * @brief Masks wakeup interrupt, but doesn't stop the time keeper.
+ */
+static inline void arch_suppress_tick_interrupt() {
+	#if (CONFIG_USE_TICKLESS_IDLE == 1)
+		TA0CCR0 &= ~CCIE;
+	#endif
+}
+
+/*---*/
+
+/**
+ * @brief Sets up the watchdog for the watchdog monitor.
+ */
+static inline void arch_setup_watchdog_interrupt(void) {
+	#if (CONFIG_WATCHDOG_MONITOR == 1)
+		WDTCTL = WDT_ARST_1000;
+		SFRIE1 |= WDTIE;
+	#endif
+}
+
+/*---*/
+
+/**
+ * @brief Puts the machine into a low power condition.
+ */
+void arch_idle(void) {
+	__low_power_mode_3();
 }
 
 /** @} */
+
 
 /*-----------------------------------------------------------*/
 
@@ -51,13 +157,13 @@ inline bool arch_interrupts_enabled(void) {
 /**
  * @brief Arch-specific task exit handler. Captures important state parameters, then transfers control to the scheduler.
  */
-static void __attribute__((naked, noreturn)) arch_task_exit(int exit_code) {
+static void __attribute__((naked, noreturn)) arch_thread_exit(int exit_code) {
 	arch_disable_interrupts();
-////	sched_task_exit();
-//	arch_restore_context();
+	sched_impl_thread_exit();
+	arch_restore_context();
 
 	while (1) {
-		panic(PANIC_UNDEFINED, "arch_task_exit() failed");
+		panic(PANIC_EXPECT_FAIL, "arch_task_exit() failed");
 	}
 }
 
@@ -112,7 +218,7 @@ volatile arch_reg_t *arch_init_stack(volatile arch_reg_t *stack_top,
 
 	/* allocate a word for the exit handler */
 	stack_top--;
-	*stack_top = (arch_reg_t) arch_task_exit;
+	*stack_top = (arch_reg_t) arch_thread_exit;
 
 	/* allocate an interrupt frame for context switching */
 	stack_top = (arch_reg_t *) (stack_base - sizeof(arch_iframe_t));
@@ -168,117 +274,6 @@ volatile arch_reg_t *arch_init_stack(volatile arch_reg_t *stack_top,
 /*-----------------------------------------------------------*/
 
 /**
- * @name MSP430 hardware-specific OS feature configuration.
- * @{
- */
-
-/* MSP430 hardware timer-specific interrupt vectors */
-#define ARCH_TICK_VECTOR 								TIMER0_A0_VECTOR
-#define ARCH_TIMEKEEPING_VECTOR							TIMER0_A1_VECTOR
-
-/* Attributes of our timer setup */
-#define ARCH_TICK_CLK_FREQ								4096
-#define ARCH_TIME_MAX_SECONDS							(unsigned int) (65536.0 / ARCH_TICK_CLK_FREQ)
-
-/* Equivalent period for the configured tick rate */
-#define CONFIG_TICK_RATE_MS								(unsigned int) (1000.0 / CONFIG_TICK_RATE_HZ)
-
-/* Calculate hardware parameters to achieve the constants above, with or w / o approximation */
-#if (CONFIG_USE_FAST_MATH == 1)
-	#define ARCH_1MS									((ARCH_TICK_CLK_FREQ) >> 10)
-	#define ARCH_MS_TO_CYCLES(ms)						((((uint32_t) ARCH_TICK_CLK_FREQ) * ((uint32_t) ms)) >> 10)
-#else
-	#define ROUND(x) 									((x) >= 0 ? (long) ((x) + 0.5) : (long) ((x) - 0.5))
-	#define ARCH_1MS									(double) (ARCH_TICK_CLK_FREQ / 1000.0)
-	#define ARCH_MS_TO_CYCLES(ms)						ROUND(((double) ms) * ARCH_1MS)
-#endif
-
-/**
- * @brief Sets up OS time slicing interrupt.
- * @param[in] ms period of timer interrupt, measured in cycles.
- */
-static void arch_setup_timer_interrupt(unsigned int period) {
-	TA0CTL = MC_0 | TACLR;
-	TA0CCR0 = period;
-	TA0CCTL0 = CCIE;
-	TA0CTL = TASSEL_1 | ID_3 | MC_2;
-}
-
-static void arch_disable_timer_interrupt(void) {
-	TA0CTL = MC_0 | TACLR;
-}
-
-/**
- * @brief Acknowledges a wakeup interrupt, but doesn't stop the system timer.
- */
-static void arch_acknowledge_wakeup_interrupt() {
-	TA0CCR1 &= ~CCIFG;
-}
-
-/**
- * @brief Acknowledges a tick interrupt, but doesn't stop the tick timer.
- */
-static void arch_acknowledge_tick_interrupt() {
-	TA0CCR0 &= ~CCIFG;
-}
-
-/**
- * @brief Sets up an interrupt at the specified time.
- * @param[in] next_wake_time When to expect a thread awakening, measured in cycles.
- */
-static void arch_schedule_next_wakeup(unsigned int next_wake_time) {
-	TA0CCR1 = next_wake_time;
-	TA0CCTL1 |= CCIE;
-}
-
-/**
- * @brief Sets up an interrupt so the next context switch will occur.
- * @param[in] next_wake_time When to expect a thread awakening, measured in cycles.
- */
-static void arch_schedule_next_tick(unsigned int next_tick_time) {
-	TA0CCR0 = TA0R + next_tick_time;
-	TA0CCTL0 |= CCIE;
-}
-
-/**
- * @brief Masks tick interrupts, but doesn't stop the tick timer.
- */
-static void arch_suppress_wakeup_interrupt() {
-	TA0CCR1 &= ~CCIE;
-}
-
-/**
- * @brief Masks wakeup interrupt, but doesn't stop the time keeper.
- */
-static void arch_suppress_tick_interrupt() {
-	TA0CCR0 &= ~CCIE;
-}
-
-#if (CONFIG_WATCHDOG_MONITOR == 1)
-
-/**
- * @brief Sets up the watchdog for the watchdog monitor.
- */
-static void arch_setup_watchdog_interrupt(void) {
-	WDTCTL = WDT_ARST_1000;
-	SFRIE1 |= WDTIE;
-}
-
-#endif
-
-unsigned int arch_time_now(void) {
-	return TA0R;
-}
-
-void arch_idle(void) {
-	_low_power_mode_3();
-}
-
-/** @} */
-
-/*-----------------------------------------------------------*/
-
-/**
  * @name MSP430 ISA-specific scheduler initialization (and preparations for arch_sched_end()).
  * @{
  */
@@ -287,6 +282,9 @@ void arch_idle(void) {
  * @brief Boots up the scheduler and saves pre-boot state for quitting.
  */
 void __attribute__((noinline)) arch_sched_start(void) {
+	extern volatile sched_impl_t sched_p;
+
+	/* Entering a critical section. */
 	arch_disable_interrupts();
 
 	/* Back up the context before booting up the kernel so that we can return later. */
@@ -298,7 +296,7 @@ void __attribute__((noinline)) arch_sched_start(void) {
 	#endif
 
 	/* Set up the time slicing and safety hardware. */
-	arch_setup_timer_interrupt(ARCH_MS_TO_CYCLES(CONFIG_TICK_RATE_MS));
+	arch_setup_os_timer(ARCH_MS_TO_CYCLES(CONFIG_TICK_RATE_MS));
 	#if (CONFIG_WATCHDOG_MONITOR == 1)
 		arch_setup_watchdog_monitor();
 	#endif
@@ -312,10 +310,11 @@ void __attribute__((noinline)) arch_sched_start(void) {
  * @brief Exits all threads to the pre-booting location.
  */
 void __attribute__((naked)) arch_sched_end(void) {
+	extern volatile sched_impl_t sched_p;
 
-	/* Disable all preemption. */
+	/* Entering a critical section. */
 	arch_disable_interrupts();
-	arch_disable_timer_interrupt();
+	arch_disable_os_timer();
 
 	/* Reload the pre-boot state so we can return back to the OS spawn point. */
 	#ifdef __MSP430X_LARGE__
@@ -344,18 +343,31 @@ void __attribute__((naked)) arch_sched_end(void) {
  * @brief Kernel panic function.
  */
 static char panic_log[CONFIG_PANIC_DUMP_SIZE];
-void __attribute__((noinline)) arch_panic(panic_code_t crash_code, const char *message) {
+void __attribute__((noreturn, noinline)) arch_panic(panic_code_t crash_code, const char *message) {
+	volatile arch_reg_t caller = 0;
 
-	// double pop address to get the source of the panic
+	/**
+	 * The noinline specifier forces panic() to ALWAYS push 2 words on the stack.
+	 * Additionally, the size of a generic call instruction is 4 bytes, so the very first panic() call
+	 * will cause the return PC to point 4 bytes ahead. Thus, we subtract 4 for the faulting address.
+	 */
+	#ifdef __MSP430X_LARGE__
+		__asm__ __volatile__("mov.a 8(sp), %0 " : : "m"(caller));
+	#else
+		__asm__ __volatile__("mov.w 4(sp), %0" : : "m"(caller));
+	#endif
+	caller -= 4;
+
+	snprintf(panic_log, CONFIG_PANIC_DUMP_SIZE, "%s (%p)", message, (void *) caller);
 
 	/* Handle the crash reasons differently. */
 	switch (crash_code) {
 		case PANIC_GENERAL_ERROR: break;
 		case PANIC_SOFT_REBOOT: break;
 		case PANIC_HARD_REBOOT: break;
-		case PANIC_ASSERT_FAIL: break;
-		case PANIC_EXPECT_FAIL: break;
-		case PANIC_SSP: break;
+		case PANIC_ASSERT_FAIL: break;		/* get what failed */
+		case PANIC_EXPECT_FAIL: break;		/* get what failed */
+		case PANIC_SSP: break;				/* get the thread that faulted and its OOB condition */
 		case PANIC_UNDEFINED: break;
 	}
 
@@ -383,16 +395,17 @@ void __attribute__((noinline)) arch_panic(panic_code_t crash_code, const char *m
  */
 static inline void __attribute__((always_inline)) arch_context_switch_prologue(void) {
 
+	/**
+	 * Save the SR. The 20-bit trapframe stores its SR in a weird chunk of the frame.
+	 */
 	#ifdef __MSP430X_LARGE__
-		/* Save the SR */
 		__asm__ __volatile__("mov.b sr, 3(sp)");
-
-		/* PC + SR is stacked so interrupts are disabled */
-		__disable_interrupt();
 	#else
 		__asm__ __volatile__("push sr");
-		__disable_interrupt();
 	#endif
+
+	/* PC + SR is stacked so interrupts are disabled */
+	__disable_interrupt();
 }
 
 /**
@@ -439,6 +452,7 @@ static inline void __attribute__((always_inline)) arch_build_trapframe(void) {
  * @brief Changes to any other runnable thread.
  */
 void __attribute__((noinline, naked)) arch_yield(void) {
+	extern volatile sched_impl_t sched_p;
 
 	/* Manual context stacking. */
 	arch_context_switch_prologue();
@@ -454,6 +468,9 @@ void __attribute__((noinline, naked)) arch_yield(void) {
 
 	/* Find a new thread of any priority. */
 	sched_impl_yield();
+	#if (CONFIG_DEBUG_MODE == 1)
+		if (sched_p.sched_active_thread == NULL) panic(PANIC_EXPECT_FAIL, "NULL thread was scheduled");
+	#endif
 
 	/* Check if the newly scheduled thread holds a critical section, and restore the lock if true. */
 	if (sched_p.state & SCHED_STATUS_IRQ_LOCKED) {
@@ -478,6 +495,7 @@ void __attribute__((noinline, naked)) arch_yield(void) {
  * @brief Changes to a higher priority thread.
  */
 void __attribute__((noinline, naked)) arch_yield_higher(void) {
+	extern volatile sched_impl_t sched_p;
 
 	/* Manual context stacking. */
 	arch_context_switch_prologue();
@@ -493,6 +511,9 @@ void __attribute__((noinline, naked)) arch_yield_higher(void) {
 
 	/* Find a higher priority thread and return into it if possible. */
 	sched_impl_yield_higher();
+	#if (CONFIG_DEBUG_MODE == 1)
+		if (sched_p.sched_active_thread == NULL) panic(PANIC_EXPECT_FAIL, "NULL thread was scheduled");
+	#endif
 
 	/* Check if the newly scheduled thread holds a critical section, and restore the lock if true. */
 	if (sched_p.state & SCHED_STATUS_IRQ_LOCKED) {
@@ -518,9 +539,18 @@ void __attribute__((noinline, naked)) arch_yield_higher(void) {
  * @param[in] wake_time the time, in cycles, that the thread will be put back on the run queue.
  */
 static void arch_sleep_until(unsigned int wake_time) {
-	thread_impl_t *next_waker = sleep_queue_peek(&sched_p.sleep_mgr);
-	arch_schedule_next_wakeup(next_waker->sq_entry.wake_time);
+	extern volatile sched_impl_t sched_p;
 
+	/* Pull the next deadline off the sleeping queue (which is in sorted order, then set the wakeup timer for then. */
+	thread_impl_t *next_waker = sleep_queue_peek((sleep_queue_t *) &sched_p.sleep_mgr);
+	#if (CONFIG_DEBUG_MODE == 1)
+		if (next_waker == NULL) {
+			panic(PANIC_ASSERT_FAIL, "arch_sleep_until() could not schedule a new thread wakeup because it was NULL");
+		}
+	#endif
+//	arch_schedule_next_wakeup(next_waker->sq_entry.wake_time);
+
+	/* Transfer control to a new thread. */
 	arch_yield();
 }
 
@@ -541,13 +571,12 @@ void arch_sleep_for(unsigned int ms) {
  * @brief Scheduler preemption tick. Invokes sched_run() to distribute time slices.
  */
 __attribute__((naked, interrupt(ARCH_TICK_VECTOR))) void arch_tick_irq(void) {
+	extern volatile sched_impl_t sched_p;
 
 	/* Standard context switching logic. */
 	arch_save_context();
 
 	arch_acknowledge_tick_interrupt();
-
-	profile_start();
 
 	/* Check for stack overflow. */
 	#if (CONFIG_CHECK_FOR_STACK_OVERFLOW == 1)
@@ -556,37 +585,39 @@ __attribute__((naked, interrupt(ARCH_TICK_VECTOR))) void arch_tick_irq(void) {
 
 	/* Find the next logical thread in the sequence. */
 	sched_impl_run();
+	#if (CONFIG_DEBUG_MODE == 1)
+		if (sched_p.sched_active_thread == NULL) panic(PANIC_EXPECT_FAIL, "NULL thread was scheduled");
+	#endif
 
 	/* Figure out when to service the next interrupt(s). */
 	#if (CONFIG_USE_TICKLESS_IDLE == 1)
 
-		/* If there are sleeping threads that need to be awoken, schedule the next service time. */
-//		thread_impl_t *next_waker = sleep_queue_peek(&sched_p.sleep_mgr);
-//		if (next_waker != NULL) arch_schedule_next_wakeup(next_waker->sq_entry.wake_time);
-//		else arch_suppress_wakeup_interrupt();
-
 		/* If there is more than 1 thread, attention needs to be divided, so keep timeslicing. */
 		if ((sched_p.state & SCHED_STATUS_THREAD_COUNT_MASK) > 1) arch_schedule_next_tick(ARCH_MS_TO_CYCLES(CONFIG_TICK_RATE_MS));
 		else arch_suppress_tick_interrupt();
+
+	/* Else service sleeping threads in software. */
 	#else
 
-		/* Service sleeping threads in software. */
+
 		// check TA0R against the min every tick and perform wakeup() manually if true
 		arch_schedule_next_tick(CONFIG_TICK_RATE_MS);
 	#endif
 
-	profile_end();
 	arch_restore_context();
 }
 
 __attribute__((naked, interrupt(ARCH_TIMEKEEPING_VECTOR))) void arch_time_irq(void) {
-	arch_enter_isr();
+	extern volatile sched_impl_t sched_p;
 
+	arch_enter_isr();
 	switch (__even_in_range(TA0IV, TA0IV_TAIFG)) {
 
 		/* We shouldn't be able to trap into an interrupt without the hardware knowing. */
 		case TA0IV_NONE:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#if (CONFIG_DEBUG_MODE == 1)
+				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#endif
 			break;
 
 		/* Whenever a wakeup happens. */
@@ -596,22 +627,24 @@ __attribute__((naked, interrupt(ARCH_TIMEKEEPING_VECTOR))) void arch_time_irq(vo
 			arch_acknowledge_wakeup_interrupt();
 
 			/* First get the thread that needs to be awoken right now and add it back to the run queue. */
-			volatile thread_impl_t *waker = sleep_queue_peek(&sched_p.sleep_mgr);
-			sleep_queue_pop(&sched_p.sleep_mgr);
-			sched_impl_register(waker);
+			volatile thread_impl_t *waker = sleep_queue_peek((sleep_queue_t *) &sched_p.sleep_mgr);
+			sleep_queue_pop((sleep_queue_t *) &sched_p.sleep_mgr);
+			sched_impl_register((thread_impl_t *) waker);
 
 			/**
 			 * Next find out who's next on the list, and if there is no one on the list, turn off the
 			 * wakeup interrupt. Otherwise, configure the wakeup interrupt for the entry's stated wakeup time.
 			 */
-			volatile thread_impl_t *next_waker = sleep_queue_peek(&sched_p.sleep_mgr);
-			if (next_waker == 0) arch_suppress_wakeup_interrupt();
+			volatile thread_impl_t *next_waker = sleep_queue_peek((sleep_queue_t *) &sched_p.sleep_mgr);
+			if (next_waker == NULL) arch_suppress_wakeup_interrupt();
 			else arch_schedule_next_wakeup(next_waker->sq_entry.wake_time);
 			break;
 
 		/* Unused for now, so these are all unexpected traps. */
 		case TA0IV_TACCR2:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#if (CONFIG_DEBUG_MODE == 1)
+				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#endif
 			break;
 
 		case TAxIV_TACCR3:
@@ -623,21 +656,26 @@ __attribute__((naked, interrupt(ARCH_TIMEKEEPING_VECTOR))) void arch_time_irq(vo
 			break;
 
 		case TA0IV_5:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#if (CONFIG_DEBUG_MODE == 1)
+				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#endif
 			break;
 
 		case TA0IV_6:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#if (CONFIG_DEBUG_MODE == 1)
+				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#endif
 			break;
 
 		case TA0IV_TAIFG:
-			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#if (CONFIG_DEBUG_MODE == 1)
+				panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
+			#endif
 			break;
 
 		default:
 			break;
 	}
-
 	arch_exit_isr();
 }
 

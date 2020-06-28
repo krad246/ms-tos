@@ -8,6 +8,9 @@
 #include "rtos.h"
 #include "sched_impl.h"
 #include "sched.h"
+#include "hal.h"
+
+extern volatile sched_impl_t sched_p;
 
 void sched_init(void) {
 	irq_disable();

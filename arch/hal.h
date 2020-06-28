@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "sched_impl.h"
 #include "thread_impl.h"
@@ -144,6 +145,8 @@ static inline __attribute__((always_inline)) void arch_restore_regs(void) {
  */
 static inline __attribute__((always_inline)) void arch_save_context(void) {
 
+	extern volatile sched_impl_t sched_p;
+
 	/* pushes registers r15 -> r4, then sets sched_active_thread */
 	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
 		#ifdef __MSP430X_LARGE__
@@ -175,6 +178,8 @@ static inline __attribute__((always_inline)) void arch_save_context(void) {
  * @brief Grabs sched_active_thread's bookkeeping data and then pulls system registers off the stack.
  */
 static inline __attribute__((always_inline)) void arch_restore_context(void) {
+
+	extern volatile sched_impl_t sched_p;
 
 	/* grabs sched_active_thread, pops registers r4 -> r15, then returns into the task */
 	#if defined(__MSP430_HAS_MSP430XV2_CPU__)  || defined(__MSP430_HAS_MSP430X_CPU__)
@@ -229,6 +234,8 @@ static inline __attribute__((always_inline)) void arch_restore_context(void) {
  */
 static inline void __attribute__((always_inline)) arch_enter_isr(void) {
 
+	extern volatile sched_impl_t sched_p;
+
 	/* back up all context on the interrupted task stack */
 	arch_save_context();
 
@@ -249,6 +256,8 @@ static inline void __attribute__((always_inline)) arch_enter_isr(void) {
  * @brief ISR exit hook. Clears IRQ_IN, and yields to a higher priority thread if appropriate.
  */
 static inline void __attribute__((always_inline)) arch_exit_isr(void) {
+
+	extern volatile sched_impl_t sched_p;
 
 	/* notify that the IRQ is done */
 	sched_p.state &= ~SCHED_STATUS_IN_IRQ;
@@ -279,31 +288,45 @@ static inline void __attribute__((always_inline)) arch_exit_isr(void) {
 /**
  * @brief Sets the IRQ disable bit in the status register.
  */
-void arch_disable_interrupts(void);
+static inline void arch_disable_interrupts(void) {
+	__disable_interrupt();	/* defined in msp430.h */
+}
 
 /**
  * @brief Clears the IRQ disable bit in the status register.
  */
-void arch_enable_interrupts(void);
+static inline void arch_enable_interrupts(void) {
+	__enable_interrupt();	/* defined in msp430.h */
+}
 
 /**
  * @brief Sets the interrupt control flag to the specified value.
  * @param[in] mask	IRQ state to restore to.
  */
-void arch_set_interrupt_state(arch_flags_t mask);
+static inline void arch_set_interrupt_state(arch_flags_t mask) {
+	/* erase the interrupt enable bit, then set it if appropriate */
+	__bic_SR_register(GIE);
+	__bis_SR_register(mask & GIE);
+}
 
 /**
  * @brief Retrieves the value of the IRQ status bit from the status register.
  * @return Value of the status register. Should not be interpreted as a boolean and instead as the raw data.
  * @see arch_interrupts_enabled
  */
-arch_flags_t arch_get_interrupt_state(void);
+static inline arch_flags_t arch_get_interrupt_state(void) {
+	/* nothing but the interrupt enable bit GIE matters */
+	return __get_SR_register() & GIE;
+}
 
 /**
  * @brief Checks if interrupts are currently enabled or disabled. Invokes arch_get_interrupt_state().
  * @return True if interrupts are active, false if not.
  */
-bool arch_interrupts_enabled(void);
+static inline bool arch_interrupts_enabled(void) {
+	#define ARCH_FLAG_INTERRUPTS_ENABLED ((arch_flags_t) GIE)
+	return (arch_get_interrupt_state() == ARCH_FLAG_INTERRUPTS_ENABLED);
+}
 
 /** @} */
 
@@ -339,7 +362,7 @@ void __attribute__((naked)) arch_sched_end(void);
  * @param[in] crash_code Reason for crashing.
  * @param[in] message More details on the crash.
  */
-void __attribute__((noinline)) arch_panic(panic_code_t crash_code, const char *message);
+void __attribute__((noreturn, noinline)) arch_panic(panic_code_t crash_code, const char *message);
 
 /**
  * @brief Manual context switch. Surrenders time slice to the next thread in the run queue.
@@ -350,6 +373,10 @@ void __attribute__((noinline, naked)) arch_yield(void);
  * @brief Manual context switch. Surrenders time slice to the highest priority thread in the run queue.
  */
 void __attribute__((noinline, naked)) arch_yield_higher(void);
+
+void arch_idle(void);
+
+void arch_sleep_for(unsigned int ms);
 
 /** @} */
 

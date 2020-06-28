@@ -18,8 +18,6 @@
 #include "sched.h"
 #include "thread.h"
 
-#include "port.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

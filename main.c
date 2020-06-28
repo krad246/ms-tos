@@ -8,6 +8,7 @@ volatile uint8_t sched_isr_stack[CONFIG_ISR_STACK_SIZE];
 volatile thread_t tcbs[NUM_THREADS];
 volatile uint8_t sched_test_stacks[NUM_THREADS][STACK_SIZE];
 volatile uint32_t run_counts[NUM_THREADS] = { 0 };
+volatile thread_fn_t fns[NUM_THREADS];
 
 /*-----------------------------------------------------------*/
 
@@ -25,13 +26,17 @@ void profile_end(void) {
 	rc++;
 }
 
+//https://www.desmos.com/calculator/bc87vbzhtr approximation calculator
+// tradeoff with the timer divider is between resolution and max sleep length without intervention
+
 /*-----------------------------------------------------------*/
 
-ISR(PORT1_VECTOR, on_button_press) {
-	arch_enter_isr();
-	P1OUT ^= BIT0;
-	arch_exit_isr();
-}
+//ISR(PORT1_VECTOR, on_button_press) {
+//	arch_enter_isr();
+//	P1OUT ^= BIT0;
+//	P1IFG &= ~BIT1;
+//	arch_exit_isr();
+//}
 
 /*-----------------------------------------------------------*/
 
@@ -39,7 +44,8 @@ void a(void *arg) {
 	while (1) {
 		run_counts[0]++;
 		_low_power_mode_3();
-		arch_yield();
+//		sched_sleep(500);
+		sched_yield();
 	}
 }
 
@@ -47,8 +53,8 @@ void b(void *arg) {
 	while (1) {
 		run_counts[1]++;
 		_low_power_mode_3();
-		arch_yield();
-		arch_yield_higher();
+		sched_yield();
+		sched_yield_higher();
 	}
 }
 
@@ -57,8 +63,9 @@ void c(void *arg) {
 		run_counts[2]++;
 		_low_power_mode_3();
 		sched_sleep(500);
-		P1OUT ^= BIT1;
-		arch_yield();
+//		panic(0, "test");
+		P1OUT ^= BIT0;
+		sched_yield();
 	}
 }
 
@@ -66,7 +73,8 @@ void d(void *arg) {
 	while (1) {
 		run_counts[3]++;
 		_low_power_mode_3();
-		arch_yield();
+//		sched_sleep(500);
+		sched_yield();
 	}
 }
 
@@ -74,7 +82,7 @@ void e(void *arg) {
 	while (1) {
 		run_counts[4]++;
 		_low_power_mode_3();
-		arch_yield();
+		sched_yield();
 	}
 }
 
@@ -82,7 +90,7 @@ void f(void *arg) {
 	while (1) {
 		run_counts[5]++;
 		_low_power_mode_3();
-		arch_yield();
+		sched_yield();
 	}
 }
 
@@ -101,6 +109,7 @@ void f(void *arg) {
 /**
  * main.c
  */
+extern volatile sched_impl_t sched_p;
 
 int main(void)
 {
@@ -111,26 +120,27 @@ int main(void)
 
 	PM5CTL0 &= ~LOCKLPM5;       //  Enable GPIOs
 
-	tcbs[0].base.sp = arch_init_stack(sched_test_stacks[0] + 256, a, run_counts[0]);
-	tcbs[1].base.sp = arch_init_stack(sched_test_stacks[1] + 256, b, run_counts[1]);
-	tcbs[2].base.sp = arch_init_stack(sched_test_stacks[2] + 256, c, run_counts[2]);
-	tcbs[3].base.sp = arch_init_stack(sched_test_stacks[3] + 256, d, run_counts[3]);
-	tcbs[4].base.sp = arch_init_stack(sched_test_stacks[4] + 256, e, run_counts[4]);
-	tcbs[5].base.sp = arch_init_stack(sched_test_stacks[5] + 256, f, run_counts[5]);
-
 	__disable_interrupt();
 	sched_init();
 
+	fns[0] = a;
+	fns[1] = b;
+	fns[2] = c;
+	fns[3] = d;
+	fns[4] = e;
+	fns[5] = f;
+
 	for (int i = 0; i < 6; ++i) {
+		thread_impl_init(&tcbs[i].base, sched_test_stacks[i] + STACK_SIZE, fns[i], run_counts[i]);
 		tcbs[i].cs_lock = 1;
-		sched_add(&tcbs[i], i + 1);
+		sched_add(&clients[i], i + 1);
 	}
 
-	sched_start();
+//	sched_start();
+//
 
 	while (1) {
 		_low_power_mode_3();
-		arch_yield();
 	}
 	return 0;
 }

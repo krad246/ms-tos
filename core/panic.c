@@ -7,8 +7,9 @@
 
 #include "rtos.h"
 #include "panic.h"
+#include "hal.h"
 
-void __attribute__((noreturn, noinline)) panic(panic_code_t crash_code, const char *message) {
+void __attribute__((naked, noreturn, noinline)) panic(panic_code_t crash_code, const char *message) {
 	arch_disable_interrupts();
 	arch_panic(crash_code, message);
 	arch_enable_interrupts();

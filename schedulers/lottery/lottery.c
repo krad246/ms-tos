@@ -44,7 +44,7 @@ static void lottery_client_copy(const void *src, void *dst) {
 static void lottery_client_init(lottery_client_t *client, unsigned int priority) {
 	client->shares = priority;
 
-	rb_node_init(&client->rq_entry);
+	rbnode_init(&client->rq_entry);
 }
 
 static void lottery_client_update(lottery_client_t *client, unsigned int priority) {
@@ -64,7 +64,7 @@ static void lottery_client_remove_from_list(lottery_mgr_t *mgr, lottery_client_t
 /*-----------------------------------------------------------*/
 
 static void lottery_mgr_init(lottery_mgr_t *mgr) {
-	rb_tree_rcached_init(&mgr->rq);
+	rbtree_rcached_init(&mgr->rq);
 
 }
 
@@ -73,7 +73,7 @@ static void lottery_mgr_start(lottery_mgr_t *mgr) {
 }
 
 static void lottery_mgr_end(lottery_mgr_t *mgr) {
-	rb_tree_clean(&mgr->rq.tree);
+	rbtree_clean(&mgr->rq.tree);
 }
 
 static int lottery_mgr_run(lottery_mgr_t *mgr) {

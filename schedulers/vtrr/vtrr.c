@@ -96,6 +96,7 @@ static void vtrr_client_copy(const void *src, void *dst) {
     b->shares = a->shares;
     b->runs_left = a->runs_left;
     b->fin_time = a->fin_time;
+    b->timestep = a->timestep;
 }
 
 /**
@@ -127,6 +128,7 @@ static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 	if (mgr->shares > 0) client->runs_left = (client->shares * mgr->runs_left) / mgr->shares;
 	else client->runs_left = client->shares;
 
+	/* Recalculate the manager state. */
 	mgr->shares += client->shares;
 	mgr->runs_left += client->runs_left;		/* lengthen the scheduling cycle */
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
@@ -155,6 +157,9 @@ static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client)
  * @name VTRR scheduling manager member functions.
  * @{
  */
+
+#define vtrr_current_client(mptr) vtrr_entry((mptr)->curr_cli)
+#define vtrr_next_client(mptr) vtrr_entry((mptr)->next_cli)
 
 /**
  * @brief Sets up a scheduling instance.
@@ -208,15 +213,16 @@ static void vtrr_mgr_task_foreach(vtrr_mgr_t *mgr, void (*cb)(void *)) {
 static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 	/* execution of the scheduled thread */
-	vtrr_client_t *curr_client = vtrr_active_client(mgr);
+	vtrr_client_t *curr_client = vtrr_current_client(mgr);
+	#if (CONFIG_DEBUG_MODE == 1)
+		if (curr_client == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
+	#endif
 	vtrr_client_run(curr_client);
 
 	/* assign the thread previously planned for execution */
 	mgr->curr_cli = mgr->next_cli;
 	mgr->group_time += mgr->timestep;
 	if (mgr->runs_left > 0) mgr->runs_left--;
-
-	if (mgr->curr_cli == NULL) panic(0, "current client is null");
 
 	/* if a cycle has completed */
 	if (mgr->runs_left == 0) {
@@ -237,8 +243,10 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 	} else if (!vtrr_client_is_runnable(vtrr_entry(mgr->curr_max))) {
 
 		/* the 2nd highest priority thread becomes the highest so far */
+		#if (CONFIG_DEBUG_MODE == 1)
+			if (mgr->curr_max == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
+		#endif
 		mgr->curr_max = (rbnode *) rb_prev(mgr->curr_max);
-		if (mgr->curr_max == NULL) panic(0, "curr max is null");
 	}
 
 	/* assume that the next thread to be scheduled will be the next thread in sorted order */
@@ -255,17 +263,17 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 	/* if the next thread violates the 'even progress invariant' by not maintaining sorted order */
 	if (next_client->runs_left > curr_client->runs_left) {
 		mgr->next_cli = next_node;
-		if (mgr->next_cli == NULL) panic(0, "next client is null");
 
 	/* if the already-running client will allow enough time to squeeze this new thread in for a slice */
 	} else if (curr_client->fin_time < mgr->group_time + (2 * curr_client->timestep)) {
 		mgr->next_cli = next_node;
-		if (mgr->next_cli == NULL) panic(0, "next client is null");
 
 	/* default to maximum possible priority */
 	} else {
+		#if (CONFIG_DEBUG_MODE == 1)
+			if (mgr->curr_max == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
+		#endif
 		mgr->next_cli = mgr->curr_max;
-		if (mgr->next_cli == NULL) panic(0, "next client is null");
 	}
 }
 
@@ -320,7 +328,6 @@ void vtrr_reregister(vtrr_mgr_t *sched, vtrr_client_t *client, unsigned int prio
 	vtrr_client_update(client, priority);
 	vtrr_register(sched, client);
 }
-
 
 void vtrr_end(vtrr_mgr_t *sched) {
 	vtrr_mgr_end(sched);
