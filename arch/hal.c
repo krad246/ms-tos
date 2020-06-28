@@ -614,11 +614,11 @@ __attribute__((naked, interrupt(ARCH_TIMEKEEPING_VECTOR))) void arch_time_irq(vo
 			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
 			break;
 
-		case TA0IV_TACCR3:
+		case TAxIV_TACCR3:
 			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
 			break;
 
-		case TA0IV_TACCR4:
+		case TAxIV_TACCR4:
 			panic(PANIC_EXPECT_FAIL, "Unexpected trap into ARCH_TIMEKEEPING_VECTOR");
 			break;
 
