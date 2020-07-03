@@ -15,7 +15,7 @@
 
 #include "port_config.h"
 #include "panic.h"
-#include "rbtree.h"
+#include "rbtree_rcached.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +34,7 @@ typedef struct sched_vtrr_client {
 	unsigned int fin_time;					/* virtual timestamp for VTRR allocation computations */
 	unsigned int timestep;					/* virtual progress amount for each timestep */
 
-	rbnode rq_entry;						/* red-black tree entry for sorted order */
+	rb_node_t rq_entry;						/* red-black tree entry for sorted order */
 } vtrr_client_t;
 
 typedef struct sched_vtrr_mgr {
@@ -43,11 +43,11 @@ typedef struct sched_vtrr_mgr {
 	unsigned int group_time;				/* virtual timestamp for thread progress comparisons */
 	unsigned int timestep;					/* virtual progress amount for each timestep */
 
-	rbtree_rcached rq;						/* red-black tree for sorted threads, maximum is cached */
-	rbnode *curr_max;						/* pointer to the highest priority runnable thread */
+	rb_tree_rcached_t rq;					/* red-black tree for sorted threads, maximum is cached */
+	rb_node_t *curr_max;						/* pointer to the highest priority runnable thread */
 
-	rbnode *curr_cli;						/* pointer to the currently running thread */
-	rbnode *next_cli;						/* pointer to the thread scheduled for the next timeslice */
+	rb_node_t *curr_cli;						/* pointer to the currently running thread */
+	rb_node_t *next_cli;						/* pointer to the thread scheduled for the next timeslice */
 } vtrr_mgr_t;
 
 /** @} */

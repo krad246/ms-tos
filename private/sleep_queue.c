@@ -9,7 +9,7 @@
 #include "sleep_queue.h"
 
 void sleep_queue_init(sleep_queue_t *que) {
-	rbtree_lcached_init(&que->q);
+	rb_tree_lcached_init(&que->q);
 }
 
 static int sleepq_entry_cmp(const void *left, const void *right) {
@@ -27,21 +27,25 @@ static void sleepq_entry_copy(const void *src, void *dst) {
 
 void sleep_queue_push(sleep_queue_t *que, thread_impl_t *thr, unsigned int wake_time) {
 	thr->sq_entry.wake_time = wake_time;
-	rb_lcached_insert(&que->q, &thr->sq_entry.node, sleepq_entry_cmp);
+	rb_tree_lcached_insert(&que->q, &thr->sq_entry.node, sleepq_entry_cmp);
 }
 
 thread_impl_t *sleep_queue_peek(sleep_queue_t *que) {
-	rbnode *ent_node = rb_first_cached(&que->q);
+	rb_node_t *ent_node = rb_min(&que->q);
 	if (ent_node == 0) return 0;
 
 	sleep_queue_entry_t *ent = rb_entry_safe(ent_node, sleep_queue_entry_t, node);
 	return container_of(ent, thread_impl_t, sq_entry);
 }
 
-void sleep_queue_pop(sleep_queue_t *que) {
-	rb_lcached_delete(&que->q, rb_first_cached(&que->q), sleepq_entry_cmp, sleepq_entry_copy);
+thread_impl_t *sleep_queue_pop(sleep_queue_t *que) {
+	rb_node_t *deleted;
+	rb_tree_lcached_delete(&que->q, rb_min(&que->q), &deleted, sleepq_entry_cmp, sleepq_entry_copy);
+	return container_of(deleted, thread_impl_t, sq_entry);
 }
 
-void sleep_queue_remove_node(sleep_queue_t *que, thread_impl_t *thr) {
-	rb_lcached_delete(&que->q, &thr->sq_entry.node, sleepq_entry_cmp, sleepq_entry_copy);
+thread_impl_t *sleep_queue_remove_node(sleep_queue_t *que, thread_impl_t *thr) {
+	rb_node_t *deleted;
+	rb_tree_lcached_delete_at(&que->q, &thr->sq_entry.node,&deleted, sleepq_entry_cmp, sleepq_entry_copy);
+	return container_of(deleted, thread_impl_t, sq_entry);
 }

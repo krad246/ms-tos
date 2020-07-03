@@ -8,17 +8,17 @@
 #ifndef INCLUDE_SLEEP_QUEUE_H_
 #define INCLUDE_SLEEP_QUEUE_H_
 
-#include "rbtree.h"
+#include "rbtree_lcached.h"
 
 typedef struct thread_impl thread_impl_t;
 
 typedef struct sleep_queue_entry {
 	unsigned int wake_time;
-	rbnode node;
+	rb_node_t node;
 } sleep_queue_entry_t;
 
 typedef struct sleep_queue {
-	rbtree_lcached q;
+	rb_tree_lcached_t q;
 } sleep_queue_t;
 
 void sleep_queue_init(sleep_queue_t *que);
@@ -27,8 +27,8 @@ void sleep_queue_push(sleep_queue_t *que, thread_impl_t *thr, unsigned int wake_
 
 thread_impl_t *sleep_queue_peek(sleep_queue_t *que);
 
-void sleep_queue_pop(sleep_queue_t *que);
+thread_impl_t *sleep_queue_pop(sleep_queue_t *que);
 
-void sleep_queue_remove_node(sleep_queue_t *que, thread_impl_t *thr);
+thread_impl_t *sleep_queue_remove_node(sleep_queue_t *que, thread_impl_t *thr);
 
 #endif /* INCLUDE_SLEEP_QUEUE_H_ */

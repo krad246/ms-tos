@@ -1,10 +1,12 @@
 private/thread_impl.o: ../private/thread_impl.c ../private/thread_impl.h \
  ../private/sleep_queue.h \
+ C:/Users/krad2/workspace_v8/rtosref333/ds/rbtree_lcached.h \
  C:/Users/krad2/workspace_v8/rtosref333/ds/rbtree.h \
- C:/Users/krad2/workspace_v8/rtosref333/port_config.h \
  ../private/sched_impl.h \
+ C:/Users/krad2/workspace_v8/rtosref333/port_config.h \
  C:/Users/krad2/workspace_v8/rtosref333/schedulers/vtrr/vtrr.h \
  C:/Users/krad2/workspace_v8/rtosref333/include/panic.h \
+ C:/Users/krad2/workspace_v8/rtosref333/ds/rbtree_rcached.h \
  C:/Users/krad2/workspace_v8/rtosref333/arch/hal.h \
  C:/ti/ccsv8/ccs_base/msp430/include_gcc/msp430.h \
  C:/ti/ccsv8/ccs_base/msp430/include_gcc/msp430fr5994.h \
@@ -18,15 +20,19 @@ private/thread_impl.o: ../private/thread_impl.c ../private/thread_impl.h \
 
 ../private/sleep_queue.h:
 
+C:/Users/krad2/workspace_v8/rtosref333/ds/rbtree_lcached.h:
+
 C:/Users/krad2/workspace_v8/rtosref333/ds/rbtree.h:
 
-C:/Users/krad2/workspace_v8/rtosref333/port_config.h:
-
 ../private/sched_impl.h:
+
+C:/Users/krad2/workspace_v8/rtosref333/port_config.h:
 
 C:/Users/krad2/workspace_v8/rtosref333/schedulers/vtrr/vtrr.h:
 
 C:/Users/krad2/workspace_v8/rtosref333/include/panic.h:
+
+C:/Users/krad2/workspace_v8/rtosref333/ds/rbtree_rcached.h:
 
 C:/Users/krad2/workspace_v8/rtosref333/arch/hal.h:
 

@@ -73,7 +73,7 @@ static void lottery_mgr_start(lottery_mgr_t *mgr) {
 }
 
 static void lottery_mgr_end(lottery_mgr_t *mgr) {
-	rbtree_clean(&mgr->rq.tree);
+
 }
 
 static int lottery_mgr_run(lottery_mgr_t *mgr) {

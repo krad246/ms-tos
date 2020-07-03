@@ -40,8 +40,6 @@ static void vtrr_client_init(vtrr_client_t *client, unsigned int priority) {
 	client->runs_left = priority;
 	client->fin_time = 0;
 	client->timestep = VTRR_TIMESTEP(client->shares);	/* precalculate the progress rate because division is slow */
-
-	rbnode_init(&client->rq_entry);
 }
 
 static void vtrr_client_update(vtrr_client_t *client, unsigned int priority) {
@@ -72,7 +70,7 @@ static void vtrr_client_run(vtrr_client_t *client) {
 /*-----------------------------------------------------------*/
 
 /**
- * @name rbtree callbacks for vtrr_clients
+ * @name rb_tree callbacks for vtrr_clients
  * @{
  */
 
@@ -133,8 +131,8 @@ static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 	mgr->runs_left += client->runs_left;		/* lengthen the scheduling cycle */
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
 
-	rb_rcached_insert(&mgr->rq, &client->rq_entry, vtrr_client_cmp);
-	mgr->curr_max = rb_last_cached(&mgr->rq);	/* update the max whenever something is added or deleted */
+	rb_tree_rcached_insert(&mgr->rq, &client->rq_entry, vtrr_client_cmp);
+	mgr->curr_max = rb_max(&mgr->rq);	/* update the max whenever something is added or deleted */
 }
 
 /**
@@ -145,8 +143,8 @@ static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client)
 	mgr->runs_left -= client->runs_left;		/* shorten the scheduling cycle */
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
 
-	rb_rcached_delete(&mgr->rq, &client->rq_entry, vtrr_client_cmp, vtrr_client_copy);
-	mgr->curr_max = rb_last_cached(&mgr->rq);	/* update the max whenever something is added or deleted */
+	rb_tree_rcached_delete(&mgr->rq, &client->rq_entry, NULL, vtrr_client_cmp, vtrr_client_copy);
+	mgr->curr_max = rb_max(&mgr->rq);	/* update the max whenever something is added or deleted */
 }
 
 /** @} */
@@ -165,7 +163,7 @@ static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client)
  * @brief Sets up a scheduling instance.
  */
 static void vtrr_mgr_init(vtrr_mgr_t *mgr) {
-	rbtree_rcached_init(&mgr->rq);
+	rb_tree_rcached_init(&mgr->rq);
 
 	mgr->curr_cli = NULL;
 	mgr->next_cli = NULL;
@@ -181,7 +179,7 @@ static void vtrr_mgr_init(vtrr_mgr_t *mgr) {
  * @brief Begins the scheduler, assuming at least 1 task is installed.
  */
 static void vtrr_mgr_start(vtrr_mgr_t *mgr) {
-	mgr->curr_max = rb_last_cached(&mgr->rq);
+	mgr->curr_max = rb_max(&mgr->rq);
 	mgr->curr_cli = mgr->curr_max;
 	mgr->next_cli = mgr->curr_max;
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* calculate the initial group timestep from the installed tasks */
@@ -204,7 +202,7 @@ static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
  * @param[in] cb Function to apply per task.
  */
 static void vtrr_mgr_task_foreach(vtrr_mgr_t *mgr, void (*cb)(void *)) {
-	rb_inorder_foreach(&mgr->rq.tree, cb);
+	rb_inorder_foreach(&mgr->rq, cb);
 }
 
 /**
@@ -234,7 +232,7 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 		mgr->runs_left = mgr->shares;
 
 		/* assign the next thread as the highest priority one */
-		mgr->curr_max = rb_last_cached(&mgr->rq);
+		mgr->curr_max = rb_max(&mgr->rq);
 		mgr->next_cli = mgr->curr_max;
 
 		return;
@@ -246,11 +244,11 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 		#if (CONFIG_DEBUG_MODE == 1)
 			if (mgr->curr_max == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
 		#endif
-		mgr->curr_max = (rbnode *) rb_prev(mgr->curr_max);
+		mgr->curr_max = (rb_node_t *) rb_prev(mgr->curr_max);
 	}
 
 	/* assume that the next thread to be scheduled will be the next thread in sorted order */
-	rbnode *next_node = (rbnode *) rb_prev(mgr->curr_cli);
+	rb_node_t *next_node = (rb_node_t *) rb_prev(mgr->curr_cli);
 
 	/* if it doesn't exist, just go back to the top */
 	if (next_node == NULL) {

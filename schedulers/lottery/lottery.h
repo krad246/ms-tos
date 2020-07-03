@@ -12,15 +12,15 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "rbtree.h"
+#include "rbtree_rcached.h"
 
 typedef struct sched_lottery_client {
 	unsigned int shares;
-	rbnode rq_entry;
+	rb_node_t rq_entry;
 } lottery_client_t;
 
 typedef struct sched_lottery_mgr {
-	rbtree_rcached rq;
+	rb_tree_rcached_t rq;
 } lottery_mgr_t;
 
 void lottery_init(lottery_mgr_t *sched);
