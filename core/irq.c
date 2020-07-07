@@ -5,25 +5,25 @@
  *      Author: krad2
  */
 
+#include <al.h>
 #include "rtos.h"
 #include "sched_impl.h"
 #include "irq.h"
 #include "thread_impl.h"
-#include "hal.h"
 
 extern volatile sched_impl_t sched_p;
 
 inline void irq_disable(void) {
-	arch_disable_interrupts();
+	al_disable_interrupts();
 }
 
 inline void irq_enable(void) {
-	arch_enable_interrupts();
+	al_enable_interrupts();
 }
 
 void irq_lock(void) {
-	if (arch_interrupts_enabled()) {
-		arch_disable_interrupts();
+	if (al_interrupts_enabled()) {
+		al_disable_interrupts();
 		container_of(sched_p.sched_active_thread, thread_t, base)->cs_lock = 0;
 //		sched_set_status(SCHED_STATUS_IRQ_LOCKED);
 	}
@@ -36,7 +36,7 @@ void irq_unlock(void) {
 	if (container_of(sched_p.sched_active_thread, thread_t, base)->cs_lock == 0) {
 		container_of(sched_p.sched_active_thread, thread_t, base)->cs_lock = 1;
 //		sched_clear_status(SCHED_STATUS_IRQ_LOCKED);
-		arch_enable_interrupts();
+		al_enable_interrupts();
 	}
 }
 
@@ -49,9 +49,9 @@ bool irq_locked(void) {
 }
 
 bool irq_is_in(void) {
-	arch_disable_interrupts();
+	al_disable_interrupts();
 	bool istate = (sched_get_status() & SCHED_STATUS_IN_IRQ) != 0;
-	if (!istate) arch_enable_interrupts();
+	if (!istate) al_enable_interrupts();
 
 	return istate;
 }

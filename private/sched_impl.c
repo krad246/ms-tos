@@ -5,9 +5,9 @@
  *      Author: krad2
  */
 
+#include <al.h>
 #include "sched_impl.h"
 #include "thread_impl.h"
-#include "hal.h"
 
 /*-----------------------------------------------------------*/
 
@@ -25,7 +25,7 @@
 	#error "No scheduling algorithm configured by CONFIG_SCHED_*"
 #endif
 
-#define sched_impl_active_client(mptr)	container_of(__sched_impl_active_client(mptr), thread_impl_t, rq_entry)
+#define sched_impl_active_client(mptr)	__sched_impl_active_client(mptr)
 
 /*-----------------------------------------------------------*/
 
@@ -34,7 +34,7 @@ volatile uint8_t idle_stack[CONFIG_IDLE_STACK_SIZE];
 
 static int idle(void *arg) {
 	while (1) {
-		arch_idle();
+		al_idle();
 	}
 
 	while (1) {
@@ -56,23 +56,24 @@ volatile sched_impl_t sched_p;
 						(void *) (idle_stack + CONFIG_IDLE_STACK_SIZE), idle, NULL);						\
 	}																										\
 																											\
-	void sched_impl_add(thread_impl_t *client, unsigned int priority) { 									\
-		type##_add((type##_mgr_t *) &sched_p.instance, (type##_client_t *) &client->rq_entry, priority);	\
+	void sched_impl_add(thread_impl_t *client, sched_impl_client_t *mclient, unsigned int priority) { 		\
+		type##_add((type##_mgr_t *) &sched_p.instance, client, (type##_client_t *) &mclient->client, priority);		\
+		client->rq_entry = mclient;																			\
 		sched_p.state += (1 << SCHED_STATUS_THREAD_COUNT_POS);												\
 	}																										\
 																											\
-	void sched_impl_register(thread_impl_t *client) {														\
-		type##_register((type##_mgr_t *) &sched_p.instance, &client->rq_entry);								\
+	void sched_impl_register(thread_impl_t *client, sched_impl_client_t *mclient) {														\
+		type##_register((type##_mgr_t *) &sched_p.instance, client, (type##_client_t *) &mclient->client);								\
 		sched_p.state += (1 << SCHED_STATUS_THREAD_COUNT_POS);												\
 	}																										\
 																											\
-	void sched_impl_deregister(thread_impl_t *client) {														\
-		type##_deregister((type##_mgr_t *) &sched_p.instance, &client->rq_entry);							\
+	void sched_impl_deregister(thread_impl_t *client, sched_impl_client_t *mclient) {														\
+		type##_deregister((type##_mgr_t *) &sched_p.instance, (type##_client_t *) &mclient->client);							\
 		sched_p.state -= (1 << SCHED_STATUS_THREAD_COUNT_POS);												\
 	}																										\
 																											\
-	void sched_impl_reregister(thread_impl_t *client, unsigned int priority) {								\
-		type##_reregister((type##_mgr_t *) &sched_p.instance, &client->rq_entry, priority);  				\
+	void sched_impl_reregister(thread_impl_t *client, sched_impl_client_t *mclient, unsigned int priority) {								\
+		type##_reregister((type##_mgr_t *) &sched_p.instance,client, (type##_client_t *) &mclient->client, priority);  				\
 	}																										\
 																											\
 	void sched_impl_start(void) {																			\
@@ -109,7 +110,7 @@ volatile sched_impl_t sched_p;
 	void sched_impl_sleep_until(unsigned int wake_time) {													\
 		sleep_queue_push((sleep_queue_t *) &sched_p.sleep_mgr, 												\
 						(thread_impl_t *) sched_p.sched_active_thread, wake_time);							\
-		sched_impl_deregister((thread_impl_t *) sched_p.sched_active_thread);								\
+		sched_impl_deregister((thread_impl_t *) sched_p.sched_active_thread, sched_p.sched_active_thread->rq_entry);								\
 	}																										\
 	void sched_impl_thread_exit(void) {																		\
 																											\

@@ -6,21 +6,21 @@ SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../arch/hal.c 
+../arch/al.c 
 
 C_DEPS += \
-./arch/hal.d 
+./arch/al.d 
 
 OBJS += \
-./arch/hal.o 
+./arch/al.o 
 
 OBJS__QUOTED += \
-"arch\hal.o" 
+"arch\al.o" 
 
 C_DEPS__QUOTED += \
-"arch\hal.d" 
+"arch\al.d" 
 
 C_SRCS__QUOTED += \
-"../arch/hal.c" 
+"../arch/al.c" 
 
 

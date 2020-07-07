@@ -8,7 +8,7 @@
 #include "vtrr.h"
 
 /*-----------------------------------------------------------*/
-
+#define swap(x, y) do { typeof(x) SWAP = x; x = y; y = SWAP; } while (0)
 #ifndef max
 #define max(a,b) \
 	({ __typeof__ (a) _a = (a); \
@@ -35,7 +35,8 @@
  * @{
  */
 
-static void vtrr_client_init(vtrr_client_t *client, unsigned int priority) {
+static void vtrr_client_init(vtrr_client_t *client, struct thread_impl *thread, unsigned int priority) {
+	client->thread = thread;
 	client->shares = priority;
 	client->runs_left = priority;
 	client->fin_time = 0;
@@ -91,10 +92,16 @@ static void vtrr_client_copy(const void *src, void *dst) {
     vtrr_client_t *a = vtrr_entry(src);
     vtrr_client_t *b = vtrr_entry(dst);
 
-    b->shares = a->shares;
-    b->runs_left = a->runs_left;
-    b->fin_time = a->fin_time;
-    b->timestep = a->timestep;
+//    b->thread = a->thread;
+//    b->shares = a->shares;
+//    b->runs_left = a->runs_left;
+//    b->fin_time = a->fin_time;
+//    b->timestep = a->timestep;
+    swap(b->thread, a->thread);
+    swap(b->shares,a->shares);
+    swap(b->runs_left,a->runs_left);
+    swap(b->fin_time,a->fin_time);
+    swap(b->timestep,a->timestep);
 }
 
 /**
@@ -117,7 +124,7 @@ static void vtrr_client_reset(void *key) {
 /**
  * @brief Adds a thread to the run queue.
  */
-static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
+static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, struct thread_impl *thread,vtrr_client_t *client) {
 
 	/* the arrival time of the task is the proportion of time in a cycle */
 	client->fin_time = max(client->fin_time, mgr->group_time + client->timestep);
@@ -131,8 +138,7 @@ static void vtrr_client_add_to_list(vtrr_mgr_t *mgr, vtrr_client_t *client) {
 	mgr->runs_left += client->runs_left;		/* lengthen the scheduling cycle */
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
 
-	rb_tree_rcached_insert(&mgr->rq, &client->rq_entry, vtrr_client_cmp);
-	mgr->curr_max = rb_max(&mgr->rq);	/* update the max whenever something is added or deleted */
+	rb_tree_rcached_insert(&mgr->rq, &client->node, vtrr_client_cmp);
 }
 
 /**
@@ -143,8 +149,7 @@ static void vtrr_client_remove_from_list(vtrr_mgr_t *mgr, vtrr_client_t *client)
 	mgr->runs_left -= client->runs_left;		/* shorten the scheduling cycle */
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* recalculate the group timestep */
 
-	rb_tree_rcached_delete(&mgr->rq, &client->rq_entry, NULL, vtrr_client_cmp, vtrr_client_copy);
-	mgr->curr_max = rb_max(&mgr->rq);	/* update the max whenever something is added or deleted */
+	rb_tree_rcached_delete_at(&mgr->rq, &client->node, NULL, vtrr_client_cmp, vtrr_client_copy);
 }
 
 /** @} */
@@ -167,7 +172,6 @@ static void vtrr_mgr_init(vtrr_mgr_t *mgr) {
 
 	mgr->curr_cli = NULL;
 	mgr->next_cli = NULL;
-	mgr->curr_max = NULL;
 
 	mgr->shares = 0;
 	mgr->runs_left = 0;
@@ -179,9 +183,8 @@ static void vtrr_mgr_init(vtrr_mgr_t *mgr) {
  * @brief Begins the scheduler, assuming at least 1 task is installed.
  */
 static void vtrr_mgr_start(vtrr_mgr_t *mgr) {
-	mgr->curr_max = rb_max(&mgr->rq);
-	mgr->curr_cli = mgr->curr_max;
-	mgr->next_cli = mgr->curr_max;
+	mgr->curr_cli = rb_max(&mgr->rq);
+	mgr->next_cli = rb_max(&mgr->rq);
 	mgr->timestep = VTRR_TIMESTEP(mgr->shares);	/* calculate the initial group timestep from the installed tasks */
 }
 
@@ -191,7 +194,6 @@ static void vtrr_mgr_start(vtrr_mgr_t *mgr) {
 static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
 	mgr->curr_cli = NULL;
 	mgr->next_cli = NULL;
-	mgr->curr_max = NULL;
 	mgr->timestep = 0;
 
 	rb_rcached_clean(&mgr->rq);					/* empties the run queue */
@@ -204,21 +206,37 @@ static void vtrr_mgr_end(vtrr_mgr_t *mgr) {
 static void vtrr_mgr_task_foreach(vtrr_mgr_t *mgr, void (*cb)(void *)) {
 	rb_inorder_foreach(&mgr->rq, cb);
 }
-
+//extern sched_impl_client_t done[10];
+#include "sched.h"
+extern struct vtrr_ clients[10];
 /**
  * @brief Scheduling algorithm invoked by yield() and the timeslicer.
  */
 static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 	/* execution of the scheduled thread */
+	mgr->curr_cli = mgr->next_cli;
 	vtrr_client_t *curr_client = vtrr_current_client(mgr);
 	#if (CONFIG_DEBUG_MODE == 1)
 		if (curr_client == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
 	#endif
 	vtrr_client_run(curr_client);
 
+	if (!vtrr_client_is_runnable(curr_client)) {
+		rb_iterator_t deleted;
+		rb_tree_rcached_delete_at(&mgr->rq, &curr_client->node, &deleted, vtrr_client_cmp, vtrr_client_copy);
+		vtrr_entry(deleted)->runs_left = vtrr_entry(deleted)->shares;
+		rb_tree_rcached_insert(&mgr->dq, deleted,  vtrr_client_cmp);
+		if (rb_is_empty(&mgr->rq)) {
+			swap(mgr->rq, mgr->dq);
+			mgr->next_cli = rb_max(&mgr->rq);
+
+		}
+
+	}
+
 	/* assign the thread previously planned for execution */
-	mgr->curr_cli = mgr->next_cli;
+
 	mgr->group_time += mgr->timestep;
 	if (mgr->runs_left > 0) mgr->runs_left--;
 
@@ -232,19 +250,9 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 		mgr->runs_left = mgr->shares;
 
 		/* assign the next thread as the highest priority one */
-		mgr->curr_max = rb_max(&mgr->rq);
-		mgr->next_cli = mgr->curr_max;
+		mgr->next_cli = rb_max(&mgr->rq);
 
 		return;
-
-	/* if a cycle hasn't completed, but the highest priority thread has run enough times */
-	} else if (!vtrr_client_is_runnable(vtrr_entry(mgr->curr_max))) {
-
-		/* the 2nd highest priority thread becomes the highest so far */
-		#if (CONFIG_DEBUG_MODE == 1)
-			if (mgr->curr_max == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
-		#endif
-		mgr->curr_max = (rb_node_t *) rb_prev(mgr->curr_max);
 	}
 
 	/* assume that the next thread to be scheduled will be the next thread in sorted order */
@@ -252,7 +260,7 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 
 	/* if it doesn't exist, just go back to the top */
 	if (next_node == NULL) {
-		mgr->next_cli = mgr->curr_max;
+		mgr->next_cli = rb_max(&mgr->rq);
 		return;
 	}
 
@@ -263,15 +271,14 @@ static void vtrr_mgr_run(vtrr_mgr_t *mgr) {
 		mgr->next_cli = next_node;
 
 	/* if the already-running client will allow enough time to squeeze this new thread in for a slice */
-	} else if (curr_client->fin_time < mgr->group_time + (2 * curr_client->timestep)) {
+	} else if ( curr_client->fin_time < mgr->group_time +  (2 * curr_client->timestep)) {
 		mgr->next_cli = next_node;
 
 	/* default to maximum possible priority */
 	} else {
 		#if (CONFIG_DEBUG_MODE == 1)
-			if (mgr->curr_max == NULL) panic(PANIC_ASSERT_FAIL, "vtrr_run()::curr_max was NULL");
 		#endif
-		mgr->next_cli = mgr->curr_max;
+		mgr->next_cli = rb_max(&mgr->rq);;
 	}
 }
 
@@ -288,10 +295,10 @@ static void vtrr_mgr_yield(vtrr_mgr_t *mgr) {
 static void vtrr_mgr_yield_higher(vtrr_mgr_t *mgr) {
 
 	/* check if the highest priority runnable thread is worth it */
-	if (vtrr_client_cmp(mgr->curr_max, mgr->curr_cli) > 0) {
+	if (vtrr_client_cmp(rb_max(&mgr->rq), mgr->curr_cli) > 0) {
 
 		/* switch it and run it if that's true */
-		mgr->next_cli = mgr->curr_max;
+		mgr->next_cli = rb_max(&mgr->rq);
 		vtrr_mgr_run(mgr);
 	}
 }
@@ -308,23 +315,23 @@ void vtrr_start(vtrr_mgr_t *sched) {
 	vtrr_mgr_start(sched);
 }
 
-void vtrr_add(vtrr_mgr_t *sched, vtrr_client_t *client, unsigned int priority) {
-	vtrr_client_init(client, priority);
-	vtrr_client_add_to_list(sched, client);
+void vtrr_add(vtrr_mgr_t *sched, struct thread_impl *thread,vtrr_client_t *client, unsigned int priority) {
+	vtrr_client_init(client, thread, priority);
+	vtrr_client_add_to_list(sched, thread, client);
 }
 
-void vtrr_register(vtrr_mgr_t *sched, vtrr_client_t *client) {
-	vtrr_client_add_to_list(sched, client);
+void vtrr_register(vtrr_mgr_t *sched, struct thread_impl *thread,vtrr_client_t *client) {
+	vtrr_client_add_to_list(sched, thread,client);
 }
 
 void vtrr_deregister(vtrr_mgr_t *sched, vtrr_client_t *client) {
 	vtrr_client_remove_from_list(sched, client);
 }
 
-void vtrr_reregister(vtrr_mgr_t *sched, vtrr_client_t *client, unsigned int priority) {
+void vtrr_reregister(vtrr_mgr_t *sched, struct thread_impl *thread,vtrr_client_t *client, unsigned int priority) {
 	vtrr_deregister(sched, client);
 	vtrr_client_update(client, priority);
-	vtrr_register(sched, client);
+	vtrr_register(sched, thread, client);
 }
 
 void vtrr_end(vtrr_mgr_t *sched) {

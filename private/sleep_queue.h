@@ -13,6 +13,7 @@
 typedef struct thread_impl thread_impl_t;
 
 typedef struct sleep_queue_entry {
+	struct sleep_queue_entry *thread;
 	unsigned int wake_time;
 	rb_node_t node;
 } sleep_queue_entry_t;

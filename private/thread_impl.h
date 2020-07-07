@@ -11,10 +11,12 @@
 #include "sleep_queue.h"
 #include "sched_impl.h"
 
+typedef struct sched_impl_client sched_impl_client_t;
+
 typedef struct thread_impl {
 	void *sp;
-	sched_impl_client_t rq_entry;
-	sleep_queue_entry_t sq_entry;
+	sched_impl_client_t *rq_entry;
+	sleep_queue_entry_t *sq_entry;
 } thread_impl_t;
 
 typedef int (*thread_fn_t)(void *);

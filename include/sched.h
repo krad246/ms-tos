@@ -71,7 +71,11 @@ void sched_clear_status(sched_status_t status);
 
 thread_t *sched_current_thread(void);
 unsigned int sched_thread_count(void);
-
+#include "sched_impl.h"
+struct vtrr_{
+	sched_impl_client_t run;
+	sched_impl_client_t done;
+};
 void sched_register_cb(void (*cb)(void *arg), void *params);
 void sched_task_exit(void);
 #ifdef __cplusplus

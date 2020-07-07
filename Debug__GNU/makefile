@@ -11,7 +11,7 @@ GEN_CMDS__FLAG :=
 
 ORDERED_OBJS += \
 "./main.o" \
-"./arch/hal.o" \
+"./arch/al.o" \
 "./core/irq.o" \
 "./core/panic.o" \
 "./core/sched.o" \
@@ -169,7 +169,7 @@ all: $(OBJS) $(CMD_SRCS) $(LD_SRCS) $(GEN_CMDS)
 rtosref333.out: $(OBJS) $(CMD_SRCS) $(LD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: GNU Linker'
-	"C:/ti/msp430-gcc/bin/msp430-elf-gcc.exe" -mhwmult=f5series -DRB_UNSAFE=1 -Ofast -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -v -mcode-region=none -mlarge -mdata-region=none -Wl,-Map,"rtosref333.map" -Wl,--gc-sections -L"C:/ti/ccsv8/ccs_base/msp430/include_gcc" -o"rtosref333.out" $(ORDERED_OBJS)
+	"C:/ti/msp430-gcc/bin/msp430-elf-gcc.exe" -mhwmult=f5series -DRB_UNSAFE=0 -O0 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -v -msmall -mmcu=msp430fr5994 -Wl,-Map,"rtosref333.map" -Wl,--gc-sections -L"C:/ti/ccsv8/ccs_base/msp430/include_gcc" -o"rtosref333.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
@@ -183,8 +183,8 @@ rtosref333.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.o" "arch\hal.o" "core\irq.o" "core\panic.o" "core\sched.o" "core\thread.o" "ds\rbtree.o" "ds\rbtree_lcached.o" "ds\rbtree_lrcached.o" "ds\rbtree_rcached.o" "private\sched_impl.o" "private\sleep_queue.o" "private\thread_impl.o" "schedulers\lottery\lottery.o" "schedulers\vtrr\vtrr.o" 
-	-$(RM) "main.d" "arch\hal.d" "core\irq.d" "core\panic.d" "core\sched.d" "core\thread.d" "ds\rbtree.d" "ds\rbtree_lcached.d" "ds\rbtree_lrcached.d" "ds\rbtree_rcached.d" "private\sched_impl.d" "private\sleep_queue.d" "private\thread_impl.d" "schedulers\lottery\lottery.d" "schedulers\vtrr\vtrr.d" 
+	-$(RM) "main.o" "arch\al.o" "core\irq.o" "core\panic.o" "core\sched.o" "core\thread.o" "ds\rbtree.o" "ds\rbtree_lcached.o" "ds\rbtree_lrcached.o" "ds\rbtree_rcached.o" "private\sched_impl.o" "private\sleep_queue.o" "private\thread_impl.o" "schedulers\lottery\lottery.o" "schedulers\vtrr\vtrr.o" 
+	-$(RM) "main.d" "arch\al.d" "core\irq.d" "core\panic.d" "core\sched.d" "core\thread.d" "ds\rbtree.d" "ds\rbtree_lcached.d" "ds\rbtree_lrcached.d" "ds\rbtree_rcached.d" "private\sched_impl.d" "private\sleep_queue.d" "private\thread_impl.d" "schedulers\lottery\lottery.d" "schedulers\vtrr\vtrr.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

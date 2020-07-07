@@ -2,7 +2,7 @@
 #include "msp430.h"
 
 #define NUM_THREADS		6
-#define STACK_SIZE		256
+#define STACK_SIZE		384
 
 volatile uint8_t sched_isr_stack[CONFIG_ISR_STACK_SIZE];
 volatile thread_t tcbs[NUM_THREADS];
@@ -43,54 +43,57 @@ void profile_end(void) {
 void a(void *arg) {
 	while (1) {
 		run_counts[0]++;
-		_low_power_mode_3();
+//		_low_power_mode_3();
 //		sched_sleep(500);
-		sched_yield();
+//		sched_yield();
 	}
 }
 
 void b(void *arg) {
 	while (1) {
 		run_counts[1]++;
-		_low_power_mode_3();
-		sched_yield();
-		sched_yield_higher();
+//		_low_power_mode_3();
+//		sched_yield();
+//		sched_yield_higher();
 	}
 }
 
 void c(void *arg) {
 	while (1) {
 		run_counts[2]++;
-		_low_power_mode_3();
-		sched_sleep(500);
+//		_low_power_mode_3();
+//		sched_sleep(500);
+//		__delay_cycles(150000);
 //		panic(0, "test");
-		P1OUT ^= BIT0;
-		sched_yield();
+//		P1OUT ^= BIT0;
+//		sched_yield();
 	}
 }
 
 void d(void *arg) {
 	while (1) {
 		run_counts[3]++;
-		_low_power_mode_3();
-//		sched_sleep(500);
-		sched_yield();
+//		_low_power_mode_3();
+//		sched_sleep(250);
+//		__delay_cycles(150000);
+//		P1OUT ^= BIT1;
+//		sched_yield();
 	}
 }
 
 void e(void *arg) {
 	while (1) {
 		run_counts[4]++;
-		_low_power_mode_3();
-		sched_yield();
+//		_low_power_mode_3();
+//		sched_yield();
 	}
 }
 
 void f(void *arg) {
 	while (1) {
 		run_counts[5]++;
-		_low_power_mode_3();
-		sched_yield();
+//		_low_power_mode_3();
+//		sched_yield();
 	}
 }
 
@@ -133,7 +136,7 @@ int main(void)
 	for (int i = 0; i < 6; ++i) {
 		thread_impl_init(&tcbs[i].base, sched_test_stacks[i] + STACK_SIZE, fns[i], run_counts[i]);
 		tcbs[i].cs_lock = 1;
-		sched_add(&tcbs[i], i + 1);
+		sched_add(&tcbs[i], 10 * (i + 1));
 	}
 
 	sched_start();

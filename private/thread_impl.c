@@ -5,9 +5,9 @@
  *      Author: krad2
  */
 
+#include <al.h>
 #include "thread_impl.h"
-#include "hal.h"
 
 void thread_impl_init(thread_impl_t *me, void *sp, thread_fn_t runnable, void *args) {
-	me->sp = (void *) arch_init_stack(sp, runnable, args);
+	me->sp = (void *) al_init_stack(sp, runnable, args);
 }

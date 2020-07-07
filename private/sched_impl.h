@@ -9,7 +9,7 @@
 #define INCLUDE_SCHEDULERS_SCHED_IMPL_H_
 
 #include "port_config.h"
-
+#include "thread_impl.h"
 #include "sleep_queue.h"
 
 #ifdef __cplusplus
@@ -20,7 +20,9 @@ extern "C" {
 
 #define DECLARE_SCHED_IMPL(type)											\
 	typedef type##_mgr_t sched_impl_mgr_t;									\
-	typedef type##_client_t sched_impl_client_t;							\
+	typedef struct sched_impl_client {										\
+		type##_client_t client;												\
+	} sched_impl_client_t;													\
 
 /*-----------------------------------------------------------*/
 
@@ -39,9 +41,12 @@ extern "C" {
 /*-----------------------------------------------------------*/
 
 #include SCHED_ALG_PATH
-DECLARE_SCHED_IMPL(vtrr);
 
 typedef struct thread_impl thread_impl_t;
+
+DECLARE_SCHED_IMPL(vtrr);
+
+
 typedef unsigned int sched_status_t;
 
 #define SCHED_STATUS_IN_IRQ_POS 								(13)
@@ -83,10 +88,10 @@ typedef struct sched_impl {
 extern volatile sched_impl_t sched_p;
 
 void sched_impl_init(void);
-void sched_impl_add(thread_impl_t *client, unsigned int priority);
-void sched_impl_register(thread_impl_t *client);
-void sched_impl_deregister(thread_impl_t *client);
-void sched_impl_reregister(thread_impl_t *client, unsigned int priority);
+void sched_impl_add(thread_impl_t *client, sched_impl_client_t *mclient, unsigned int priority);
+void sched_impl_register(thread_impl_t *client, sched_impl_client_t *mclient);
+void sched_impl_deregister(thread_impl_t *client, sched_impl_client_t *mclient);
+void sched_impl_reregister(thread_impl_t *client, sched_impl_client_t *mclient, unsigned int priority);
 void sched_impl_start(void);
 void sched_impl_end(void);
 void sched_impl_run(void);

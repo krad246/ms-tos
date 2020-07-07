@@ -29,12 +29,13 @@ extern "C" {
  */
 
 typedef struct sched_vtrr_client {
+	struct thread_impl *thread;				/* reference to a tcb */
 	unsigned int shares;					/* thread priority */
 	unsigned int runs_left;					/* number of quanta left to go */
 	unsigned int fin_time;					/* virtual timestamp for VTRR allocation computations */
 	unsigned int timestep;					/* virtual progress amount for each timestep */
 
-	rb_node_t rq_entry;						/* red-black tree entry for sorted order */
+	rb_node_t node;							/* red-black tree entry for sorted order */
 } vtrr_client_t;
 
 typedef struct sched_vtrr_mgr {
@@ -44,10 +45,10 @@ typedef struct sched_vtrr_mgr {
 	unsigned int timestep;					/* virtual progress amount for each timestep */
 
 	rb_tree_rcached_t rq;					/* red-black tree for sorted threads, maximum is cached */
-	rb_node_t *curr_max;						/* pointer to the highest priority runnable thread */
+	rb_tree_rcached_t dq;					/* red-black tree for finished threads in a cycle, max cached for swappability */
 
-	rb_node_t *curr_cli;						/* pointer to the currently running thread */
-	rb_node_t *next_cli;						/* pointer to the thread scheduled for the next timeslice */
+	rb_node_t *curr_cli;					/* pointer to the currently running thread */
+	rb_node_t *next_cli;					/* pointer to the thread scheduled for the next timeslice */
 } vtrr_mgr_t;
 
 /** @} */
@@ -59,9 +60,9 @@ typedef struct sched_vtrr_mgr {
  * @{
  */
 
-#define __vtrr_entry(ptr) rb_entry((ptr), vtrr_client_t, rq_entry)
+#define __vtrr_entry(ptr) rb_entry((ptr), vtrr_client_t, node)
 #define vtrr_entry(ptr) __vtrr_entry((ptr))
-#define vtrr_active_client(ptr) vtrr_entry((ptr)->curr_cli)
+#define vtrr_active_client(ptr) vtrr_entry((ptr)->curr_cli)->thread
 
 /** @} */
 
@@ -83,7 +84,7 @@ void vtrr_init(vtrr_mgr_t *sched);
  * @param[in] sched	Pointer to a vtrr_mgr_t instance.
  * @param[in] priority Thread scheduling priority.
  */
-void vtrr_add(vtrr_mgr_t *sched, vtrr_client_t *client, unsigned int priority);
+void vtrr_add(vtrr_mgr_t *sched, struct thread_impl *thread,vtrr_client_t *client, unsigned int priority);
 
 /**
  * @brief Adds an already-initialized thread to the run queue.
@@ -91,7 +92,7 @@ void vtrr_add(vtrr_mgr_t *sched, vtrr_client_t *client, unsigned int priority);
  * @param[in] sched	Pointer to a vtrr_mgr_t instance.
  * @param[in] client Thread to be added.
  */
-void vtrr_register(vtrr_mgr_t *sched, vtrr_client_t *client);
+void vtrr_register(vtrr_mgr_t *sched, struct thread_impl *thread,vtrr_client_t *client);
 
 /**
  * @brief Removes an already-initialized thread from the run queue.
@@ -108,7 +109,7 @@ void vtrr_deregister(vtrr_mgr_t *sched, vtrr_client_t *client);
  * @param[in] client Thread to be updated.
  * @param[in] priority New thread priority.
  */
-void vtrr_reregister(vtrr_mgr_t *sched, vtrr_client_t *client, unsigned int priority);
+void vtrr_reregister(vtrr_mgr_t *sched, struct thread_impl *thread,vtrr_client_t *client, unsigned int priority);
 
 /**
  * @brief Readies the VTRR manager for timeslicing.
